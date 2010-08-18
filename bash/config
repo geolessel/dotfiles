@@ -32,12 +32,10 @@ bakcyn='\e[46m'   # Cyan
 bakwht='\e[47m'   # White
 txtrst='\e[0m'    # Text Reset
 
-fortune
-
 # set the command prompt
 PS1="\n[\[$txtgrn\]\u@\[$bldgrn\]\h\[$txtrst\] \[$txtcyn\]\w\[$txtrst\]] \$(vcprompt) \n\$ "
 
-set the terminal window title
+# set the terminal window title
 case "$TERM" in
 	xterm*|rxvt*)
 		# XTERM_TITLE='\u@\h'
