@@ -24,6 +24,7 @@ alias gca="git commit -a"
 alias gco="git checkout"
 alias gd="git diff"
 alias gp="git push"
+alias gm="git merge"
 
 # Ruby on Rails
 alias ss="./script/server"
