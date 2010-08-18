@@ -33,7 +33,12 @@ bakwht='\e[47m'   # White
 txtrst='\e[0m'    # Text Reset
 
 # set the command prompt
-PS1="\n[\[$txtgrn\]\u@\[$bldgrn\]\h\[$txtrst\] \[$txtcyn\]\w\[$txtrst\]] \$(vcprompt) \n\$ "
+if [ -f ~/bin/vcprompt ];
+then
+	PS1="\n[\[$txtgrn\]\u@\[$bldgrn\]\h\[$txtrst\] \[$txtcyn\]\w\[$txtrst\]] \$(vcprompt) \n\$ "
+else
+	PS1="\n[\[$txtgrn\]\u@\[$bldgrn\]\h\[$txtrst\] \[$txtcyn\]\w\[$txtrst\]] \n\$ "
+fi
 
 # set the terminal window title
 case "$TERM" in
