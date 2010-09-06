@@ -18,6 +18,7 @@ alias tm='top -o rsize' # sort by memory
 
 # Git
 alias g="git status"
+alias ga="git add"
 alias gs="git status"
 alias gc="git commit"
 alias gca="git commit -a"
