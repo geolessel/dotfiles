@@ -36,6 +36,7 @@ alias sc="./script/console"
 alias l="ls -lh"
 alias ll="ls -lh"
 alias la="ls -A"
+alias lla="ls -lhA"
 
 # Files
 alias untar="tar -xvzf"
