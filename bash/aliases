@@ -39,3 +39,6 @@ alias la="ls -A"
 
 # Files
 alias untar="tar -xvzf"
+
+# Programs
+alias vi="vim"
