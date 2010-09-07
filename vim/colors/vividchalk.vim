@@ -7,6 +7,8 @@
 " Based on the Vibrank Ink theme for TextMate
 " Distributable under the same terms as Vim itself (see :help license)
 
+set background=dark
+
 if has("gui_running")
     set background=dark
 endif
@@ -122,8 +124,10 @@ highlight Search        guifg=NONE ctermfg=NONE gui=none cterm=none
 call s:hibg("Search"    ,"#555555","DarkBlue",81)
 highlight IncSearch     guifg=White guibg=Black ctermfg=White ctermbg=Black
 highlight MoreMsg       guifg=#00AA00 ctermfg=Green
-highlight LineNr        guifg=#DDEEFF ctermfg=White
-call s:hibg("LineNr"    ,"#222222","DarkBlue",80)
+highlight LineNr        guifg=#DDEEFF ctermfg=Green
+"highlight LineNr        guifg=#DDEEFF ctermfg=White
+"call s:hibg("LineNr"    ,"#222222","Black",80)
+"call s:hibg("LineNr"    ,"#222222","DarkBlue",80)
 highlight Question      none
 high link Question      MoreMsg
 highlight Title         guifg=Magenta ctermfg=Magenta
