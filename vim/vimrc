@@ -28,6 +28,7 @@ set hlsearch                      " Highlight matches.
 
 set wrap                          " Turn on line wrapping.
 set scrolloff=3                   " Show 3 lines of context around the cursor.
+set linebreak                     " Don't allow words to be broken up in order to wrap
 
 set title                         " Set the terminal's title
 
@@ -63,6 +64,9 @@ map <leader>tm :tabmove
 
 " Uncomment to use Jamis Buck's file opening plugin
 map <Leader>t :FuzzyFinderTextMate<Enter>
+
+" Open up NERDTree
+map <leader>nt :NERDTree<Enter>
 
 " Controversial...swap colon and semicolon for easier commands
 "nnoremap ; :
