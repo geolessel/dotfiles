@@ -26,6 +26,8 @@ alias gco="git checkout"
 alias gd="git diff"
 alias gp="git push"
 alias gm="git merge"
+alias gf="git fetch"
+alias gk="gitk --all"
 
 # Ruby on Rails
 alias ss="./script/server"
