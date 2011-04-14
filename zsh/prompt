@@ -1,0 +1,17 @@
+autoload colors zsh/terminfo
+if [[ "$terminfo[colors]" -ge 8 ]]; then
+  colors
+fi
+for color in RED GREEN YELLOW BLUE MAGENTA CYAN WHITE; do
+  eval PR_$color='%{$terminfo[bold]$fg[${(L)color}]%}'
+  eval PR_LIGHT_$color='%{$fg[${(L)color}]%}'
+  (( count = $count + 1 ))
+done
+PR_NO_COLOR="%{$terminfo[sgr0]%}"
+# PS1="$fg[green]%n$fg[white]@$fg_bold[green]%m$terminfo[sgr0]:%2c %(!.#.$)"
+PS1="
+%(!.$PR_RED%U%n@%m%u %6c$PR_NO_COLOR.$PR_GREEN%m$PR_NO_COLOR $PR_LIGHT_GREEN%4c$PR_NO_COLOR)
+%(!.$PR_RED#$PR_NO_COLOR.>) "
+#RPROMPT="$PR_LIGHT_YELLOW(%D{%H:%M})$PR_NO_COLOR"
+#PS1="[$fg[green]%n$PR_WHITE@$PR_GREEN%U%m%u$PR_NO_COLOR:$PR_RED%2c$PR_NO_COLOR]%(!.#.$) "
+#RPROMPT="$PR_LIGHT_YELLOW(%D{%m-%d %H:%M})$PR_NO_COLOR"
