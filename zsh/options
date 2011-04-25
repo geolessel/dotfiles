@@ -26,7 +26,7 @@ unsetopt bgnice autoparamslash
 zmodload -a zsh/stat stat
 zmodload -a zsh/zpty zpty
 zmodload -a zsh/zprof zprof
-zmodload -ap zsh/mapfile mapfile
+#zmodload -ap zsh/mapfile mapfile
 
 
 PATH="/usr/local/bin:/usr/local/sbin/:/bin:/sbin:/usr/bin:/usr/sbin:$PATH"
@@ -139,3 +139,10 @@ zstyle ':completion:*:ssh:*' tag-order \
 zstyle ':completion:*:ssh:*' group-order \
    hosts-domain hosts-host users hosts-ipaddr
 zstyle '*' single-ignored show
+
+case $TERM in
+  rxvt|*term*)
+    precmd () {print -Pn "\e]0;%n@%m: %~\a"}
+    preexec () {print -Pn "\e]0;%n@%m: $1\a"}
+    ;;
+esac

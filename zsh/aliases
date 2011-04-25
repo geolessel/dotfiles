@@ -14,3 +14,4 @@ alias vi='/usr/local/bin/vim'
 # alias	=clear
 
 cdpath=( ~ ~/Dropbox/Documents/Insight/Short\ Sales )
+shorts=~/Dropbox/Documents/Insight/Short\ Sales
