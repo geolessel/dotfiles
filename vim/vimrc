@@ -81,3 +81,5 @@ map <leader>nt :NERDTree<Enter>
 " autocmd FileType css  setlocal foldmethod=indent shiftwidth=2 tabstop=2
 
 :au BufRead,BufNewFile *.pago set filetype=pago
+:au BufRead,BufNewFile *.daily set filetype=markdown textwidth=74
+syntax on
