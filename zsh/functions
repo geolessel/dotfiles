@@ -18,3 +18,18 @@
 #}
 #chpwd
 
+daily() {
+  days=$1
+  previousdir=`pwd`
+  cd ~/Dropbox/Documents/Personal/Dailies
+  echo "Checking if daily exists..."
+  filedate=`date -d "$days days" +%Y%m%d`
+  if [[ -f $filedate.daily ]]; then
+    echo "File exists. Opening."
+  else
+    echo "File does not exist. Creating."
+    ruby newdaily.rb $filedate.daily $days
+  fi
+  vi $filedate.daily
+  cd $previousdir
+}
