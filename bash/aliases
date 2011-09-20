@@ -45,4 +45,4 @@ alias lla="ls -lhA"
 alias untar="tar -xvzf"
 
 # Programs
-alias vi="/usr/local/bin/vim"
+#alias vi="/usr/local/bin/vim"
