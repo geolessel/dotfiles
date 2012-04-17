@@ -1,4 +1,5 @@
 alias man='LC_ALL=C LANG=C man'
 alias f=finger
 alias ll='ls -al'
+alias ds='du -sh * | sort -rh | head 10'
 #alias vi='/usr/local/bin/vim'

@@ -5,12 +5,6 @@ alias eatm="mate -w ~/bin/dotfiles/bash/aliases && reload"
 alias ee="$EDITOR ~/bin/dotfiles/bash/env"
 alias c="clear"
 alias cl="clear; l"
-function ds() {
-	g=`du -sh * | grep [0-9]G | sort -nr`
-	m=`du -sh * | grep [0-9]M | sort -nr`
-	k=`du -sh * | grep [0-9]K | sort -nr`
-	echo -e "$g\n$m\n$k\n" | head -20
-}
 
 # Processes
 alias tu='top -o cpu' # sort by cpu
