@@ -35,7 +35,7 @@ set incsearch                     " Highlight matches as you type.
 set hlsearch                      " Highlight matches.
 
 set wrap                          " Turn on line wrapping.
-set scrolloff=3                   " Show 3 lines of context around the cursor.
+set scrolloff=5                   " Show 3 lines of context around the cursor.
 set sidescrolloff=7
 set sidescroll=1
 set linebreak                     " Don't allow words to be broken up in order to wrap
@@ -56,8 +56,10 @@ set autoindent
 
 " folding settings
 set foldmethod=indent             " fold based on indent level
-set foldnestmax=3                 " deepest fold is 3 levels
-set nofoldenable                  " dont fold by default
+set foldnestmax=5                 " deepest fold is 3 levels
+"set nofoldenable                  " dont fold by default
+set foldenable                    " fold by default
+set foldlevelstart=99             " When a file is opened, don't fold any folds
 
 set formatoptions-=o              " dont continue comments when pushing o/O
 
@@ -90,6 +92,11 @@ colorscheme vividchalk
 " colorscheme topfunky-light
 " set background=dark
 " colorscheme solarized
+
+" Set the cursor background to a dark gray
+" See http://www.pixelbeat.org/docs/terminal_colours/ for a list
+set cursorline
+highlight CursorLine term=NONE cterm=NONE ctermbg=233 ctermfg=NONE
 
 " Tab mappings.
 map <leader>tt :tabnew<cr>
