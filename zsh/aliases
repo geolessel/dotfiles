@@ -1,5 +1,43 @@
+# Utility
+alias reload="source ~/bin/dotfiles/zsh/aliases"
+alias ea="$EDITOR ~/bin/dotfiles/zsh/aliases && reload"
+alias eatm="mate -w ~/bin/dotfiles/zsh/aliases && reload"
+alias ee="$EDITOR ~/bin/dotfiles/zsh/env"
+alias c="clear"
+alias cl="clear; l"
 alias man='LC_ALL=C LANG=C man'
 alias f=finger
 alias ll='ls -al'
 alias ds='du -sh * | sort -rh | head 10'
-#alias vi='/usr/local/bin/vim'
+
+# Processes
+alias tu='top -o cpu' # sort by cpu
+alias tm='top -o rsize' # sort by memory
+
+# Git
+alias g="git status"
+alias ga="git add"
+alias gs="git status"
+alias gc="git commit"
+alias gca="git commit -a"
+alias gco="git checkout"
+alias gd="git diff"
+alias gp="git push"
+alias gm="git merge"
+alias gf="git fetch"
+alias gk="gitk --all"
+
+# Ruby on Rails
+alias ss="./script/server"
+alias sg="./script/generate"
+alias sp="./script/plugin install"
+alias sc="./script/console"
+
+# File System
+alias l="ls -lh"
+alias ll="ls -lh"
+alias la="ls -A"
+alias lla="ls -lhA"
+
+# Files
+alias untar="tar -xvzf"

@@ -11,18 +11,12 @@ for color in RED GREEN YELLOW BLUE MAGENTA CYAN WHITE; do
 done
 PR_NO_COLOR="%{$terminfo[sgr0]%}"
 
-# PS1="$fg[green]%n$fg[white]@$fg_bold[green]%m$terminfo[sgr0]:%2c %(!.#.$)"
-
-if [[ -f ~/bin/vcprompt ]]; then
-PS1='
-%(!.$PR_RED%U%n@%m%u %6c$PR_NO_COLOR.$PR_GREEN%m$PR_NO_COLOR $PR_LIGHT_GREEN%4c$PR_NO_COLOR) $PR_LIGHT_YELLOW$(vcprompt -f "<%b %r>%u%m")$PR_NO_COLOR
+if [[ -e $HOME/bin/dotfiles/vcprompt ]]; then
+PROMPT='
+%(!.$PR_RED%U%n@%m%u %6c$PR_NO_COLOR.$PR_GREEN%m$PR_NO_COLOR $PR_LIGHT_GREEN%4c$PR_NO_COLOR) $PR_LIGHT_YELLOW$($HOME/bin/dotfiles/vcprompt -f "<%b %r> %a%m%u")$PR_NO_COLOR
 %(!.$PR_RED#$PR_NO_COLOR.>) '
 else
-PS1="
+PROMPT="
 %(!.$PR_RED%U%n@%m%u %6c$PR_NO_COLOR.$PR_GREEN%m$PR_NO_COLOR $PR_LIGHT_GREEN%4c$PR_NO_COLOR)
 %(!.$PR_RED#$PR_NO_COLOR.>) "
 fi
-
-#RPROMPT="$PR_LIGHT_YELLOW(%D{%H:%M})$PR_NO_COLOR"
-#PS1="[$fg[green]%n$PR_WHITE@$PR_GREEN%U%m%u$PR_NO_COLOR:$PR_RED%2c$PR_NO_COLOR]%(!.#.$) "
-#RPROMPT="$PR_LIGHT_YELLOW(%D{%m-%d %H:%M})$PR_NO_COLOR"
