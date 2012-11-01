@@ -1,10 +1,25 @@
 " Copy or symlink to ~/.vimrc or ~/_vimrc.
 
 set nocompatible                  " Must come first because it changes other options.
+filetype off
 
-" set up pathogen
-call pathogen#infect()
-call pathogen#helptags()
+set rtp+=~/.vim/bundle/vundle/
+ call vundle#rc()
+
+" let Vundle manage Vundle
+" required! 
+Bundle 'gmarik/vundle'
+Bundle 'tpope/vim-rails.git'
+Bundle 'skalnik/vim-vroom'
+Bundle 'kien/ctrlp.vim.git'
+Bundle 'Shougo/neocomplcache.git'
+Bundle 'scrooloose/nerdcommenter.git'
+Bundle 'scrooloose/nerdtree.git'
+Bundle 'msanders/snipmate.vim.git'
+Bundle 'kchmck/vim-coffee-script.git'
+Bundle 'tpope/vim-endwise.git'
+Bundle 'tpope/vim-fugitive.git'
+Bundle 'tsaleh/vim-matchit'
 
 " Use , instead of \ as a leader
 let mapleader=','
