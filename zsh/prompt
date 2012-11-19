@@ -13,7 +13,7 @@ PR_NO_COLOR="%{$terminfo[sgr0]%}"
 
 if [[ -e $HOME/bin/dotfiles/vcprompt ]]; then
 PROMPT='
-%(!.$PR_RED%U%n@%m%u %6c$PR_NO_COLOR.$PR_GREEN%m$PR_NO_COLOR $PR_LIGHT_GREEN%4c$PR_NO_COLOR) $PR_LIGHT_YELLOW$($HOME/bin/dotfiles/vcprompt -f "<%b %r> %a%m%u")$PR_NO_COLOR
+%(!.$PR_RED%U%n@%m%u %6c$PR_NO_COLOR.$PR_GREEN%m$PR_NO_COLOR $PR_LIGHT_GREEN%4c$PR_NO_COLOR) $PR_LIGHT_YELLOW$($HOME/bin/dotfiles/vcprompt -f "<%b %r %a%m%u>")$PR_NO_COLOR $PR_BLUE<$(rvm current | sed 's/ruby-//g')>$PR_NO_COLOR
 %(!.$PR_RED#$PR_NO_COLOR.>) '
 else
 PROMPT="
