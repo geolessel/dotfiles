@@ -20,6 +20,8 @@ Bundle 'kchmck/vim-coffee-script.git'
 Bundle 'tpope/vim-endwise.git'
 Bundle 'tpope/vim-fugitive.git'
 Bundle 'tsaleh/vim-matchit'
+Bundle 'godlygeek/tabular'
+Bundle 'vimwiki'
 
 " Use , instead of \ as a leader
 let mapleader=','
