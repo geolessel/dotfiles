@@ -19,6 +19,7 @@ Bundle 'msanders/snipmate.vim.git'
 Bundle 'kchmck/vim-coffee-script.git'
 Bundle 'tpope/vim-endwise.git'
 Bundle 'tpope/vim-fugitive.git'
+Bundle 'tpope/vim-markdown.git'
 Bundle 'tsaleh/vim-matchit'
 Bundle 'godlygeek/tabular'
 Bundle 'vimwiki'
@@ -146,6 +147,8 @@ let g:ctrlp_match_window_reversed = 1 " top to bottom
 " autocmd FileType ruby setlocal foldmethod=syntax
 " autocmd FileType css  setlocal foldmethod=indent shiftwidth=2 tabstop=2
 
+" ============================================================================
+" === Set up filetypes
 :au BufRead,BufNewFile *.pago set filetype=pago
 :au BufRead,BufNewFile *.daily set filetype=markdown textwidth=74
 
@@ -236,3 +239,9 @@ let g:neocomplcache_omni_patterns.cpp = '\h\w*\%(\.\|->\)\h\w*\|\h\w*::'
 
 " === end neocomplcache
 " ========================================================================
+
+" ========================================================================
+" === VimWiki
+let g:vimwiki_list = [{'path': "$HOME/Dropbox/Documents/vimwiki/", 'syntax': 'markdown', 'ext': '.mkd'}]
+"let g:vimwiki_ext2syntax = {'.md': 'markdown', '.mkd': 'markdown', '.wiki': 'default'}
+"let g:vimwiki_global_ext = 0
