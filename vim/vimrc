@@ -23,6 +23,7 @@ Bundle 'tpope/vim-markdown.git'
 Bundle 'tsaleh/vim-matchit'
 Bundle 'godlygeek/tabular'
 Bundle 'vimwiki'
+Bundle 'moll/vim-bbye'
 
 " Use , instead of \ as a leader
 let mapleader=','
@@ -135,6 +136,9 @@ map <leader>nt :NERDTree<Enter>
 
 " Options for CTRLp
 let g:ctrlp_match_window_reversed = 1 " top to bottom
+
+" Use Bdelete from bbye to delete a buffer without changing window setup
+nnoremap <leader>q :Bdelete<cr>
 
 " Controversial...swap colon and semicolon for easier commands
 "nnoremap ; :

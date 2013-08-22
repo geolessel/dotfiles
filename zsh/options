@@ -1,26 +1,45 @@
-# next lets set some enviromental/shell pref stuff up
-# setopt NOHUP
-#setopt NOTIFY
-#setopt NO_FLOW_CONTROL
+########################################################################
+## General #############################################################
+setopt NOBEEP
+setopt EXTENDED_GLOB
+
+
+########################################################################
+## History #############################################################
 setopt INC_APPEND_HISTORY SHARE_HISTORY
 setopt APPEND_HISTORY
+setopt EXTENDED_HISTORY		# puts timestamps in the history
+setopt HIST_IGNORE_DUPS
+setopt HIST_EXPIRE_DUPS_FIRST # removes dupes when history fills up
+setopt HIST_SAVE_NO_DUPS
+setopt HIST_FIND_NO_DUPS
+setopt HIST_REDUCE_BLANKS
+setopt HIST_NO_FUNCTIONS
+
+
+########################################################################
+### Directories ########################################################
+setopt AUTO_CD
+setopt AUTO_PUSHD
+setopt PUSHDMINUS
+
+
+
 # setopt AUTO_LIST		# these two should be turned off
 # setopt AUTO_REMOVE_SLASH
 # setopt AUTO_RESUME		# tries to resume command of same name
 unsetopt BG_NICE		# do NOT nice bg commands
 setopt CORRECT			# command CORRECTION
-setopt EXTENDED_HISTORY		# puts timestamps in the history
-# setopt HASH_CMDS		# turns on hashing
-#
+
 #setopt MENUCOMPLETE
 setopt ALL_EXPORT
 
 # Set/unset  shell options
 setopt   notify globdots correct pushdtohome cdablevars autolist
-setopt   correctall autocd recexact longlistjobs
+setopt   correctall recexact longlistjobs
 setopt   autoresume histignoredups pushdsilent 
-setopt   autopushd pushdminus extendedglob rcquotes mailwarning
-unsetopt bgnice autoparamslash
+setopt   rcquotes mailwarning
+unsetopt autoparamslash
 
 # Autoload zsh modules when they are referenced
 zmodload -a zsh/stat stat

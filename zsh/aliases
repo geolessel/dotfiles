@@ -9,6 +9,7 @@ alias man='LC_ALL=C LANG=C man'
 alias f=finger
 alias ll='ls -al'
 alias ds='du -sh * | sort -rh | head 10'
+alias dirs='dirs -v' # list the dir number always
 
 # Processes
 alias tu='top -o cpu' # sort by cpu
@@ -41,3 +42,7 @@ alias lla="ls -lhA"
 
 # Files
 alias untar="tar -xvzf"
+
+# Quick way to rebuild the Launch Services database and get rid
+# of duplicates in the Open With submenu.
+alias fixopenwith='/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user'
