@@ -33,6 +33,7 @@ alias ss="./script/server"
 alias sg="./script/generate"
 alias sp="./script/plugin install"
 alias sc="./script/console"
+alias whichserver="cat config/deploy/production.rb"
 
 # File System
 alias l="ls -lh"
