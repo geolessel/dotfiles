@@ -30,6 +30,9 @@ Bundle 'rking/ag.vim'
 " Use , instead of \ as a leader
 let mapleader=','
 
+" Edit vimrc file
+nmap ,ec ;edit ~/bin/dotfiles/vim/vimrc<cr>
+
 "tell the term has 256 colors
 set t_Co=256
 
@@ -49,7 +52,8 @@ set wildmode=list:longest         " Complete files like a shell.
 set ignorecase                    " Case-insensitive searching.
 set smartcase                     " But case-sensitive if expression contains a capital letter.
 
-set number                        " Show line numbers.
+"set number                       " Show line numbers.
+set relativenumber                " Show relative line numbers.
 set ruler                         " Show cursor position.
 
 set incsearch                     " Highlight matches as you type.
@@ -131,35 +135,28 @@ map <C-l> <C-w>l
 
 
 " Tab mappings.
-map <leader>tt :tabnew<cr>
-map <leader>te :tabedit
-map <leader>tc :tabclose<cr>
-map <leader>to :tabonly<cr>
-map <leader>tn :tabnext<cr>
-map <leader>tp :tabprevious<cr>
-map <leader>tf :tabfirst<cr>
-map <leader>tl :tablast<cr>
-map <leader>tm :tabmove
+map <leader>tt ;tabnew<cr>
+map <leader>te ;tabedit
+map <leader>tc ;tabclose<cr>
+map <leader>to ;tabonly<cr>
+map <leader>tn ;tabnext<cr>
+map <leader>tp ;tabprevious<cr>
+map <leader>tf ;tabfirst<cr>
+map <leader>tl ;tablast<cr>
+map <leader>tm ;tabmove
 
 " Uncomment to use Jamis Buck's file opening plugin
 "map <Leader>t :FuzzyFinderTextMate<Enter>
 
 " Open up NERDTree
-map <leader>nt :NERDTree<Enter>
+map <leader>nt ;NERDTree<Enter>
 
 " Options for CTRLp
 let g:ctrlp_match_window_reversed = 1 " top to bottom
 
 " Use Bdelete from bbye to delete a buffer without changing window setup
-nnoremap <leader>q :Bdelete<cr>
+nnoremap <leader>q ;Bdelete<Enter>
 
-
-" Controversial...swap colon and semicolon for easier commands
-"nnoremap ; :
-"nnoremap : ;
-
-"vnoremap ; :
-"vnoremap : ;
 
 " Automatic fold settings for specific files. Uncomment to use.
 " autocmd FileType ruby setlocal foldmethod=syntax
@@ -263,3 +260,10 @@ nnoremap <leader>q :Bdelete<cr>
 let g:vimwiki_list = [{'path': "$HOME/Dropbox/Documents/vimwiki/", 'syntax': 'markdown', 'ext': '.mkd'}]
 "let g:vimwiki_ext2syntax = {'.md': 'markdown', '.mkd': 'markdown', '.wiki': 'default'}
 "let g:vimwiki_global_ext = 0
+
+
+" Controversial...swap colon and semicolon for easier commands
+nnoremap ; :
+nnoremap : ;
+vnoremap ; :
+vnoremap : ;

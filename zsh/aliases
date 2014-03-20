@@ -16,9 +16,10 @@ alias tu='top -o cpu' # sort by cpu
 alias tm='top -o rsize' # sort by memory
 
 # Git
-alias g="git status"
+alias g="git status -sb"
 alias ga="git add"
-alias gs="git status"
+alias gs="git status -sb"
+alias gsl="git status"
 alias gc="git commit"
 alias gca="git commit -a"
 alias gco="git checkout"
@@ -27,6 +28,8 @@ alias gp="git push"
 alias gm="git merge"
 alias gf="git fetch"
 alias gk="gitk --all"
+alias gl="git log --oneline --decorate"
+alias gll="git log --decorate"
 
 # Ruby on Rails
 alias ss="./script/server"
@@ -34,6 +37,7 @@ alias sg="./script/generate"
 alias sp="./script/plugin install"
 alias sc="./script/console"
 alias whichserver="cat config/deploy/production.rb"
+alias ber='bundle exec rake'
 
 # File System
 alias l="ls -lh"
