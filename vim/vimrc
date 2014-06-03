@@ -3,30 +3,31 @@
 set nocompatible                  " Must come first because it changes other options.
 filetype off
 
-set rtp+=~/.vim/bundle/vundle/
- call vundle#rc()
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
 
 " let Vundle manage Vundle
 " required! 
-Bundle 'gmarik/vundle'
-Bundle 'tpope/vim-rails.git'
-Bundle 'skalnik/vim-vroom'
-Bundle 'kien/ctrlp.vim.git'
-Bundle 'Shougo/neocomplcache.git'
-Bundle 'scrooloose/nerdcommenter.git'
-Bundle 'scrooloose/nerdtree.git'
-Bundle 'msanders/snipmate.vim.git'
-Bundle 'kchmck/vim-coffee-script.git'
-Bundle 'tpope/vim-endwise.git'
-Bundle 'tpope/vim-fugitive.git'
-Bundle 'tpope/vim-markdown.git'
-Bundle 'tpope/vim-surround.git'
-Bundle 'tsaleh/vim-matchit'
-Bundle 'godlygeek/tabular'
-Bundle 'vimwiki'
-Bundle 'moll/vim-bbye'
-Bundle 'junegunn/vim-easy-align'
-Bundle 'rking/ag.vim'
+Plugin 'gmarik/vundle'
+Plugin 'tpope/vim-rails.git'
+Plugin 'skalnik/vim-vroom'
+Plugin 'kien/ctrlp.vim.git'
+Plugin 'Shougo/neocomplcache.git'
+Plugin 'scrooloose/nerdcommenter.git'
+Plugin 'scrooloose/nerdtree.git'
+Plugin 'msanders/snipmate.vim.git'
+Plugin 'kchmck/vim-coffee-script.git'
+Plugin 'tpope/vim-endwise.git'
+Plugin 'tpope/vim-fugitive.git'
+Plugin 'tpope/vim-markdown.git'
+Plugin 'tpope/vim-surround.git'
+Plugin 'tsaleh/vim-matchit'
+Plugin 'godlygeek/tabular'
+Plugin 'vimwiki'
+Plugin 'moll/vim-bbye'
+Plugin 'junegunn/vim-easy-align'
+Plugin 'rking/ag.vim'
+call vundle#end()
 
 " Use , instead of \ as a leader
 let mapleader=','
@@ -106,6 +107,9 @@ set statusline+=\ %P              " percent through file
 " on wrapped long lines, go to the next visual line, not code line
 nnoremap j gj
 nnoremap k gk
+
+" use jj as <esc>
+inoremap jj <esc>
 
 " Easy window navigation
 map <C-h> <C-w>h
