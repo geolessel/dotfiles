@@ -28,6 +28,9 @@ Plugin 'moll/vim-bbye'
 Plugin 'junegunn/vim-easy-align'
 Plugin 'rking/ag.vim'
 Plugin 'elixir-lang/vim-elixir'
+Plugin 'slim-template/vim-slim.git'
+Plugin 'mattn/webapi-vim'
+Plugin 'mattn/gist-vim'
 call vundle#end()
 
 " Use , instead of \ as a leader
@@ -196,3 +199,9 @@ nnoremap ; :
 nnoremap : ;
 vnoremap ; :
 vnoremap : ;
+
+" vim-gist config
+let g:gist_detect_filetype = 1
+let g:gist_open_browser_after_post = 1
+let g:gist_post_private = 1
+let g:gist_show_privates = 1
