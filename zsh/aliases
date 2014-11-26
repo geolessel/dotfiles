@@ -51,3 +51,15 @@ alias untar="tar -xvzf"
 # Quick way to rebuild the Launch Services database and get rid
 # of duplicates in the Open With submenu.
 alias fixopenwith='/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user'
+
+# PCO Vagrant Box
+alias pb='pco box'
+alias pbe='pb bundle exec'
+alias pbandj='pb bundle install'
+alias pbconsole='pb rails c'
+alias pbrestart='touch tmp/restart.txt'
+alias pbinstall='pb bundle install'
+alias pbforeman='pb foreman start'
+alias pbmigrate='pbe rake db:migrate'
+alias pbtl='pco box tl'
+alias pbst='pco box tail -f ../**/log/development.log'
