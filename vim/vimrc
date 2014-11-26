@@ -21,7 +21,9 @@ Plugin 'tpope/vim-endwise.git'
 Plugin 'tpope/vim-fugitive.git'
 Plugin 'tpope/vim-markdown.git'
 Plugin 'tpope/vim-surround.git'
-Plugin 'tsaleh/vim-matchit'
+"Plugin 'tsaleh/vim-matchit' " can't find this anymore
+runtime macros/matchit.vim
+Plugin 'vim-scripts/ruby-matchit'
 Plugin 'godlygeek/tabular'
 Plugin 'vimwiki'
 Plugin 'moll/vim-bbye'
