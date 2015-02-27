@@ -19,7 +19,8 @@ Plugin 'msanders/snipmate.vim.git'
 Plugin 'kchmck/vim-coffee-script.git'
 Plugin 'tpope/vim-endwise.git'
 Plugin 'tpope/vim-fugitive.git'
-Plugin 'tpope/vim-markdown.git'
+"Plugin 'tpope/vim-markdown.git'
+Plugin 'plasticboy/vim-markdown'
 Plugin 'tpope/vim-surround.git'
 "Plugin 'tsaleh/vim-matchit' " can't find this anymore
 runtime macros/matchit.vim
@@ -33,6 +34,14 @@ Plugin 'elixir-lang/vim-elixir'
 Plugin 'slim-template/vim-slim.git'
 Plugin 'mattn/webapi-vim'
 Plugin 'mattn/gist-vim'
+Plugin 'kana/vim-textobj-user'
+Plugin 'nelstrom/vim-textobj-rubyblock'
+Plugin 'endel/vim-github-colorscheme'
+Plugin 'bbatsov/rubocop.git'
+Plugin 'ngmy/vim-rubocop.git'
+Plugin 'zerowidth/vim-copy-as-rtf'
+Plugin 'pangloss/vim-javascript'
+Plugin 'mxw/vim-jsx.git'
 call vundle#end()
 
 " Use , instead of \ as a leader
@@ -43,6 +52,8 @@ nmap ,ec ;edit ~/bin/dotfiles/vim/vimrc<cr>
 
 " Allow saving of files as sudo when I forgot to start vim using sudo.
 cmap w!! w !sudo tee > /dev/null %
+
+cmap bda 1,9999bdelete
 
 "tell the term has 256 colors
 set t_Co=256
@@ -93,7 +104,7 @@ set autoindent
 " folding settings
 set foldmethod=indent             " fold based on indent level
 set foldnestmax=5                 " deepest fold is 3 levels
-"set nofoldenable                  " dont fold by default
+set nofoldenable                  " dont fold by default
 set foldenable                    " fold by default
 set foldlevelstart=99             " When a file is opened, don't fold any folds
 
@@ -138,15 +149,16 @@ set ttyfast
 
 "=====[ Colors and Indicators ]================================================
     " colorscheme vividchalk
-    colorscheme smyck
+    " colorscheme Tomorrow
+    colorscheme hemisu
     " colorscheme topfunky-light
     " colorscheme solarized
-    set background=dark
+    " set background=dark
 
     "====[ Set the cursor background to a dark gray ]==========================
     " See http://www.pixelbeat.org/docs/terminal_colours/ for a list
     set cursorline
-    highlight CursorLine term=NONE cterm=NONE ctermbg=233 ctermfg=NONE
+    highlight CursorLine term=NONE cterm=NONE ctermbg=254 ctermfg=NONE
 
     "====[ Make the 81st column stand out ]====================================
     highlight ColorColumn ctermbg=magenta
