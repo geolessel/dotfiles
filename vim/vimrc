@@ -3,13 +3,14 @@
 set nocompatible                  " Must come first because it changes other options.
 filetype off
 
-set rtp+=~/.vim/bundle/Vundle.vim
+set rtp+=~/.vim/bundle/Vundle
 call vundle#begin()
 
 " let Vundle manage Vundle
 " required! 
 Plugin 'gmarik/vundle'
 Plugin 'tpope/vim-rails.git'
+Plugin 'vim-ruby/vim-ruby.git'
 Plugin 'skalnik/vim-vroom'
 Plugin 'kien/ctrlp.vim.git'
 Plugin 'Shougo/neocomplcache.git'
@@ -74,9 +75,12 @@ set wildmode=list:longest         " Complete files like a shell.
 set ignorecase                    " Case-insensitive searching.
 set smartcase                     " But case-sensitive if expression contains a capital letter.
 
-"set number                       " Show line numbers.
+set number                        " Show line numbers.
 set relativenumber                " Show relative line numbers.
 set ruler                         " Show cursor position.
+
+" Helps crazy slow redraws when holding down hjkl scrolls in ruby files
+set lazyredraw
 
 set incsearch                     " Highlight matches as you type.
 set hlsearch                      " Highlight matches.
@@ -133,12 +137,13 @@ inoremap jj <esc>
 
 " Easy window navigation
 map <C-h> <C-w>h
-map <C-j> <C-w>j
-map <C-k> <C-w>k
-map <C-l> <C-w>l
+"nmap <BS> <C-W>h
+nmap <C-j> <C-w>j
+nmap <C-k> <C-w>k
+nmap <C-l> <C-w>l
 
-" Don't try to highlight lines longer than 800 characters.
-set synmaxcol=800
+" Don't try to highlight lines longer than 300 characters.
+set synmaxcol=300
 
 " Resize splits when the window is resized
 au VimResized * :wincmd =
