@@ -13,7 +13,7 @@ Plugin 'tpope/vim-rails.git'
 Plugin 'vim-ruby/vim-ruby.git'
 Plugin 'skalnik/vim-vroom'
 Plugin 'kien/ctrlp.vim.git'
-Plugin 'Shougo/neocomplcache.git'
+"Plugin 'Shougo/neocomplcache.git'
 Plugin 'scrooloose/nerdcommenter.git'
 Plugin 'scrooloose/nerdtree.git'
 Plugin 'msanders/snipmate.vim.git'
@@ -43,6 +43,34 @@ Plugin 'ngmy/vim-rubocop.git'
 Plugin 'zerowidth/vim-copy-as-rtf'
 Plugin 'pangloss/vim-javascript'
 Plugin 'mxw/vim-jsx.git'
+Plugin 'scrooloose/syntastic'
+Plugin 'othree/yajs.vim'
+Plugin 'tomasr/molokai' " colorscheme
+Plugin 'Valloric/YouCompleteMe'
+
+" Vimsnippets
+"Plugin 'MarcWeber/vim-addon-mw-utils'
+"Plugin 'tomtom/tlib_vim'
+"Plugin 'garbas/vim-snipmate'
+
+" ===== Utilsnips
+" Track the engine.
+Plugin 'SirVer/ultisnips'
+
+" Snippets are separated from the engine. Add this if you want them:
+" Plugin 'honza/vim-snippets'
+
+" Trigger configuration. Do not use <tab> if you use https://github.com/Valloric/YouCompleteMe.
+let g:UltiSnipsExpandTrigger='<tab>'
+let g:UltiSnipsJumpForwardTrigger='<C-l>'
+let g:UltiSnipsJumpBackwardTrigger="<C-h>"
+
+" If you want :UltiSnipsEdit to split your window.
+let g:UltiSnipsEditSplit="vertical"
+
+" ----- Utilsnips
+
+let g:molokai_original = 1 "original background color
 call vundle#end()
 
 " Use , instead of \ as a leader
@@ -106,7 +134,8 @@ set smartindent                  " If the current line is indented, indent the n
 set autoindent
 
 " folding settings
-set foldmethod=indent             " fold based on indent level
+" THIS MAKES IT REALLY SLOW set foldmethod=indent             " fold based on indent level
+set foldmethod=manual
 set foldnestmax=5                 " deepest fold is 3 levels
 set nofoldenable                  " dont fold by default
 set foldenable                    " fold by default
@@ -136,8 +165,8 @@ nnoremap k gk
 inoremap jj <esc>
 
 " Easy window navigation
-map <C-h> <C-w>h
-"nmap <BS> <C-W>h
+nmap <C-h> <C-w>h
+nmap <BS> <C-W>h
 nmap <C-j> <C-w>j
 nmap <C-k> <C-w>k
 nmap <C-l> <C-w>l
@@ -153,17 +182,24 @@ set ttyfast
 
 
 "=====[ Colors and Indicators ]================================================
-    " colorscheme vividchalk
+    " ===[ Light Themes ]===
     " colorscheme Tomorrow
-    colorscheme hemisu
+    " colorscheme hemisu " light
     " colorscheme topfunky-light
+    " set background=light
+    " highlight CursorLine term=NONE cterm=NONE ctermbg=254 ctermfg=NONE
+
+    " ===[ Dark themes ]===
+    " colorscheme vividchalk
     " colorscheme solarized
-    " set background=dark
+    colorscheme smyck
+    " colorscheme molokai
+    set background=dark
 
     "====[ Set the cursor background to a dark gray ]==========================
     " See http://www.pixelbeat.org/docs/terminal_colours/ for a list
     set cursorline
-    highlight CursorLine term=NONE cterm=NONE ctermbg=254 ctermfg=NONE
+    highlight CursorLine term=NONE cterm=NONE ctermbg=235 ctermfg=NONE
 
     "====[ Make the 81st column stand out ]====================================
     highlight ColorColumn ctermbg=magenta
@@ -198,7 +234,7 @@ nnoremap <leader>q ;Bdelete<Enter>
 
 
 " Automatic fold settings for specific files. Uncomment to use.
-autocmd FileType ruby setlocal foldmethod=syntax
+autocmd FileType ruby setlocal foldmethod=indent
 autocmd FileType css  setlocal foldmethod=indent shiftwidth=2 tabstop=2
 
 " ============================================================================
@@ -224,3 +260,18 @@ let g:gist_detect_filetype = 1
 let g:gist_open_browser_after_post = 1
 let g:gist_post_private = 1
 let g:gist_show_privates = 1
+
+" syntastic config
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
+
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_auto_loc_list = 1
+let g:syntastic_check_on_open = 0
+let g:syntastic_check_on_wq = 0
+let g:syntastic_ruby_checkers=['rubocop', 'mri']
+let g:syntastic_javascript_checkers=['jshint']
+
+" Don't use the mouse!
+set mouse-=a

@@ -30,6 +30,8 @@ alias gf="git fetch"
 alias gk="gitk --all"
 alias gl="git log --oneline --decorate"
 alias gll="git log --decorate"
+# alias sanity_check="git diff `git rev-parse HEAD`"
+alias gitclean="git branch --merged master | grep -v \"\* master\" | xargs -n 1 git branch -d"
 
 # Ruby on Rails
 alias ss="./script/server"
