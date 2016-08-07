@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: Geo's Rails logger
+# key: log
+# --
+Rails.logger.debug("GEO: ${1:${2:variable}: #{$2.inspect}}")

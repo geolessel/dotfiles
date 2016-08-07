@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: Enumerable select
+# key: select
+# --
+select { |${1:variable_name}| ${2:selection method} } 

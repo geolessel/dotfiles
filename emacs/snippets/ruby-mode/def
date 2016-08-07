@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# contributor: Geoffrey Lessel (https://github.com/geolessel)
+# name: define a new method with (optionally) arguments
+# key: def
+# --
+def ${1:method_name}${2:(${3:variable_name [press C-d to delete variable]})}
+  $0
+end

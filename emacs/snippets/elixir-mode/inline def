@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: inline def
+# key: def,
+# --
+def ${1:method_name}, do: $0
