@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: define new function
-# key: def
-# --
-def ${1:method_name}${2:(${3:variable_names [press C-d to delete variable section]})}
-  $0
-end

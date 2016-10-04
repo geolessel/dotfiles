@@ -34,12 +34,9 @@ alias gll="git log --decorate"
 alias gitclean="git branch --merged master | grep -v \"\* master\" | xargs -n 1 git branch -d"
 
 # Ruby on Rails
-alias ss="./script/server"
-alias sg="./script/generate"
-alias sp="./script/plugin install"
-alias sc="./script/console"
-alias whichserver="cat config/deploy/production.rb"
-alias ber='bundle exec rspec'
+alias b='bundle'
+alias be='bundle exec'
+alias ber='bundle exec rake'
 
 # File System
 alias l="ls -lh"

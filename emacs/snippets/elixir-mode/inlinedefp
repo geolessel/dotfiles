@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: inlinedefp
+# key: defp,
+# --
+defp ${1:method_name}${2: when $3}, do: $0

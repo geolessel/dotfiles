@@ -1,0 +1,175 @@
+<?xml version="1.0"?>
+<root>
+  <appdef>
+    <appname>FIREFOX_DEV</appname>
+    <equal>org.mozilla.firefoxdeveloperedition</equal>
+  </appdef>
+
+  <appdef>
+    <appname>CHROME</appname>
+    <equal>com.google.Chrome</equal>
+  </appdef>
+
+  <appdef>
+    <appname>SLACK</appname>
+    <equal>com.tinyspeck.slackmacgap</equal>
+  </appdef>
+
+  <appdef>
+    <appname>MESSAGES</appname>
+    <equal>com.apple.iChat</equal>
+  </appdef>
+
+  <appdef>
+    <appname>MAIL</appname>
+    <equal>com.apple.mail</equal>
+  </appdef>
+
+  <item>
+    <name>Vim-like in Firefox and Chrome</name>
+    <identifier>private.firefox.ctrl_hjkl</identifier>
+    <only>FIREFOX_DEV, CHROME</only>
+
+    <autogen>
+      __KeyToKey__
+      KeyCode::L, ModifierFlag::CONTROL_L,
+      KeyCode::CURSOR_RIGHT, ModifierFlag::COMMAND_L | ModifierFlag::OPTION_L
+    </autogen>
+    <autogen>
+      __KeyToKey__
+      KeyCode::H, ModifierFlag::CONTROL_L,
+      KeyCode::CURSOR_LEFT, ModifierFlag::COMMAND_L | ModifierFlag::OPTION_L
+    </autogen>
+    <autogen>
+      __KeyToKey__
+      KeyCode::K, ModifierFlag::CONTROL_L,
+      KeyCode::CURSOR_UP
+    </autogen>
+    <autogen>
+      __KeyToKey__
+      KeyCode::J, ModifierFlag::CONTROL_L,
+      KeyCode::CURSOR_DOWN
+    </autogen>
+    <autogen>
+      __KeyToKey__
+      KeyCode::D, ModifierFlag::CONTROL_L,
+      KeyCode::PAGEDOWN
+    </autogen>
+    <autogen>
+      __KeyToKey__
+      KeyCode::U, ModifierFlag::CONTROL_L,
+      KeyCode::PAGEUP
+    </autogen>
+  </item>
+
+  <item>
+    <name>Ctrl-jk in Slack</name>
+    <identifier>private.slack.ctrl_jk</identifier>
+    <only>SLACK</only>
+
+    <autogen>
+      __KeyToKey__
+      KeyCode::K, ModifierFlag::CONTROL_L,
+      KeyCode::CURSOR_UP, ModifierFlag::SHIFT_L | ModifierFlag::OPTION_L
+    </autogen>
+    <autogen>
+      __KeyToKey__
+      KeyCode::J, ModifierFlag::CONTROL_L,
+      KeyCode::CURSOR_DOWN, ModifierFlag::SHIFT_L | ModifierFlag::OPTION_L
+    </autogen>
+  </item>
+
+  <item>
+    <name>Ctrl-jk in Messages</name>
+    <identifier>private.messages.ctrl_jk</identifier>
+    <only>MESSAGES</only>
+    <autogen>
+      __KeyToKey__
+      KeyCode::K, ModifierFlag::CONTROL_L,
+      KeyCode::TAB, ModifierFlag::CONTROL_L | ModifierFlag::SHIFT_L
+    </autogen>
+    <autogen>
+      __KeyToKey__
+      KeyCode::J, ModifierFlag::CONTROL_L,
+      KeyCode::TAB, ModifierFlag::CONTROL_L
+    </autogen>
+  </item>
+
+  <item>
+    <name>Ctrl-jk in Mail</name>
+    <identifier>private.mail.ctrl_jk</identifier>
+    <only>MAIL</only>
+    <autogen>
+      __KeyToKey__
+      KeyCode::K, ModifierFlag::CONTROL_L,
+      KeyCode::CURSOR_UP
+    </autogen>
+    <autogen>
+      __KeyToKey__
+      KeyCode::J, ModifierFlag::CONTROL_L,
+      KeyCode::CURSOR_DOWN
+    </autogen>
+  </item>
+
+
+  <item>
+    <name>VIM Style Media Play Next Mapping</name>
+    <appendix>Remaps Left OPTION + L to Media Key Next</appendix>
+    <identifier>private-music-remap-play-next</identifier>
+    <autogen>
+      __KeyToKey__
+      KeyCode::L, ModifierFlag::OPTION_L | ModifierFlag::NONE,
+      ConsumerKeyCode::MUSIC_NEXT
+    </autogen>
+  </item>
+  <item>
+    <name>VIM Style Media Play Previous Mapping</name>
+    <appendix>Remaps Left OPTION + H to Media Key Previous</appendix>
+    <identifier>private-music-remap-play-previous</identifier>
+    <autogen>
+      __KeyToKey__
+      KeyCode::H, ModifierFlag::OPTION_L | ModifierFlag::NONE,
+      ConsumerKeyCode::MUSIC_PREV
+    </autogen>
+  </item>
+  <item>
+    <name>VIM Style Media Play Previous Mapping (Alternate)</name>
+    <appendix>Remaps Left OPTION + J to Media Key Previous</appendix>
+    <identifier>private-music-remap-play-previous-alternate</identifier>
+    <autogen>
+      __KeyToKey__
+      KeyCode::J, ModifierFlag::OPTION_L | ModifierFlag::NONE,
+      ConsumerKeyCode::MUSIC_PREV
+    </autogen>
+  </item>
+  <item>
+    <name>VIM Style Media Play/Pause Mapping</name>
+    <appendix>Remaps Left OPTION + K to Media Key Play/Pause</appendix>
+    <identifier>private-music-remap-play-pause</identifier>
+    <autogen>
+      __KeyToKey__
+      KeyCode::K, ModifierFlag::OPTION_L | ModifierFlag::NONE,
+      ConsumerKeyCode::MUSIC_PLAY
+    </autogen>
+  </item>
+  <item>
+    <name>VIM Style Volume Up Mapping</name>
+    <appendix>Remaps Left OPTION + K to Media Key Volume Up</appendix>
+    <identifier>private-music-remap-volume-up</identifier>
+    <autogen>
+      __KeyToKey__
+      KeyCode::K, ModifierFlag::OPTION_L | ModifierFlag::NONE,
+      ConsumerKeyCode::VOLUME_UP
+    </autogen>
+  </item>
+  <item>
+    <name>VIM Style Volume Down Mapping</name>
+    <appendix>Remaps Left OPTION + J to Media Key Volume Down</appendix>
+    <identifier>private-music-remap-volume-down</identifier>
+    <autogen>
+      __KeyToKey__
+      KeyCode::J, ModifierFlag::OPTION_L | ModifierFlag::NONE,
+      ConsumerKeyCode::VOLUME_DOWN
+    </autogen>
+  </item>
+</root>

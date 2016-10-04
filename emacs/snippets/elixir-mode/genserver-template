@@ -1,0 +1,59 @@
+# -*- mode: snippet -*-
+# name: genserver-template
+# key: genserver
+# --
+use GenServer
+
+# ┌────────────┐
+# │ Client API │
+# └────────────┘
+
+# replace :ok with initial state
+def start_link(opts \\\\ []) do
+  GenServer.start_link(__MODULE__, :ok, opts)
+end
+
+
+# ┌──────────────────┐
+# │ Server Callbacks │
+# └──────────────────┘
+
+def init(state) do
+  # {:ok, state}
+  # {:ok, state, timeout}
+  # {:ignore}
+  # {:stop, reason}
+  {:ok, state}
+end
+ 
+# def handle_call(msg, {from, ref}, state) do
+#   # {:reply, reply, state}
+#   # {:reply, reply, state, timeout}
+#   # {:reply, reply, state, :hibernate}
+#   # {:noreply, state}
+#   # {:noreply, state, timeout}
+#   # {:noreply, state, :hibernate}
+#   # {:stop, reason, reply, state}
+#   # {:stop, reason, state}
+# end
+# 
+# def handle_cast(msg, state) do
+#   # {:noreply, state}
+#   # {:noreply, state, timeout}
+#   # {:noreply, state, :hibernate}
+# end
+# 
+# def handle_info(msg, state) do
+#   # {:noreply, state}
+#   # {:noreply, state, timeout}
+#   # {:stop, reason, state}
+# end
+# 
+# def terminate(reason, state) do
+#   :ok
+# end
+
+
+# ┌──────────────────┐
+# │ Helper Functions │
+# └──────────────────┘

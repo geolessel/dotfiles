@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: defp
+# key: defp
+# --
+defp ${1:method_name}${2:(${3:variable_names [press C-d to delete variable section]})}${4:${5: when}} do
+  $0
+end
