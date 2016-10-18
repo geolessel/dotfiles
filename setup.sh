@@ -2,6 +2,8 @@ cd $1
 ln -s bin/dotfiles/vim .vim
 ln -s bin/dotfiles/vim/vimrc .vimrc
 ln -s bin/dotfiles/git_template .git_template
+ln -s bin/dotfiles/emacs/emacs .emacs
+ln -s bin/dotfiles/emacs/emacs.d .emacs.d
 echo "source-file ${1}/bin/dotfiles/tmux.conf" > .tmux.conf
 echo "source ${1}/bin/dotfiles/zshrc" > .zshrc
 
