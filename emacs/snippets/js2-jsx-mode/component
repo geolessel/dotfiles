@@ -1,0 +1,21 @@
+# -*- mode: snippet -*-
+# name: component
+# key: component
+# --
+class ${2:ComponentName} extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+    }
+    // bind any functions that use `this`
+    // this.handleClick = this.handleClick.bind(this)
+  }
+
+  render() {
+    return (
+      $0
+    )
+  }
+}
+
+export default $2

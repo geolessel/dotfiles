@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: bind react component functions
+# key: bind
+# --
+this.${1:functionName} = this.$1.bind(this)

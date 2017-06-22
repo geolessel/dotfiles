@@ -33,6 +33,7 @@
  '(region ((t (:background "#49483e"))))
  '(secondary-selection ((t (:background "#75715e"))))
  '(error ((t (:foreground "#f92672" :weight bold))))
+ '(flycheck-fringe-error ((t (:foreground "#f92672" :weight bold))))
  '(warning ((t (:foreground "#fd971f" :weight bold))))
  '(success ((t (:foreground "#a6e22e" :weight bold))))
  '(header-line ((t (:inherit mode-line :foreground "#ae81ff" :background nil))))

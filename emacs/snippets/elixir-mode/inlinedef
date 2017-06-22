@@ -2,4 +2,4 @@
 # name: inline def
 # key: def,
 # --
-def ${1:method_name}${2: when $3}, do: $0
+def ${1:method_name}, do: $0
