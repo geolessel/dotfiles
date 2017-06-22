@@ -12,3 +12,5 @@ emacs/emacs.d/tramp
 emacs/emacs.d/url/*
 emacs/emacs.d/eshell/*
 emacs/emacs.d/lisp/*
+vim/bundle/*
+vim/UltiSnips/*
