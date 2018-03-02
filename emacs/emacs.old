@@ -1,4 +1,5 @@
 ;;; .emacs --- geo's emacs
+;;; Code:
 ;;; Commentary:
 
 (custom-set-variables
@@ -44,10 +45,6 @@
  '(flycheck-color-mode-line-info-face ((t (:inherit flycheck-fringe-info :weight normal))))
  '(flycheck-color-mode-line-warning-face ((t (:inherit flycheck-fringe-warning :weight normal)))))
 
-
-; https://github.com/syl20bnr/spacemacs/blob/develop/doc/FAQ.org#why-is-spacemacs-hanging-on-startup
-; setting this reduces laughingly slow startup times
-(setq tramp-ssh-controlmaster-options "-o ControlMaster=auto -o ControlPath='tramp.%%C' -o ControlPersist=no")
 
 ; list the packages you want
 (setq package-list '(evil
@@ -115,16 +112,6 @@
 
 (exec-path-from-shell-initialize)
 
-;## Evil
-(setq evil-shift-width 2)
-(setq evil-want-C-u-scroll t)
-(require 'evil)
-(evil-mode 1)
-(define-key evil-normal-state-map ";" 'evil-ex) ; Use ; instead of :
-(define-key evil-normal-state-map ":" 'evil-repeat-find-char) ; Use ; as :
-(define-key evil-normal-state-map "," ctl-x-map) ; Use , as "leader" (C-x)
-(define-key evil-normal-state-map " " ctl-x-map) ; Use SPC as "leader" (C-x)
-;(define-key evil-normal-state-map (kbd "<tab>") 'evil-indent) ; Use TAB to correct indentation
 
 ;;; yasnippet
 (setq yas-snippet-dirs
@@ -241,12 +228,6 @@
 
 (setq apropos-sort-by-scores t)
 
-(menu-bar-mode -1)
-(tool-bar-mode -1)
-(setq ns-use-native-fullscreen nil)
-(scroll-bar-mode -1)
-;(toggle-frame-fullscreen) ; can't get it to not use native full screen
-
 (require 'elixir-mode)
 ; ;; Use ruby-end-mode with elixir files
 ; (add-to-list 'elixir-mode-hook
@@ -281,7 +262,6 @@
 (setq ring-bell-function 'ignore) ; IGNORE ALL THE BELLS!
 (setq blink-cursor-blinks 0) ; blink cursor forever
 (setq global-hl-line-mode t) ; highlight current row
-(setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
 (setq system-uses-terminfo nil) ; fixes 4m in term sessions
 (mac-auto-operator-composition-mode t)
 (show-paren-mode t)
