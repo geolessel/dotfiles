@@ -36,7 +36,7 @@ Plugin 'slim-template/vim-slim.git'
 Plugin 'mattn/webapi-vim'
 Plugin 'mattn/gist-vim'
 Plugin 'kana/vim-textobj-user'
-Plugin 'nelstrom/vim-textobj-rubyblock'
+" Plugin 'nelstrom/vim-textobj-rubyblock'
 Plugin 'endel/vim-github-colorscheme'
 Plugin 'bbatsov/rubocop.git'
 Plugin 'ngmy/vim-rubocop.git'
@@ -47,6 +47,7 @@ Plugin 'scrooloose/syntastic'
 Plugin 'othree/yajs.vim'
 Plugin 'tomasr/molokai' " colorscheme
 Plugin 'Valloric/YouCompleteMe'
+Plugin 'mjakl/vim-asciidoc'
 
 " Vimsnippets
 "Plugin 'MarcWeber/vim-addon-mw-utils'

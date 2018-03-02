@@ -8,10 +8,10 @@
  ;; If there is more than one, they won't work right.
  '(battery-mode-line-limit 90)
  '(coffee-tab-width 2)
- '(custom-enabled-themes (quote (geo-dark)))
+ '(custom-enabled-themes (quote (twilight-bright)))
  '(custom-safe-themes
    (quote
-    ("f380fd03bab460c7ab257896fcf13c54052e6258bdb54e54246fd07e4923273b" "5a7830712d709a4fc128a7998b7fa963f37e960fd2e8aa75c76f692b36e6cf3c" "50e7f9d112e821e42bd2b8410d50de966c35c7434dec12ddea99cb05dd368dd8" "e1551b5516e0a439b6ab019ba00cee866e735f66f22ff67a5d882ad0f1383454" "e34496b6cb6d1364616a0c2e41d41648648c1d950af82a30858901a0a1c6805a" "59f28152c20630fb2f7d414020d21ede9444a138fdedee53a77ecdb7f3ed48a0" "8eeb8a60d588af66fca1be07913faf722c165c48904cd4cf45d7c11cca94ff11" "3b2ecfa8cb375377f8906d77fa59aa11bcbb1fdabbf362b8e8e6d58ca657be9f" "90c7657ca7ae586bff992e8ce2d20447dd343ef235f25cf4e4b228969750d66b" "8389282278e6febad73d5889c959a408053e42750d79bffd238ce641d7e5da49" "a0c61e07ac38bec833186b8f6b82caa005b00250d375bc410f0dd99de456cf63" "e0d6bf68ed6b52d6b4b22b4d7f1d09235c0cd96a9edfe12a67cfeed183d0a6f1" "fb417dca72f9b08777194a9e3a5b86da29dc42972194f91ed5aff4ef81c3c54b" "24acd771fd56cd61bd12732f2772275429f9d75bc12bc9f0bd3a268fddb6a645" "3f873e7cb090efbdceafb8f54afed391899172dd917bb7a354737a8bb048bd71" "3a3917dbcc6571ef3942c2bf4c4240f70b5c4bc0b28192be6d3f9acd83607a24" "a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" "38b536cbb5b15ae65c2d5a9a4d2e8deff9291a99ed6ab67cf51cf6a8b02b83ad" "a55ef8d8cb330dd324b70935dd1f41996ae7d892a9dd468596b156d216fda7e1" default)))
+    ("c1390663960169cd92f58aad44ba3253227d8f715c026438303c09b9fb66cdfb" default)))
  '(display-time-24hr-format t)
  '(display-time-default-load-average nil)
  '(display-time-mode t)
@@ -24,6 +24,7 @@
    (quote
     (adoc-mode all-the-icons-dired diminish spaceline spaceline-all-the-icons powerline powerline-evil go-mode flycheck-color-mode-line flycheck-credo flycheck-dialyzer lua-mode magithub rspec-mode writeroom-mode twilight-bright-theme zoom-frm yasnippet yaml-mode which-key web-mode smex smart-mode-line slim-mode sass-mode ruby-refactor ruby-end robe paradox markdown-mode ledger-mode keychain-environment json-mode js2-mode helm-rails helm-projectile helm-dash helm-ag git-timemachine geo-light-2-theme flycheck-elixir flx-ido exec-path-from-shell evil-rails evil-org evil-matchit evil-magit elixir-mix drag-stuff discover-my-major discover coffee-mode base16-theme alchemist ag)))
  '(paradox-github-token t)
+ '(prettier-args (quote ("--semi" "false" "--trailing-comma" "es5")))
  '(projectile-mode-line (quote (:eval (format " P[%s]" (projectile-project-name)))))
  '(show-paren-mode t)
  '(sml/mule-info nil)
@@ -42,7 +43,6 @@
  '(flycheck-color-mode-line-error-face ((t (:background "black" :foreground "red" :weight normal))))
  '(flycheck-color-mode-line-info-face ((t (:inherit flycheck-fringe-info :weight normal))))
  '(flycheck-color-mode-line-warning-face ((t (:inherit flycheck-fringe-warning :weight normal)))))
-
 
 
 ; https://github.com/syl20bnr/spacemacs/blob/develop/doc/FAQ.org#why-is-spacemacs-hanging-on-startup
@@ -100,6 +100,8 @@
 ; activate all the packages (in particular autoloads)
 (package-initialize)
 (add-to-list 'load-path "~/.emacs.d/lisp")
+
+(load-theme 'twilight-bright)
 
 ; fetch the list of packages available
 (unless package-archive-contents
@@ -173,6 +175,7 @@
 ;## Flycheck
 (require 'flycheck)
 (add-hook 'after-init-hook #'global-flycheck-mode)
+(setq flycheck-javascript-eslint-executable "eslint_d")
 ;; (flycheck-add-mode 'javascript-eslint 'web-mode)
 ;; disable jshint since we prefer eslint checking
 ;; (setq-default flycheck-disabled-checkers
@@ -273,6 +276,7 @@
 (setq tooltip-use-echo-area t)  ; Use the echo area for tooltips
 (setq redisplay-dont-pause t)   ; fully redraw before processing input events
 (setq show-trailing-whitespace t)
+(add-hook 'before-save-hook 'delete-trailing-whitespace)
 ;(setq visible-bell t) ; TURN OFF THE BEEPING!
 (setq ring-bell-function 'ignore) ; IGNORE ALL THE BELLS!
 (setq blink-cursor-blinks 0) ; blink cursor forever
@@ -330,7 +334,5 @@
 (add-hook 'js2-mode-hook
           '(lambda ()
                   (add-hook 'before-save-hook 'prettier-before-save)))
-(setq prettier-args '(
-  "--semi" "false"))
 
 (add-to-list 'auto-mode-alist (cons "\\.adoc\\'" 'adoc-mode))

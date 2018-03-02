@@ -13,3 +13,8 @@ daily() {
   vi $filedate.daily
   cd $previousdir
 }
+
+xzip() {
+  echo "RUNNING tar -c \"$1\" | xz -9 --lzma2=preset=9,dict=512Mi > \"$1.tar.xz\""
+  tar -c "$1" | xz -9 --lzma2=preset=9,dict=512Mi > "$1.tar.xz"
+}
