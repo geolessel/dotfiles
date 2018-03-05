@@ -1,8 +1,8 @@
-(deftheme geo-light-theme
+(deftheme geo-light
   "Created 2016-07-05.")
 
 (custom-theme-set-variables
- 'geo-light-theme
+ 'geo-light
  '(ansi-color-names-vector ["#0c0d0e" "#e31a1c" "#31a354" "#dca060" "#3182bd" "#756bb1" "#3182bd" "#b7b8b9"])
  '(battery-mode-line-limit 90)
  '(custom-safe-themes (quote ("8eeb8a60d588af66fca1be07913faf722c165c48904cd4cf45d7c11cca94ff11" "3b2ecfa8cb375377f8906d77fa59aa11bcbb1fdabbf362b8e8e6d58ca657be9f" "90c7657ca7ae586bff992e8ce2d20447dd343ef235f25cf4e4b228969750d66b" "8389282278e6febad73d5889c959a408053e42750d79bffd238ce641d7e5da49" "a0c61e07ac38bec833186b8f6b82caa005b00250d375bc410f0dd99de456cf63" "e0d6bf68ed6b52d6b4b22b4d7f1d09235c0cd96a9edfe12a67cfeed183d0a6f1" "fb417dca72f9b08777194a9e3a5b86da29dc42972194f91ed5aff4ef81c3c54b" "24acd771fd56cd61bd12732f2772275429f9d75bc12bc9f0bd3a268fddb6a645" "3f873e7cb090efbdceafb8f54afed391899172dd917bb7a354737a8bb048bd71" "3a3917dbcc6571ef3942c2bf4c4240f70b5c4bc0b28192be6d3f9acd83607a24" "a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" "38b536cbb5b15ae65c2d5a9a4d2e8deff9291a99ed6ab67cf51cf6a8b02b83ad" "a55ef8d8cb330dd324b70935dd1f41996ae7d892a9dd468596b156d216fda7e1" default)))
@@ -12,13 +12,12 @@
  '(initial-buffer-choice t)
  '(rich-minority-mode t)
  '(display-battery-mode t)
- '(fringe-mode (quote (quote (nil . 0))))
  '(menu-bar-mode nil)
  '(tool-bar-mode nil)
  '(global-hl-line-mode t))
 
 (custom-theme-set-faces
- 'geo-light-theme
+ 'geo-light
  '(default ((t (:background "#fcfdfe" :foreground "#515253"))))
  '(fringe ((t (:background "gainsboro"))))
  '(mode-line ((t (:background "gold2" :foreground "black" :box nil))))
@@ -120,4 +119,4 @@
  '(custom-group-tag ((t (:foreground "#3182bd"))))
  '(custom-state ((t (:foreground "#31a354")))))
 
-(provide-theme 'geo-light-theme)
+(provide-theme 'geo-light)

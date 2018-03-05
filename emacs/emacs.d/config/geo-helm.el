@@ -53,4 +53,6 @@
       ("w" helm-toggle-resplit-and-swap-windows)
       ("f" helm-follow-mode))
 
+(use-package helm-projectile :ensure nil)
+
 (provide 'geo-helm)
