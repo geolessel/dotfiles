@@ -29,7 +29,9 @@
       global-hl-line-mode t                ; highlight current row
       show-paren-mode t
       mac-auto-operator-composition-mode t ; get ligatures on those fonts, yo!
+      use-package-always-ensure t          ; make use-package install packages
       js-indent-level 2
+      mac-option-modifier 'super           ; make opt key do Super
       create-lockfiles nil)
 
 (eval-when-compile
@@ -40,9 +42,11 @@
 (add-to-list 'load-path "~/.emacs.d/config/")
 (add-to-list 'load-path "~/.emacs.d/lisp/")
 
-(use-package geo-required-packages :ensure nil)
 (use-package geo-evil :ensure nil)
 (use-package geo-look-and-feel :ensure nil)
+(use-package geo-code-style :ensure nil)
+(use-package geo-helm :ensure nil)
+(use-package geo-ruby :ensure nil)
 
 (use-package key-chord
   :config
@@ -50,35 +54,40 @@
   (key-chord-define evil-insert-state-map "jk" 'evil-normal-state)
   (key-chord-define evil-normal-state-map "''" 'helm-M-x))
 
-(use-package geo-helm :ensure nil)
 (use-package magit
   :bind (
   ("C-x g" . magit-status)))
-(use-package evil-magit :ensure nil)
+(use-package evil-magit)
 (use-package projectile
-  :ensure nil
   :config
   (projectile-mode))
-(use-package projectile-rails :ensure nil)
-(use-package rjsx-mode
-  :ensure t
+
+(use-package elixir-mode
   :config
-  (setq js2-strict-missing-semi-warning nil)
-  (setq js2-strict-trailing-comma-warning nil)
-  :init
-  (add-hook 'rjsx-mode-hook 'smartparens-mode)
-  (add-hook 'rjsx-mode-hook '(lambda () (add-hook 'before-save-hook 'prettier-before-save)))
-  (add-to-list 'auto-mode-alist '("\\.jsx?\\'" . rjsx-mode))
+  (use-package alchemist
+    :config
+    (add-to-list 'elixir-mode-hook 'alchemist-mode)
+    )
   )
-(use-package prettier-js
-  :ensure t
-  :commands (prettier-js-mode)
+
+(use-package yasnippet
+  :diminish yas-minor-mode
   :config
-  (setq prettier-args
-        '("--semi" "false"
-          "--trailing-comma" "es5"))
-  (setq prettier-target-mode "rjsx-mode")
+  (setq yas-snippet-dirs '("~/bin/dotfiles/emacs/snippets"))
+  (yas-global-mode 1)
   )
+
+(use-package ag
+  :config
+  (use-package helm-ag)
+  )
+
+(use-package exec-path-from-shell
+  :config
+  (setq exec-path-from-shell-variables (quote ("PATH")))
+  (exec-path-from-shell-initialize)
+  )
+
 
 ; -----------------------------------------------------------------------------
 (custom-set-variables
@@ -110,9 +119,10 @@
  '(menu-bar-mode nil)
  '(package-selected-packages
    (quote
-    (rjsx-mode prettier-js projectile-rails projectile bind-map magit key-chord helm zoom-frm yasnippet yaml-mode writeroom-mode which-key web-mode use-package twilight-bright-theme spaceline-all-the-icons smex smart-mode-line slim-mode sass-mode ruby-refactor ruby-end rspec-mode robe powerline-evil paradox magithub lua-mode ledger-mode keychain-environment json-mode js2-mode helm-rails helm-projectile helm-dash helm-ag go-mode git-timemachine geo-light-2-theme font-lock+ flycheck-elixir flycheck-dialyzer flycheck-credo flycheck-color-mode-line flx-ido exec-path-from-shell evil-rails evil-org evil-matchit evil-magit evil-leader elixir-mix drag-stuff discover-my-major discover diminish coffee-mode base16-theme all-the-icons-dired alchemist ag adoc-mode)))
+    (markdown-mode flycheck-status-emoji elixir-mode flycheck rjsx-mode prettier-js projectile-rails projectile bind-map magit key-chord helm zoom-frm yasnippet yaml-mode writeroom-mode which-key web-mode use-package twilight-bright-theme spaceline-all-the-icons smex smart-mode-line slim-mode sass-mode ruby-refactor ruby-end rspec-mode robe powerline-evil paradox magithub lua-mode ledger-mode keychain-environment json-mode js2-mode helm-rails helm-projectile helm-dash helm-ag go-mode git-timemachine geo-light-2-theme font-lock+ flycheck-elixir flycheck-dialyzer flycheck-credo flycheck-color-mode-line flx-ido exec-path-from-shell evil-rails evil-org evil-matchit evil-magit evil-leader elixir-mix drag-stuff discover-my-major discover diminish coffee-mode base16-theme all-the-icons-dired alchemist ag adoc-mode)))
  '(paradox-github-token t)
  '(rich-minority-mode t)
+ '(rspec-use-bundler-when-possible t)
  '(tool-bar-mode nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.

@@ -2,7 +2,6 @@
 
 (setq custom-theme-directory "~/.emacs.d/themes/")
 (use-package base16-theme
-  :ensure t
   :demand t)
 
 (load-theme 'geo-light)
@@ -40,5 +39,31 @@
   )
 
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
+
+(use-package flx-ido
+  :config
+  (ido-mode 1)
+  (ido-everywhere 1)
+  (flx-ido-mode 1)
+  ;; disable ido faces to see flx highlights
+  (setq ido-enable-flex-matching t)
+  (setq ido-use-faces nil)
+  )
+
+(use-package diminish
+  :config
+  (diminish 'auto-revert-mode)
+  (diminish 'undo-tree-mode)
+  )
+
+(use-package markdown-mode
+  :ensure t
+  :commands (markdown-mode gfm-mode)
+  :mode (("README\\.md\\'" . gfm-mode)
+         ("\\.md\\'" . markdown-mode)
+         ("\\.markdown\\'" . markdown-mode))
+  :init (setq markdown-command "multimarkdown"))
+
+(use-package slim-mode :ensure t)
 
 (provide 'geo-look-and-feel)
