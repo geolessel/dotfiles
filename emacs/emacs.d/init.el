@@ -5,11 +5,9 @@
 (require 'package)
 (let* ((no-ssl (and (memq system-type '(windows-nt ms-dos))
                     (not (gnutls-available-p))))
-       (url (concat (if no-ssl "http" "https") "://melpa.org/packages/")))
-  (add-to-list 'package-archives (cons "melpa" url) t))
-(when (< emacs-major-version 24)
-  ;; For important compatibility libraries like cl-lib
-  (add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/")))
+       (proto (if no-ssl "http" "https")))
+  (add-to-list 'package-archives (cons "melpa" (concat proto "://melpa.org/packages/")) t))
+
 (package-initialize)
 
 (menu-bar-mode 0)
@@ -52,12 +50,14 @@
   :config
   (key-chord-mode 1)
   (key-chord-define evil-insert-state-map "jk" 'evil-normal-state)
+  (key-chord-define evil-insert-state-map "jj" 'evil-normal-state)
   (key-chord-define evil-normal-state-map "''" 'helm-M-x))
 
 (use-package magit
   :bind (
   ("C-x g" . magit-status)))
 (use-package evil-magit)
+(use-package github-browse-file)
 (use-package projectile
   :config
   (projectile-mode))
@@ -87,6 +87,23 @@
   (setq exec-path-from-shell-variables (quote ("PATH")))
   (exec-path-from-shell-initialize)
   )
+
+(use-package dockerfile-mode
+  :config
+  (add-to-list 'auto-mode-alist '("Dockerfile\\'" . dockerfile-mode))
+  )
+
+(use-package yaml-mode
+  :config
+  (add-to-list 'auto-mode-alist '("\\.yml\\'" . yaml-mode))
+  )
+
+(use-package web-mode
+  :config
+  (add-to-list 'auto-mode-alist '("\\.eex\\'" . web-mode))
+  )
+
+
 
 
 ; -----------------------------------------------------------------------------
@@ -119,11 +136,16 @@
  '(menu-bar-mode nil)
  '(package-selected-packages
    (quote
-    (markdown-mode flycheck-status-emoji elixir-mode flycheck rjsx-mode prettier-js projectile-rails projectile bind-map magit key-chord helm zoom-frm yasnippet yaml-mode writeroom-mode which-key web-mode use-package twilight-bright-theme spaceline-all-the-icons smex smart-mode-line slim-mode sass-mode ruby-refactor ruby-end rspec-mode robe powerline-evil paradox magithub lua-mode ledger-mode keychain-environment json-mode js2-mode helm-rails helm-projectile helm-dash helm-ag go-mode git-timemachine geo-light-2-theme font-lock+ flycheck-elixir flycheck-dialyzer flycheck-credo flycheck-color-mode-line flx-ido exec-path-from-shell evil-rails evil-org evil-matchit evil-magit evil-leader elixir-mix drag-stuff discover-my-major discover diminish coffee-mode base16-theme all-the-icons-dired alchemist ag adoc-mode)))
+    (github-browse-file github-browse-commit browse-at-remote dockerfile-mode markdown-mode flycheck-status-emoji elixir-mode flycheck rjsx-mode prettier-js projectile-rails projectile bind-map magit key-chord helm zoom-frm yasnippet yaml-mode writeroom-mode which-key web-mode use-package twilight-bright-theme spaceline-all-the-icons smex smart-mode-line slim-mode sass-mode ruby-refactor ruby-end rspec-mode robe powerline-evil paradox magithub lua-mode ledger-mode keychain-environment json-mode js2-mode helm-rails helm-projectile helm-dash helm-ag go-mode git-timemachine geo-light-2-theme font-lock+ flycheck-elixir flycheck-dialyzer flycheck-credo flycheck-color-mode-line flx-ido exec-path-from-shell evil-rails evil-org evil-matchit evil-magit evil-leader elixir-mix drag-stuff discover-my-major discover diminish coffee-mode base16-theme all-the-icons-dired alchemist ag adoc-mode)))
  '(paradox-github-token t)
  '(rich-minority-mode t)
  '(rspec-use-bundler-when-possible t)
- '(tool-bar-mode nil))
+ '(tool-bar-mode nil)
+ '(web-mode-code-indent-offset 2)
+ '(web-mode-css-indent-offset 2)
+ '(web-mode-enable-auto-closing nil)
+ '(web-mode-enable-auto-opening nil)
+ '(web-mode-enable-auto-pairing nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

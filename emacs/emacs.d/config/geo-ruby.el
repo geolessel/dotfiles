@@ -11,4 +11,6 @@
   (setq compilation-scroll-output t)
   )
 
+(setq ruby-insert-encoding-magic-comment nil)
+
 (provide 'geo-ruby)
