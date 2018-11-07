@@ -3,34 +3,35 @@
 set nocompatible                  " Must come first because it changes other options.
 filetype off
 
-set rtp+=~/.vim/bundle/Vundle
+" requires a previously-run `git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim`
+set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 
 " let Vundle manage Vundle
-" required! 
+" required!
 Plugin 'gmarik/vundle'
 Plugin 'tpope/vim-rails.git'
 Plugin 'vim-ruby/vim-ruby.git'
 Plugin 'skalnik/vim-vroom'
 Plugin 'kien/ctrlp.vim.git'
-"Plugin 'Shougo/neocomplcache.git'
-Plugin 'scrooloose/nerdcommenter.git'
+" Plugin 'Shougo/neocomplcache.git'
+" Plugin 'scrooloose/nerdcommenter.git'
 Plugin 'scrooloose/nerdtree.git'
 Plugin 'msanders/snipmate.vim.git'
-Plugin 'kchmck/vim-coffee-script.git'
+" Plugin 'kchmck/vim-coffee-script.git'
 Plugin 'tpope/vim-endwise.git'
 Plugin 'tpope/vim-fugitive.git'
-"Plugin 'tpope/vim-markdown.git'
+" Plugin 'tpope/vim-markdown.git'
 Plugin 'plasticboy/vim-markdown'
 Plugin 'tpope/vim-surround.git'
-"Plugin 'tsaleh/vim-matchit' " can't find this anymore
+" Plugin 'tsaleh/vim-matchit' " can't find this anymore
 runtime macros/matchit.vim
 Plugin 'vim-scripts/ruby-matchit'
-Plugin 'godlygeek/tabular'
-Plugin 'vimwiki'
-Plugin 'moll/vim-bbye'
-Plugin 'junegunn/vim-easy-align'
-Plugin 'rking/ag.vim'
+" Plugin 'godlygeek/tabular'
+" Plugin 'vimwiki'
+" Plugin 'moll/vim-bbye'
+" Plugin 'junegunn/vim-easy-align'
+" Plugin 'rking/ag.vim'
 Plugin 'elixir-lang/vim-elixir'
 Plugin 'slim-template/vim-slim.git'
 Plugin 'mattn/webapi-vim'
@@ -46,13 +47,13 @@ Plugin 'mxw/vim-jsx.git'
 Plugin 'scrooloose/syntastic'
 Plugin 'othree/yajs.vim'
 Plugin 'tomasr/molokai' " colorscheme
-Plugin 'Valloric/YouCompleteMe'
+" Plugin 'Valloric/YouCompleteMe'
 Plugin 'mjakl/vim-asciidoc'
 
 " Vimsnippets
-"Plugin 'MarcWeber/vim-addon-mw-utils'
-"Plugin 'tomtom/tlib_vim'
-"Plugin 'garbas/vim-snipmate'
+" Plugin 'MarcWeber/vim-addon-mw-utils'
+" Plugin 'tomtom/tlib_vim'
+" Plugin 'garbas/vim-snipmate'
 
 " ===== Utilsnips
 " Track the engine.
@@ -60,6 +61,8 @@ Plugin 'SirVer/ultisnips'
 
 " Snippets are separated from the engine. Add this if you want them:
 " Plugin 'honza/vim-snippets'
+
+call vundle#end()
 
 " Trigger configuration. Do not use <tab> if you use https://github.com/Valloric/YouCompleteMe.
 let g:UltiSnipsExpandTrigger='<tab>'
@@ -72,7 +75,6 @@ let g:UltiSnipsEditSplit="vertical"
 " ----- Utilsnips
 
 let g:molokai_original = 1 "original background color
-call vundle#end()
 
 " Use , instead of \ as a leader
 let mapleader=','

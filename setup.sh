@@ -1,6 +1,10 @@
 cd $1
+
 ln -s bin/dotfiles/vim .vim
 ln -s bin/dotfiles/vim/vimrc .vimrc
+mkdir -p .config/nvim
+ln -s bin/dotfiles/vim/nvim/init.vim .config/nvim/init.vim
+
 ln -s bin/dotfiles/git_template .git_template
 ln -s bin/dotfiles/emacs/emacs .emacs
 ln -s bin/dotfiles/emacs/emacs.d .emacs.d
