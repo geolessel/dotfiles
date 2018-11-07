@@ -4,7 +4,8 @@
 (use-package base16-theme
   :demand t)
 
-(load-theme 'geo-light)
+(load-theme 'geo-dark)
+; (load-theme 'geo-light)
 
 
 ; FEEL ---------------------------------------------------------------------
@@ -65,5 +66,9 @@
   :init (setq markdown-command "multimarkdown"))
 
 (use-package slim-mode :ensure t)
+
+(use-package company
+  :init
+  (add-hook 'after-init-hook 'global-company-mode))
 
 (provide 'geo-look-and-feel)
