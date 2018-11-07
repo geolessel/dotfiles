@@ -64,3 +64,6 @@ alias pbmigrate='pbe rake db:migrate'
 alias pbtl='pco box tl'
 alias pbst='pco box tail -f ../**/log/development.log'
 alias pbssh='pco box ssh'
+
+bindkey "^[[1;3C" forward-word
+bindkey "^[[1;3D" backward-word
