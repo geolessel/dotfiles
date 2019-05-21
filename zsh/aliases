@@ -33,10 +33,12 @@ alias gll="git log --decorate"
 # alias sanity_check="git diff `git rev-parse HEAD`"
 alias gitclean="git branch --merged master | grep -v \"\* master\" | xargs -n 1 git branch -d"
 
-# Ruby on Rails
+# Development
 alias b='bundle'
 alias be='bundle exec'
 alias ber='bundle exec rake'
+alias by='bundle && yarn'
+alias wds='bin/webpack-dev-server'
 
 # File System
 alias l="ls -lh"

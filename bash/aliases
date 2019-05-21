@@ -24,10 +24,8 @@ alias gf="git fetch"
 alias gk="gitk --all"
 
 # Ruby on Rails
-alias ss="./script/server"
-alias sg="./script/generate"
-alias sp="./script/plugin install"
-alias sc="./script/console"
+alias be="bundle exec"
+alias by="bundle && yarn"
 
 # File System
 alias l="ls -lh"
