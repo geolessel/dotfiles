@@ -16,6 +16,11 @@
         '("--semi" "false"
           "--trailing-comma" "es5"))
   (setq prettier-target-mode "rjsx-mode")
+  (use-package add-node-modules-path
+    :init
+    (eval-after-load 'rjsx-mode
+      '(add-hook 'rjsx-mode-hook #'add-node-modules-path))
+    )
   )
 
 (use-package rjsx-mode
@@ -23,6 +28,7 @@
   (setq js2-strict-missing-semi-warning nil)
   (setq js2-strict-trailing-comma-warning nil)
   :init
+  (add-hook 'rjsx-mode-hook #'add-node-modules-path)
   (add-hook 'rjsx-mode-hook '(lambda () (add-hook 'before-save-hook 'prettier-before-save)))
   (add-to-list 'auto-mode-alist '("\\.jsx?\\'" . rjsx-mode))
   )

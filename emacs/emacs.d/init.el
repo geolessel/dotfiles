@@ -19,7 +19,7 @@
  '(ansi-color-names-vector
    ["#FFFFFF" "#d15120" "#5f9411" "#d2ad00" "#6b82a7" "#a66bab" "#6b82a7" "#505050"])
  '(ansi-term-color-vector
-   [unspecified "#FFFFFF" "#d15120" "#5f9411" "#d2ad00" "#6b82a7" "#a66bab" "#6b82a7" "#505050"])
+   [unspecified "#FFFFFF" "#d15120" "#5f9411" "#d2ad00" "#6b82a7" "#a66bab" "#6b82a7" "#505050"] t)
  '(battery-mode-line-limit 90)
  '(custom-safe-themes
    (quote
@@ -40,7 +40,7 @@
  '(menu-bar-mode nil)
  '(package-selected-packages
    (quote
-    (crystal-mode cargo flycheck-rust rust-mode company-mode company github-browse-file github-browse-commit browse-at-remote dockerfile-mode markdown-mode flycheck-status-emoji elixir-mode flycheck rjsx-mode prettier-js projectile-rails projectile bind-map magit key-chord helm zoom-frm yasnippet yaml-mode writeroom-mode which-key web-mode use-package twilight-bright-theme spaceline-all-the-icons smex smart-mode-line slim-mode sass-mode ruby-refactor ruby-end rspec-mode robe powerline-evil paradox magithub lua-mode ledger-mode keychain-environment json-mode js2-mode helm-rails helm-projectile helm-dash helm-ag go-mode git-timemachine geo-light-2-theme font-lock+ flycheck-elixir flycheck-dialyzer flycheck-credo flycheck-color-mode-line flx-ido exec-path-from-shell evil-rails evil-org evil-matchit evil-magit evil-leader elixir-mix drag-stuff discover-my-major discover diminish coffee-mode base16-theme all-the-icons-dired alchemist ag adoc-mode)))
+    (add-node-modules-path origami hydra crystal-mode cargo flycheck-rust rust-mode company-mode company github-browse-file github-browse-commit browse-at-remote dockerfile-mode markdown-mode flycheck-status-emoji elixir-mode flycheck prettier-js projectile-rails projectile bind-map magit key-chord helm zoom-frm yasnippet yaml-mode writeroom-mode which-key web-mode use-package twilight-bright-theme spaceline-all-the-icons smex smart-mode-line slim-mode sass-mode ruby-refactor ruby-end rspec-mode robe powerline-evil paradox magithub lua-mode ledger-mode keychain-environment json-mode js2-mode helm-rails helm-projectile helm-dash helm-ag go-mode git-timemachine geo-light-2-theme font-lock+ flycheck-elixir flycheck-dialyzer flycheck-credo flycheck-color-mode-line flx-ido exec-path-from-shell evil-rails evil-org evil-matchit evil-magit evil-leader elixir-mix drag-stuff discover-my-major discover diminish coffee-mode base16-theme all-the-icons-dired alchemist ag adoc-mode)))
  '(paradox-github-token t)
  '(rich-minority-mode t)
  '(rspec-use-bundler-when-possible t)
@@ -55,7 +55,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:weight normal :height 140 :width normal :foundry "nil" :family "PragmataPro Liga")))))
+ '(default ((t (:weight normal :height 160 :width normal :foundry "nil" :family "PragmataPro Liga")))))
 
 (menu-bar-mode 0)
 (tool-bar-mode 0)
@@ -93,6 +93,7 @@
 (use-package geo-ruby :ensure nil)
 (use-package geo-js :ensure nil)
 (use-package geo-look-and-feel :ensure nil)
+(use-package geo-hydra :ensure nil)
 
 (use-package key-chord
   :config
