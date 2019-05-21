@@ -10,9 +10,12 @@ use GenServer
 
 # replace :ok with initial state
 def start_link(opts \\\\ []) do
-  GenServer.start_link(__MODULE__, :ok, opts)
+  GenServer.start_link(__MODULE__, :ok, opts ++ [name: __MODULE__])
 end
 
+def example(args) do
+  GenServer.call(__MODULE__, {:example, args})
+end
 
 # ┌──────────────────┐
 # │ Server Callbacks │
@@ -25,7 +28,12 @@ def init(state) do
   # {:stop, reason}
   {:ok, state}
 end
- 
+
+def handle_call({:example, args}, _, state) do
+  # do stuff
+  {:reply, :ok, state}
+end
+
 # def handle_call(msg, {from, ref}, state) do
 #   # {:reply, reply, state}
 #   # {:reply, reply, state, timeout}
@@ -36,19 +44,19 @@ end
 #   # {:stop, reason, reply, state}
 #   # {:stop, reason, state}
 # end
-# 
+#
 # def handle_cast(msg, state) do
 #   # {:noreply, state}
 #   # {:noreply, state, timeout}
 #   # {:noreply, state, :hibernate}
 # end
-# 
+#
 # def handle_info(msg, state) do
 #   # {:noreply, state}
 #   # {:noreply, state, timeout}
 #   # {:stop, reason, state}
 # end
-# 
+#
 # def terminate(reason, state) do
 #   :ok
 # end
