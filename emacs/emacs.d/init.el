@@ -157,4 +157,9 @@
   (add-to-list 'auto-mode-alist '("\\.eex\\'" . web-mode))
   )
 
+(use-package crystal-mode
+  :config
+  (add-to-list 'auto-mode-alist '("\\.cr\\'" . crystal-mode))
+  )
+
 (use-package geo-keyboard-overrides :ensure nil)
