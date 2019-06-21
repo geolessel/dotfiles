@@ -54,7 +54,7 @@ SAVEHIST=1000
 HOSTNAME="`hostname`"
 PAGER='less'
 
-EDITOR='/usr/local/bin/vim'
+EDITOR='/usr/local/bin/nvim'
 
 LC_ALL='en_US.UTF-8'
 LANG='en_US.UTF-8'
