@@ -9,19 +9,28 @@
     )
   )
 
-(use-package prettier-js
-  :commands (prettier-js-mode prettier-before-save)
-  :config
-  (setq prettier-args
-        '("--semi" "false"
-          "--trailing-comma" "es5"))
-  (setq prettier-target-mode "rjsx-mode")
-  (use-package add-node-modules-path
-    :init
-    (eval-after-load 'rjsx-mode
-      '(add-hook 'rjsx-mode-hook #'add-node-modules-path))
-    )
+(use-package eslintd-fix
+  :init
+  (add-hook 'js2-mode-hook 'eslintd-fix-mode)
+  (add-hook 'rjsx-mode-hook 'eslintd-fix-mode)
   )
+
+;; (use-package prettier-js
+;;   :commands (prettier-js-mode prettier-before-save)
+;;   :config
+;;   ;; (setq prettier-args
+;;   ;;       '("--semi" "false"
+;;   ;;         "--trailing-comma" "es5"))
+;;   ;; (setq prettier-target-mode "rjsx-mode")
+;;   :init
+;;   (add-hook 'js2-mode-hook 'prettier-js-mode)
+;;   (add-hook 'web-mode-hook 'prettier-js-mode)
+;;   (use-package add-node-modules-path
+;;     :init
+;;     (eval-after-load 'rjsx-mode
+;;       '(add-hook 'rjsx-mode-hook #'add-node-modules-path))
+;;     )
+;;   )
 
 (use-package rjsx-mode
   :config
@@ -29,7 +38,7 @@
   (setq js2-strict-trailing-comma-warning nil)
   :init
   (add-hook 'rjsx-mode-hook #'add-node-modules-path)
-  (add-hook 'rjsx-mode-hook '(lambda () (add-hook 'before-save-hook 'prettier-before-save)))
+  ;; (add-hook 'rjsx-mode-hook '(lambda () (add-hook 'before-save-hook 'prettier-before-save)))
   (add-to-list 'auto-mode-alist '("\\.jsx?\\'" . rjsx-mode))
   )
 
