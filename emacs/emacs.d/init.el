@@ -94,6 +94,7 @@
 (use-package geo-code-style :ensure nil)
 (use-package geo-helm :ensure nil)
 (use-package geo-ruby :ensure nil)
+(use-package geo-elixir :ensure nil)
 (use-package geo-js :ensure nil)
 (use-package geo-look-and-feel :ensure nil)
 (use-package geo-hydra :ensure nil)
@@ -113,17 +114,6 @@
 (use-package projectile
   :config
   (projectile-mode))
-
-(use-package elixir-mode
-  :config
-  ;; Create a buffer-local hook to run elixir-format on save, only when we enable elixir-mode.
-  (add-hook 'elixir-mode-hook
-    (lambda () (add-hook 'before-save-hook 'elixir-format nil t)))
-  (use-package alchemist
-    :config
-    (add-to-list 'elixir-mode-hook 'alchemist-mode)
-    )
-  )
 
 (use-package rust-mode
   :config
