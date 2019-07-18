@@ -134,7 +134,7 @@
 
 (use-package exec-path-from-shell
   :config
-  (setq exec-path-from-shell-variables (quote ("PATH")))
+  (setq exec-path-from-shell-variables (quote ("PATH" "MYSQL_PORT_3306_TCP_ADDR" "MYSQL_SLAVE_PORT_3306_TCP_ADDR" "MYSQL_SLAVE_PORT_3306_TECP_PORT")))
   (exec-path-from-shell-initialize)
   )
 
