@@ -41,20 +41,20 @@ wget --no-verbose "${EXAMPLES_MASTER}/examples/stm32/f1/Makefile.include" \
 sed -i '' 's|include ../../../../rules.mk|include ../libopencm3.rules.mk|g' \
   libopencm3.target.mk
 
-mkdir src
-cd src
-
 echo "$PREFIX Creating Makefile..."
 cat << EOF > "Makefile"
-BINARY = $1
+BINARY = src/$1
 
-OPENCM3_DIR=../libopencm3
+OPENCM3_DIR=libopencm3
 LDSCRIPT = \$(OPENCM3_DIR)/lib/stm32/f1/stm32f103x8.ld
 
-include ../libopencm3.target.mk
+include ./libopencm3.target.mk
 EOF
 
 echo "$PREFIX Creating blinky example file (src/$1.c)..."
+mkdir src
+cd src
+
 cat << EOF > "$1.c"
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/gpio.h>
