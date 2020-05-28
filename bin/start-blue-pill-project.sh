@@ -3,12 +3,15 @@
 # Start a new libopencm3 based project for Blue Pill STM32F103C8 board.
 # Takes project name as a parameter.
 
+PREFIX="  -->"
+
 EXAMPLES_MASTER=\
 "https://raw.githubusercontent.com/geolessel/libopencm3-examples/stlink-flash"
 
 mkdir "$1"
 cd "$1"
 
+echo "$PREFIX Initializing git and adding libopencm3 submodule..."
 git init .
 git submodule add https://github.com/libopencm3/libopencm3
 
@@ -24,13 +27,15 @@ cat << EOF > ".gitignore"
 *.srec
 EOF
 
+echo "$PREFIX Making libopencm3 (this could take a few minutes)..."
 cd libopencm3
-make
+make 1> /dev/null
 cd ..
 
-wget "${EXAMPLES_MASTER}/examples/rules.mk" -O libopencm3.rules.mk
+echo "$PREFIX Downloading required example files..."
+wget --no-verbose "${EXAMPLES_MASTER}/examples/rules.mk" -O libopencm3.rules.mk
 
-wget "${EXAMPLES_MASTER}/examples/stm32/f1/Makefile.include" \
+wget --no-verbose "${EXAMPLES_MASTER}/examples/stm32/f1/Makefile.include" \
   -O libopencm3.target.mk
 
 sed -i '' 's|include ../../../../rules.mk|include ../libopencm3.rules.mk|g' \
@@ -39,6 +44,7 @@ sed -i '' 's|include ../../../../rules.mk|include ../libopencm3.rules.mk|g' \
 mkdir src
 cd src
 
+echo "$PREFIX Creating Makefile..."
 cat << EOF > "Makefile"
 BINARY = $1
 
@@ -48,6 +54,7 @@ LDSCRIPT = \$(OPENCM3_DIR)/lib/stm32/f1/stm32f103x8.ld
 include ../libopencm3.target.mk
 EOF
 
+echo "$PREFIX Creating blinky example file (src/$1.c)..."
 cat << EOF > "$1.c"
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/gpio.h>
@@ -69,4 +76,4 @@ int main(void)
 }
 EOF
 
-cd $1
+echo "$PREFIX Done!"
