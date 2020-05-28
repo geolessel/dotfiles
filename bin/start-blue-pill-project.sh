@@ -4,7 +4,7 @@
 # Takes project name as a parameter.
 
 EXAMPLES_MASTER=\
-"https://raw.githubusercontent.com/libopencm3/libopencm3-examples/master"
+"https://raw.githubusercontent.com/geolessel/libopencm3-examples/stlink-flash"
 
 mkdir "$1"
 cd "$1"
@@ -33,7 +33,7 @@ wget "${EXAMPLES_MASTER}/examples/rules.mk" -O libopencm3.rules.mk
 wget "${EXAMPLES_MASTER}/examples/stm32/f1/Makefile.include" \
   -O libopencm3.target.mk
 
-sed -i 's|include ../../../../rules.mk|include ../libopencm3.rules.mk|g' \
+sed -i '' 's|include ../../../../rules.mk|include ../libopencm3.rules.mk|g' \
   libopencm3.target.mk
 
 mkdir src
