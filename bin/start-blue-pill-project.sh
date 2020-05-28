@@ -1,0 +1,72 @@
+#!/bin/sh
+
+# Start a new libopencm3 based project for Blue Pill STM32F103C8 board.
+# Takes project name as a parameter.
+
+EXAMPLES_MASTER=\
+"https://raw.githubusercontent.com/libopencm3/libopencm3-examples/master"
+
+mkdir "$1"
+cd "$1"
+
+git init .
+git submodule add https://github.com/libopencm3/libopencm3
+
+cat << EOF > ".gitignore"
+*.a
+*.bin
+*.d
+*.elf
+*.hex
+*.list
+*.map
+*.o
+*.srec
+EOF
+
+cd libopencm3
+make
+cd ..
+
+wget "${EXAMPLES_MASTER}/examples/rules.mk" -O libopencm3.rules.mk
+
+wget "${EXAMPLES_MASTER}/examples/stm32/f1/Makefile.include" \
+  -O libopencm3.target.mk
+
+sed -i 's|include ../../../../rules.mk|include ../libopencm3.rules.mk|g' \
+  libopencm3.target.mk
+
+mkdir src
+cd src
+
+cat << EOF > "Makefile"
+BINARY = $1
+
+OPENCM3_DIR=../libopencm3
+LDSCRIPT = \$(OPENCM3_DIR)/lib/stm32/f1/stm32f103x8.ld
+
+include ../libopencm3.target.mk
+EOF
+
+cat << EOF > "$1.c"
+#include <libopencm3/stm32/rcc.h>
+#include <libopencm3/stm32/gpio.h>
+
+int main(void)
+{
+    int i;
+    rcc_periph_clock_enable(RCC_GPIOC);
+    gpio_set_mode(GPIOC, GPIO_MODE_OUTPUT_2_MHZ,
+        GPIO_CNF_OUTPUT_PUSHPULL, GPIO13);
+
+    /* Blink the LED (PC13) on the board. */
+    while (1) {
+        gpio_toggle(GPIOC, GPIO13);
+        for (i = 0; i < 800000; i++)
+            __asm__("nop");
+    }
+    return 0;
+}
+EOF
+
+cd $1
