@@ -75,5 +75,36 @@ int main(void)
     return 0;
 }
 EOF
+cd ..
+
+echo "$PREFIX Creating simple README file..."
+cat << EOF > "README.md"
+# STM32 Project: $1
+
+The main source file is located at \`src/$1.c\`.
+
+## Building
+
+To build the project, run
+
+\`\`\`shell
+make
+\`\`\`
+
+from the root of the project. After building, if you need a .hex file,
+you can run
+
+\`\`\`shell
+arm-none-eabi-objcopy -O ihex $1.elf $1.hex
+\`\`\`
+
+To upload the resulting build onto the STM32 using an ST-LINK, run
+
+\`\`\`shell
+make stflash
+\`\`\`
+EOF
 
 echo "$PREFIX Done!"
+echo
+cat README.md
