@@ -103,6 +103,14 @@ To upload the resulting build onto the STM32 using an ST-LINK, run
 \`\`\`shell
 make stflash
 \`\`\`
+
+## Resources
+
+* [ST-LINK tutorial](https://github.com/stlink-org/stlink/blob/develop/doc/tutorial.md)
+* [Blue Pill board info](https://stm32-base.org/boards/STM32F103C8T6-Blue-Pill.html)
+* [Opencm3 tutorial (with STM32F07)](https://www.rhye.org/post/stm32-with-opencm3-0-compiling-and-uploading/)
+* [Another Opencm3 tutorial (with STM32F07)](https://bdebyl.net/post/stm32-part0/)
+* [libopencm3 documentation](http://libopencm3.org/docs/latest/html/index.html)
 EOF
 
 echo "$PREFIX Done!"
