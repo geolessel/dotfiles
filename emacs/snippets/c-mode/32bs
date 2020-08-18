@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: 32bit register struct bitmask
+# key: 32bs
+# --
+
+uint32_t ${1:bit_name} : ${2:bit_size};

@@ -1,0 +1,27 @@
+# -*- mode: snippet -*-
+# name: AVR ASM Header
+# key: asm
+# --
+;; =======================================================================
+;; PROGRAM NAME
+;; Author:  Geoffrey Lessel
+;; Date:    2020-02-26
+;; Version: 0.1
+;; AVR:     atmega328p
+;; Clock:   16MHz (16,000,000)
+;;
+;; PROGRAM FUNCTION
+;; Turns on an LED connected to PB0 (digital 0)
+;; when you push a button connected to PD0
+
+     .nolist
+     .include "../../../includes/m328Pdef.inc"
+     .list
+
+;; =======================================================================
+;; DECLARATIONS
+
+     .def    temp =r16           ; designate working register r16 as temp
+
+;; =======================================================================
+;; START OF PROGRAM

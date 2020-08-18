@@ -15,6 +15,7 @@
   (define-key evil-motion-state-map "\C-p" nil)
   (define-key evil-insert-state-map "\C-p" nil)
   (define-key evil-emacs-state-map "\C-p" nil)
+  (define-key evil-normal-state-map "\C-p" 'counsel-projectile)
   (setq-default evil-symbol-word-search t) ; treat _ as part of words in searches
   )
 
