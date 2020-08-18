@@ -1,81 +1,30 @@
 #!/bin/sh
 
-# Start a new libopencm3 based project for Blue Pill STM32F103C8 board.
+# Start a new project for Blue Pill STM32F103C8 board.
 # Takes project name as a parameter.
+
+if [ $# -eq 0 ] # the number of input arguments is 0
+then
+    echo "Enter the name of the project as the only argument."
+    echo "This will be used for the directory name and in the Makefile."
+    exit 1
+fi
 
 PREFIX="  -->"
 
-EXAMPLES_MASTER=\
-"https://raw.githubusercontent.com/geolessel/libopencm3-examples/stlink-flash"
+echo "$PREFIX Pulling template files..."
+git clone --depth 1 --branch v2 git@github.com:geolessel/stm32-template.git $1
+cd $1
 
-mkdir "$1"
-cd "$1"
-
-echo "$PREFIX Initializing git and adding libopencm3 submodule..."
+echo "$PREFIX Initializing git and adding drivers submodule..."
+rm -rf .git
 git init .
-git submodule add https://github.com/libopencm3/libopencm3
+git submodule add git@github.com:geolessel/stm32f103-drivers.git drivers
 
 cat << EOF > ".gitignore"
-*.a
-*.bin
-*.d
-*.elf
-*.hex
-*.list
-*.map
-*.o
-*.srec
+bin/
+obj/
 EOF
-
-echo "$PREFIX Making libopencm3 (this could take a few minutes)..."
-cd libopencm3
-make 1> /dev/null
-cd ..
-
-echo "$PREFIX Downloading required example files..."
-wget --no-verbose "${EXAMPLES_MASTER}/examples/rules.mk" -O libopencm3.rules.mk
-
-wget --no-verbose "${EXAMPLES_MASTER}/examples/stm32/f1/Makefile.include" \
-  -O libopencm3.target.mk
-
-sed -i '' 's|include ../../../../rules.mk|include ./libopencm3.rules.mk|g' \
-  libopencm3.target.mk
-
-echo "$PREFIX Creating Makefile..."
-cat << EOF > "Makefile"
-BINARY = src/$1
-
-OPENCM3_DIR=libopencm3
-LDSCRIPT = \$(OPENCM3_DIR)/lib/stm32/f1/stm32f103x8.ld
-
-include ./libopencm3.target.mk
-EOF
-
-echo "$PREFIX Creating blinky example file (src/$1.c)..."
-mkdir src
-cd src
-
-cat << EOF > "$1.c"
-#include <libopencm3/stm32/rcc.h>
-#include <libopencm3/stm32/gpio.h>
-
-int main(void)
-{
-    int i;
-    rcc_periph_clock_enable(RCC_GPIOC);
-    gpio_set_mode(GPIOC, GPIO_MODE_OUTPUT_2_MHZ,
-        GPIO_CNF_OUTPUT_PUSHPULL, GPIO13);
-
-    /* Blink the LED (PC13) on the board. */
-    while (1) {
-        gpio_toggle(GPIOC, GPIO13);
-        for (i = 0; i < 800000; i++)
-            __asm__("nop");
-    }
-    return 0;
-}
-EOF
-cd ..
 
 echo "$PREFIX Creating simple README file..."
 cat << EOF > "README.md"
@@ -91,12 +40,7 @@ To build the project, run
 make
 \`\`\`
 
-from the root of the project. After building, if you need a .hex file,
-you can run
-
-\`\`\`shell
-arm-none-eabi-objcopy -O ihex $1.elf $1.hex
-\`\`\`
+from the root of the project. All binaries can then be found at \`./bin\`.
 
 To upload the resulting build onto the STM32 using an ST-LINK, run
 
@@ -108,11 +52,17 @@ make stflash
 
 * [ST-LINK tutorial](https://github.com/stlink-org/stlink/blob/develop/doc/tutorial.md)
 * [Blue Pill board info](https://stm32-base.org/boards/STM32F103C8T6-Blue-Pill.html)
-* [Opencm3 tutorial (with STM32F07)](https://www.rhye.org/post/stm32-with-opencm3-0-compiling-and-uploading/)
-* [Another Opencm3 tutorial (with STM32F07)](https://bdebyl.net/post/stm32-part0/)
-* [libopencm3 documentation](http://libopencm3.org/docs/latest/html/index.html)
 EOF
+
+echo "$PREFIX Updating template files with project name..."
+sed -i '' "s/project_name/$1/g" Makefile
+# sed -i '' "s/main\.c/$1\.c/g" src/main.c
+# mv src/main.c src/$1.c
+
+echo "$PREFIX Making initial commit..."
+git add .
+git commit -a -m 'Initial commit'
 
 echo "$PREFIX Done!"
 echo
-cat README.md
+# cat README.md
