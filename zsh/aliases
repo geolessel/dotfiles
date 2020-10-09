@@ -32,6 +32,10 @@ alias gl="git log --oneline --decorate"
 alias gll="git log --decorate"
 # alias sanity_check="git diff `git rev-parse HEAD`"
 alias gitclean="git branch --merged master | grep -v \"\* master\" | xargs -n 1 git branch -d"
+alias gitrecent="git branch --sort=committerdate | \
+   sed 's/^..//' | \
+   xargs -I{} -n 1 git log -1 --color --format='%C(green){}%Creset|%ai|%C(dim)%an%Creset|%C(yellow)%s%Creset' {} | \
+   awk -F'|' 'BEGIN {OFS = FS} {if(length(\$4)>73) \$4=substr(\$4,1,70) \"...\"}1;' | column -t -s '|'"
 
 # Development
 alias b='bundle'
