@@ -10,19 +10,22 @@ for color in RED GREEN YELLOW BLUE MAGENTA CYAN WHITE; do
 done
 PR_NO_COLOR="%{$terminfo[sgr0]%}"
 
-if [[ -e $HOME/bin/dotfiles/vcprompt ]]; then
-  RUBY_VERSION=$(rbenv version | awk '{print $1}')
+if [[ -e $HOME/bin/git-prompt ]]; then
+
 PROMPT='
-%(!.$PR_RED%U%n@%m%u %6c$PR_NO_COLOR.$PR_GREEN%m$PR_NO_COLOR $PR_LIGHT_GREEN%4c$PR_NO_COLOR) $PR_LIGHT_YELLOW$($HOME/bin/dotfiles/vcprompt -f "<%b %r %a%m%u>")$PR_NO_COLOR $PR_BLUE<$RUBY_VERSION@$(rbenv gemset active 2> /dev/null)>$PR_NO_COLOR  $PR_LIGHT_GREEN$($HOME/bin/hex-time)$PR_NO_COLOR
+%(!.$PR_RED%U%n@%m%u %6c$PR_NO_COLOR.$PR_GREEN%m$PR_NO_COLOR $PR_LIGHT_GREEN%4c$PR_NO_COLOR) $PR_LIGHT_YELLOW$($HOME/bin/git-prompt)$PR_NO_COLOR
 %(!.$PR_RED#$PR_NO_COLOR.>) '
 # PROMPT='
-# %(!.$PR_RED%U%n@%m%u %6c$PR_NO_COLOR.$PR_GREEN%m$PR_NO_COLOR $PR_LIGHT_GREEN%4c$PR_NO_COLOR) $PR_BLUE<$RUBY_VERSION@$(rbenv gemset active 2> /dev/null)>$PR_NO_COLOR  $PR_LIGHT_GREEN$($HOME/bin/hex-time)$PR_NO_COLOR
+# %(!.$PR_RED%U%n@%m%u %6c$PR_NO_COLOR.$PR_GREEN%m$PR_NO_COLOR $PR_LIGHT_GREEN%4c$PR_NO_COLOR)
 # %(!.$PR_RED#$PR_NO_COLOR.>) '
 RPROMPT='
 %($PR_LIGHT_GREEN$($HOME/bin/hex-time)$PR_NO_COLOR
 <)'
+
 else
+
 PROMPT="
 %(!.$PR_RED%U%n@%m%u %6c$PR_NO_COLOR.$PR_GREEN%m$PR_NO_COLOR $PR_LIGHT_GREEN%4c$PR_NO_COLOR)
 %(!.$PR_RED#$PR_NO_COLOR.>) "
+
 fi

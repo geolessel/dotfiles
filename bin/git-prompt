@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ -e .git ]]; then
+  git status -sb | awk '
+    /^## / { split($2, branches, /\.\.\./); branch = branches[1] }
+    { git[$1]++ }
+    END {
+      if (git["A"] > 0)
+        status = status " " "+" git["A"]
+      if (git["M"] > 0)
+        status = status " " "*" git["M"]
+      if (git["D"] > 0)
+        status = status " " "-" git["D"]
+      if (git["??"] > 0)
+        status = status " " "?" git["??"]
+      print "<" branch status ">"
+    }
+  '
+fi
