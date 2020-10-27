@@ -1,8 +1,8 @@
 # Utility
-alias reload="source ~/bin/dotfiles/bash/aliases"
-alias ea="$EDITOR ~/bin/dotfiles/bash/aliases && reload"
-alias eatm="mate -w ~/bin/dotfiles/bash/aliases && reload"
-alias ee="$EDITOR ~/bin/dotfiles/bash/env"
+alias reload="source ~/usr/dotfiles/bash/aliases"
+alias ea="$EDITOR ~/usr/dotfiles/bash/aliases && reload"
+alias eatm="mate -w ~/usr/dotfiles/bash/aliases && reload"
+alias ee="$EDITOR ~/usr/dotfiles/bash/env"
 alias c="clear"
 alias cl="clear; l"
 

@@ -115,7 +115,7 @@
 
 ;;; yasnippet
 (setq yas-snippet-dirs
-      '("~/bin/dotfiles/emacs/snippets"
+      '("~/usr/dotfiles/emacs/snippets"
         ))
 (yas-global-mode 1)
 
