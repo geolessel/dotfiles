@@ -1,0 +1,17 @@
+#!/bin/zsh
+
+container=$(docker ps --format '{{.Names}} => {{.Image}}' | fzf --border | awk -F' \\=>' '{print $1}')
+if [[ $container != '' ]]; then
+    echo
+    print -P "  %B%F{green}Docker container:%f%b $container"
+
+    container_options="-it"
+    vared -p "  %B%F{green}Options:%f%b " container_options
+
+    command="/bin/sh"
+    vared -p "  %B%F{green}Command:%f%b " command
+
+    echo
+    print -P "  %Bdocker container exec $container_options $container $command%b"
+    docker container exec $container_options $container $command
+fi

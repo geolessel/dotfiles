@@ -1,0 +1,13 @@
+#!/bin/zsh
+
+if [[ $# -eq 0 ]]; then
+  echo "Enter the text to search as the only argument"
+  exit 1
+fi
+
+FORMAT="%C(auto)%h%d %s %C(black)%C(bold)%cr"
+PREVIEW="git show --compact-summary {1} | bat --style=numbers --color=always"
+BIND_ENTER="enter:execute(git show --color=always {1} | bat --style=numbers --color=always | less -R)"
+
+git log -S$1 --color=always --format=$FORMAT \
+  | fzf --ansi --tiebreak=index --reverse --preview=$PREVIEW --bind=$BIND_ENTER
