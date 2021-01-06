@@ -15,10 +15,9 @@
 ** Convert an arbitrarily-long decimal number
 ** into a binary string.
 */
-void toBinaryString(char modifiedString[], uint64_t const number) {
+void toBinaryString(char* string, uint64_t const number) {
     int i, byte;
     uint64_t maxByte = 1;
-    int stringIndex = 0;
     uint64_t max;
 
     if (number >= UINT64_MAX)
@@ -42,21 +41,21 @@ void toBinaryString(char modifiedString[], uint64_t const number) {
 
             uint64_t mask = (uint64_t) 1llu << ((byte * 8) - 1 - i);
             if (number & mask)
-                modifiedString[stringIndex++] = '1';
+                *string++ = '1';
             else
-                modifiedString[stringIndex++] = '0';
+                *string++ = '0';
         }
 
-        modifiedString[stringIndex++] = ' ';
+        *string++ = ' ';
     }
 
-    modifiedString[stringIndex++] = '\0';
+    *string++ = '\0';
 }
 
 /*
 ** Convert a hex string into a long long
 */
-uint64_t htoll(char const string[]) {
+uint64_t htoll(char* const string) {
     uint64_t acc = 0;
     unsigned int i;
     unsigned int raiseBy = strlen(string) - 3; // -3 to strip 0x and \n
