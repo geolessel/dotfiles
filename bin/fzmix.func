@@ -1,0 +1,14 @@
+#!/bin/zsh
+#
+# view and execute mix tasks
+
+PREVIEW="echo {1} | sed 's/mix //' | xargs mix help | bat --style=plain --color=always"
+
+emulate -L zsh
+
+fzmix() {
+    command=$(mix help | fzf --delimiter="#" --preview=$PREVIEW | sed 's/ *#.*//')
+    print -z -- "$command "
+}
+
+zle -N fzmix3
