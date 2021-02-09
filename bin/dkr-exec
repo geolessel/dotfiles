@@ -1,6 +1,9 @@
 #!/bin/zsh
 
-container=$(docker ps --format '{{.Names}} => {{.Image}}' | fzf --border | awk -F' \\=>' '{print $1}')
+container=$(docker ps --format '{{.Names}} => {{.Image}}' |
+                fzf --height=25% --reverse --margin=10%,2% --info=hidden --pointer='⇒ ' --header='Docker container => image' |
+                awk -F' \\=>' '{print $1}')
+
 if [[ $container != '' ]]; then
     echo
     print -P "  %B%F{green}Docker container:%f%b $container"
