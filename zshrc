@@ -6,6 +6,8 @@ fpath=(~/usr/dotfiles/zsh/completion $fpath)
 autoload -Uz compinit && compinit -i
 #source ~/usr/dotfiles/zsh/functions
 
+[[ -d ~/bin ]] && source ~/bin/*.func
+
 # Bring in my bash aliases, env and config
 # source ~geo/usr/dotfiles/bash/aliases
 # source ~geo/usr/dotfiles/bash/env
