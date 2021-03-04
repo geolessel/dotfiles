@@ -1,0 +1,539 @@
+#+TITLE: Geo's emacs config
+#+AUTHOR: Geoffrey Lessel
+#+TOC: true
+
+* Startup
+
+Things that need to happen right away.
+
+** Increase garbage collector threshold
+   The default is 800kB and increasing it will speed up startup time.
+   Before we're done with the config though, we need to put it back down.
+
+    #+BEGIN_SRC emacs-lisp
+(setq gc-cons-threshold 10000000)
+;; restore after startup
+(add-hook 'after-init-hook
+(lambda
+()
+(setq gc-cons-threshold 1000000)
+(message "gc-cons-threshold restored to %S" gc-cons-threshold)))
+#+END_SRC
+
+** Bootstrap `straight` package manager
+    #+BEGIN_SRC emacs-lisp
+(defvar bootstrap-version)
+(let
+((bootstrap-file
+(expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+(bootstrap-version 5))
+(unless
+(file-exists-p bootstrap-file)
+(with-current-buffer
+(url-retrieve-synchronously
+            "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+            'silent 'inhibit-cookies)
+(goto-char
+(point-max))
+(eval-print-last-sexp)))
+(load bootstrap-file nil 'nomessage))
+#+END_SRC
+
+** `use-package`
+    #+BEGIN_SRC emacs-lisp
+(straight-use-package 'use-package)
+#+END_SRC
+
+*** Syntax example
+    #+BEGIN_SRC emacs-lisp :tangle no
+(use-package package-name              ; use the package package-name
+    :straight t                          ; use straight to manage it
+    :init                                ; execute code BEFORE package load
+(setq foo-variable t)
+:config                              ; execute code AFTER package load
+(foo-mode 1)
+)
+#+END_SRC
+
+*** Always install a package if it's not available
+    #+BEGIN_SRC emacs-lisp
+(require 'use-package-ensure)
+(setq use-package-always-ensure t)
+#+END_SRC
+
+
+* Emacs general system settings
+
+Configurations around Emacs itself
+(i.e. not from a package)
+.
+
+** Don't show startup message
+    #+BEGIN_SRC emacs-lisp
+(setq inhibit-startup-message t)
+#+END_SRC
+
+** Specify backup directory
+    #+BEGIN_SRC emacs-lisp
+(setq backup-directory-alist
+'(("." . "~/.emacs-backups"))
+backup-by-copying t   ; don't delink hardlinks
+      version-control t     ; use version numbers on backups
+      delete-old-versions t ; automatically delete excess backups
+      kept-new-versions 20  ; how many of the newest versions to keep
+      kept-old-versions 5   ; how many of the old versions to keep
+      )
+#+END_SRC
+
+** Use a custom location for "customize" settings
+
+   #+BEGIN_SRC emacs-lisp
+(setq custom-file "~/.emacs.d/custom.el")
+#+END_SRC
+
+** Hide the toolbar
+    #+BEGIN_SRC emacs-lisp
+(tool-bar-mode -1)
+#+END_SRC
+
+** Hide the menu bar
+    #+BEGIN_SRC emacs-lisp
+(menu-bar-mode -1)
+#+END_SRC
+
+** Hide the scroll bar
+    #+BEGIN_SRC emacs-lisp
+(scroll-bar-mode -1)
+#+END_SRC
+
+** Show line numbers in programming mode
+    #+BEGIN_SRC emacs-lisp
+(add-hook 'prog-mode-hook 'display-line-numbers-mode)
+#+END_SRC
+
+** Show the matching parens
+    #+BEGIN_SRC emacs-lisp
+(show-paren-mode 1)
+#+END_SRC
+
+** Set the default tab width
+    #+BEGIN_SRC emacs-lisp
+(setq-default tab-width 2)
+#+END_SRC
+
+** Always use spaces for tabs
+    #+BEGIN_SRC emacs-lisp
+(setq-default indent-tabs-mode nil)
+#+END_SRC
+
+** Turn off the error bell
+    #+BEGIN_SRC emacs-lisp
+(setq ring-bell-function 'ignore)
+#+END_SRC
+
+** Make the yes/no prompts accept y/n
+    #+BEGIN_SRC emacs-lisp
+(defalias 'yes-or-no-p 'y-or-n-p)
+#+END_SRC
+
+** Always delete trailing whitespace
+    #+BEGIN_SRC emacs-lisp
+(add-hook 'before-save-hook 'delete-trailing-whitespace)
+#+END_SRC
+
+
+* UI
+
+** Themes
+   Doom emacs has some great themes. Let's use them!
+
+    #+BEGIN_SRC emacs-lisp
+    (use-package doom-themes
+      :straight t)
+    #+END_SRC
+
+   Here is the theme to load for this session.
+
+    #+BEGIN_SRC emacs-lisp
+    (load-theme 'doom-laserwave t) ; t treats it as safe
+    #+END_SRC
+
+** Font
+
+   When you have the best font, use the best font.
+
+   #+BEGIN_SRC emacs-lisp
+   (set-frame-font "PragmataPro Liga-14" nil t)
+   #+END_SRC
+
+   Turn on ligature support in the emacs-mac build.
+
+   #+BEGIN_SRC emacs-lisp
+   (mac-auto-operator-composition-mode t)
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp :tangle no
+   (straight-use-package
+     '(font-size :type git :host github :repo "nabeix/emacs-font-size")
+     :config
+     (font-size-init 18)
+     (define-key global-map (kbd "C-=") 'font-size-increase))
+   #+END_SRC
+
+** Modeline
+   Doom emacs also provides a pretty slick mode line. Let's use that, too.
+
+    #+BEGIN_SRC emacs-lisp
+    (use-package doom-modeline
+      :straight t
+      :hook
+      (after-init . doom-modeline-mode)
+      :config
+      ; use unicode as a fallback (instead of ASCII) when not using icons
+      (setq doom-modeline-unicode-fallback t))
+    #+END_SRC
+
+** Dashboard
+   Doom emacs has a great startup dashboard. Let's use it!
+
+    #+BEGIN_SRC emacs-lisp
+(use-package dashboard
+    :straight t
+    :config
+(dashboard-setup-startup-hook)
+(setq dashboard-banner-logo-title "Greetings Geo. Shall we play a game?")
+; set the title
+(setq dashboard-startup-banner 'logo)
+; set the banner
+(setq dashboard-items
+'((recents . 5)))
+; set the sections I'd like displayed
+                            ;; (projects . 5)))
+; and how many of each
+(setq dashboard-center-content t)
+; center it all
+(setq dashboard-show-shortcuts nil)
+; don't show shortcut keys
+(setq dashboard-set-file-icons t)
+; use nice icons for the files
+(setq dashboard-set-heading-icons t)
+; use nice section icons
+(setq dashboard-set-footer nil))
+; disable the snarky footer
+    #+END_SRC
+
+
+* Modes
+
+** Evil mode
+   Make it like vim!
+
+    #+BEGIN_SRC emacs-lisp
+    (use-package evil
+      :straight t
+      :init
+      (setq evil-want-integration t)
+      (setq evil-want-keybinding nil)
+      (setq evil-want-C-u-scroll t) ; use Ctrl-U to scroll up
+      :config
+      (evil-mode 1)) ; use evil-mode everywhere
+    #+END_SRC
+
+*** Extra keybindings
+    A collection of Evil bindings for the parts of Emacs that Evil does not
+    cover properly by default, such as help-mode, M-x calendar, Eshell and more.
+
+    #+BEGIN_SRC emacs-lisp
+    (use-package evil-collection
+      :straight t
+      :after evil
+      :config
+      (evil-collection-init))
+    #+END_SRC
+
+
+* Editing
+
+  Things that provide general, non-language specific editing functionality.
+
+** Moving and navigating the buffer
+
+    With *=evil-easymotion=* you can invoke =M=, and this plugin will put a
+    target character on every possible position. Type the character on the
+    target and wham! you have teleported there.
+
+    #+BEGIN_SRC emacs-lisp
+(use-package evil-easymotion
+      :straight t
+      :after evil
+      :config
+(evilem-default-keybindings "M")
+)
+#+END_SRC
+
+    *=evil-snipe=* emulates =vim-seek= and/or =vim-sneak= in =evil-mode=.
+    It provides 2-character motions for quickly
+(and more accurately)
+jumping around text, compared
+    to evil's built-in f/F/t/T motions, incrementally highlighting candidate targets as you type.
+
+    #+BEGIN_SRC emacs-lisp
+(use-package evil-snipe
+      :straight t
+      :after evil
+      :config
+(evil-snipe-mode +1)
+; binds `s`/`S` (forward/backward)
+(evil-snipe-override-mode +1)
+; binds `f`, `F`, `t`, `T` overrides
+(setq evil-snipe-scope 'visible)
+; highlights all forward matches in visible buffer
+    )
+#+END_SRC
+
+** Commenting
+
+    A Nerd Commenter emulation, help you comment code efficiently. For example,
+    you can press =99,ci= to comment out 99 lines.
+
+    Examples:
+
+    - `,ci` comments the current line
+
+    #+BEGIN_SRC emacs-lisp
+(use-package evil-nerd-commenter
+      :straight t
+      :after evil
+      :config
+(evilnc-default-hotkeys))
+; `,cl` in evil-mode and `M-;` in all modes
+    #+END_SRC
+
+** Aliging
+
+   *=evil-lion=* provides =gl= and =gL= align operators: ~gl MOTION CHAR~ and right-align ~gL MOTION CHAR~.
+   Use ~CHAR /~ to enter regular expression if a single character wouldn't suffice.
+   Use ~CHAR RET~ to align with align.el's default rules for the active major mode.
+
+    #+BEGIN_SRC emacs-lisp
+(use-package evil-lion
+      :straight t
+      :bind
+(:map evil-normal-state-map
+("g l " . evil-lion-left)
+("g L " . evil-lion-right)
+:map evil-visual-state-map
+("g l " . evil-lion-left)
+("g L " . evil-lion-right)))
+#+END_SRC
+
+** Change text surrounding selection
+
+   *=evil-surround-mode=* emulates surround.vim by Tim Pope.
+   Surround.vim is all about "surroundings": parentheses, brackets, quotes, XML tags, and more. The
+   plugin provides mappings to easily delete, change and add such surroundings in pairs.
+
+   It's easiest to explain with examples.
+
+   1. Press ~cs"'~ inside ="Hello world!"= to change it to ='Hello world!'=
+   2. Now press ~cs'<q>~ to change it to =<q>Hello world!</q>=
+   3. To go full circle, press ~cst"~ to get ="Hello world!"=
+   4. To remove the delimiters entirely, press ~ds"~. =Hello world!=
+   5. Now with the cursor on ="Hello"=, press ~ysiw]~ (~iw~ is a text object). =[Hello] world!=
+   6. Let's make that braces and add some space (use ~}~ instead of ~{~ for no space): ~cs]{~ ={ Hello } world!=
+   7. Now wrap the entire line in parentheses with ~yssb~ or ~yss)~. =({ Hello } world!)=
+   8. Revert to the original text: ~ds{ds)~ =Hello world!=
+   9. Emphasize hello: ~ysiw<em>~ =<em>Hello</em> world!=
+
+    #+BEGIN_SRC emacs-lisp
+    (use-package evil-surround
+      :straight t
+      :after evil
+      :config
+      (global-evil-surround-mode 1))
+    #+END_SRC
+
+** Version control (git)
+
+   *=magit=* of course.
+
+   - [[https://github.com/magit/magit][Github]]
+   - [[https://magit.vc/manual/][Manual]]
+
+   #+BEGIN_SRC emacs-lisp
+   (use-package magit
+     :straight t
+     :bind (
+       ("C-c g" . magit-status)))
+   #+END_SRC
+
+
+* General packages
+
+Things that I couldn't think of a better top-level heading for.
+
+** Packages that provide some help
+
+*** Show available keys for a mode in a popup
+
+    #+BEGIN_SRC emacs-lisp
+    (use-package which-key
+      :straight t
+      :config
+      (which-key-mode))
+    #+END_SRC
+
+** Make the minibuffer better
+
+*** Select from a list with Ivy and Counsel
+
+    *=ivy=* is for quick and easy selection from a list. It
+    is provided in the =counsel= package along with =swiper=.
+
+    - [[https://oremacs.com/swiper/][Documentation]]
+    - [[https://github.com/abo-abo/swiper][Github]]
+
+    #+BEGIN_SRC emacs-lisp
+    (use-package counsel
+      :straight t
+      :config
+      (ivy-mode t)      ; enable ivy-mode everywhere
+      (counsel-mode t)  ; enable counsel mode replacements
+      (setq ivy-use-virtual-buffers t)
+      (setq ivy-count-format "(%d/%d) ")
+      (setq ivy-initial-inputs-alist nil) ; don't start the search with ~^~
+      ;; :bind
+      ;; ("C-c b" . counsel-switch-buffer))
+      )
+    #+END_SRC
+
+**** Make =ivy= prettier
+
+     *=ivy-rich=* has rich transformers for commands from =ivy= and =counsel=.
+     You can defined your own transformers too.
+
+     [[https://github.com/yevgnen/ivy-rich][Github]]
+
+     #+BEGIN_SRC emacs-lisp
+     (use-package ivy-rich
+       :straight t
+       :after ivy counsel
+       :config
+       (ivy-rich-mode 1)
+       ; the docs recommend to set this as well
+       (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line))
+     #+END_SRC
+
+**** Use fuzzy finding for counsel
+
+     We have two good choices for filtering results. The first is
+     =flx= and the second is =prescient=.
+
+     Currently enabled: Prescient
+
+     *CURRENTLY DISABLED*
+     Use *=flx=* to provide some fuzzy matching.
+
+     The default matcher will use a ~.*~ regex wild card in place of
+     /each single space/ in the input. If you want to use the fuzzy
+     matcher and use a ~.*~ regex wild card between /each input letter/,
+     we config with fuzzy. From https://oremacs.com/2016/01/06/ivy-flx/.
+
+     - [[https://github.com/lewang/flx][Github]]
+
+     #+BEGIN_SRC emacs-lisp :tangle no
+     (use-package flx
+       :straight t
+       :after ivy counsel
+       :config
+       (setq ivy-re-builders-alist
+         '((ivy-switch-buffer . ivy--regex-plus)
+           (t . ivy--regex-fuzzy))))
+     #+END_SRC
+
+     *CURRENTLY ENABLED*
+     Use *=prescient=* to sort and filter a list of candidates.
+
+     prescient.el takes as input a list of candidates, and a query
+     that you type. The query is first split on spaces into subqueries
+     (two consecutive spaces match a literal space). Each subquery
+     filters the candidates because it must match as either a
+     substring of the candidate, a regexp, or an initialism
+     (e.g. ffap matches find-file-at-point, and so does fa). The last
+     few candidates you selected are displayed first, followed by the
+     most frequently selected ones, and then the remaining candidates
+     are sorted by length. If you don't like the algorithm used for
+     filtering, you can choose a different one by customizing
+     prescient-filter-method.
+
+     - [[https://github.com/raxod502/prescient.el][Github]]
+
+     #+BEGIN_SRC emacs-lisp
+     (use-package prescient :straight t)
+     (use-package ivy-prescient
+       :straight t
+       :after ivy counsel prescient
+       :config
+       (ivy-prescient-mode t)
+       ; describe-variable prescient-filter-method for docs
+       (setq prescient-filter-method '(literal regexp fuzzy initialism)))
+     #+END_SRC
+
+*** Replace M-x with Amx
+
+    *=amx=* is an alternative interface for ~M-x~ in Emacs. Some
+    enhancements include prioritizing your most-used commands in the
+    completion list and showing keyboard shortcuts.
+
+    - [[https://github.com/DarwinAwardWinner/amx][Github]]
+
+    Some tips:
+    - ~C-h f~ while Amx is active runs ~describe-function~ on the currently
+      selected command
+    - ~M-.~ jumps to the definition of the selected command
+    - ~C-h w~ shows the key bindings for the selected command
+    - ~amx-major-mode-commands~ runs Amx limited to commands that are relevant
+      to the active major mode.
+    - ~amx-show-unbound-commands~ shows frequently used commands that have
+      no keybindings.
+
+    #+BEGIN_SRC emacs-lisp
+    (use-package amx
+      :straight t
+      :after ivy counsel
+      :config
+      (amx-mode t))   ; it auto-detects ivy-mode
+    #+END_SRC
+
+*** Show the ivy frame other places
+
+    *[DISABLED]*
+
+    *=ivy-posframe=* lets ivy use posframe to show its menu.
+
+    - [[https://github.com/tumashu/ivy-posframe][Github]]
+
+    #+BEGIN_SRC emacs-lisp :tangle no
+    (use-package ivy-posframe
+      :straight t
+      :after ivy)
+    #+END_SRC
+
+*** Add icons to Ivy
+
+    *[DISABLED]*
+
+    Use *=all-the-icons-ivy=* to make it look prettier(?).
+    Better? More graphical at least.
+
+    #+BEGIN_SRC emacs-lisp :tangle no
+    (use-package all-the-icons-ivy
+      :init
+      (add-hook 'after-init-hook 'all-the-icons-ivy-setup))
+    #+END_SRC
+
+
+* References
+  Helpful things I've found while researching configs.
+
+  - https://jamiecollinson.com/blog/my-emacs-config/

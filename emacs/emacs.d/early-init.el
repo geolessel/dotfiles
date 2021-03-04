@@ -31,3 +31,6 @@
 ;; compiled ahead-of-time when they are installed and site files are compiled
 ;; when gccemacs is installed.
 (setq comp-deferred-compilation nil)
+
+; disable the default Emacs package manager
+(setq package-enable-at-startup nil)
