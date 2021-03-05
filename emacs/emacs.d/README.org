@@ -462,6 +462,27 @@ jumping around text, compared
            (ibuffer-do-sort-by-alphabetic)))))
    #+END_SRC
 
+** Undo
+
+   Even I make mistakes. Emacs' built-in undo system is pretty powerful
+   but a little hard to understand. There are other undo packages that
+   dumb it down at the expense of functionality, but *undo-tree* tries
+   to make that power come easier, especially with tree visualization.
+
+   The documentation for this one (with examples) is in the source code.
+
+   - [[https://www.dr-qubit.org/undo-tree.html][Homepage]]
+
+   #+BEGIN_SRC emacs-lisp :tangle no
+   (use-package undo-tree
+     :straight t
+     :config
+     (global-undo-tree-mode)          ; use it everwhere!
+     ;; (setq evil-undo-system 'undo-tree)
+     )
+   #+END_SRC
+
+
 * General packages
 
 Things that I couldn't think of a better top-level heading for.
