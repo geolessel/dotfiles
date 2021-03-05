@@ -204,10 +204,6 @@ Configurations around Emacs itself (i.e. not from a package).
    Doom emacs has a great startup dashboard. Let's use it!
 
     #+BEGIN_SRC emacs-lisp
-(setq dashboard-items
-'((recents . 5)))
-; set the sections I'd like displayed
-                            ;; (projects . 5)))
     (use-package dashboard
       :straight t
       :config
@@ -217,6 +213,7 @@ Configurations around Emacs itself (i.e. not from a package).
       ; set the banner
       (setq dashboard-startup-banner 'logo)
       ; set the sections I'd like displayed and how many of each
+      (setq dashboard-items '((recents . 5) (projects . 5)))
       ; center it all
       (setq dashboard-center-content t)
       ; don't show shortcut keys
@@ -299,6 +296,40 @@ jumping around text, compared
     )
 #+END_SRC
 
+** Projects
+
+*** Use *projectile* to manage projects.
+
+   - [[https://projectile.mx/][Home page]]
+   - [[https://docs.projectile.mx/projectile/index.html][Manual]]
+
+   #+BEGIN_SRC emacs-lisp
+   (use-package projectile
+     :straight t
+     :bind-keymap
+     ("C-c p" . projectile-command-map)
+     :config
+     (projectile-mode +1))
+   #+END_SRC
+
+*** Group buffers by project
+
+    Sometimes it's helpful to see the buffers open grouped by project.
+    We can use *ibuffer-projectile* to do that.
+
+    - [[https://github.com/purcell/ibuffer-projectile][Github]]
+
+    #+BEGIN_SRC emacs-lisp
+    (use-package ibuffer-projectile
+      :straight t
+      :config
+      (add-hook 'ibuffer-hook
+        (lambda ()
+          (ibuffer-projectile-set-filter-groups)
+          (unless (eq ibuffer-sorting-mode 'alphabetic)
+            (ibuffer-do-sort-by-alphabetic)))))
+    #+END_SRC
+
 ** Commenting
 
     A Nerd Commenter emulation, help you comment code efficiently. For example,
@@ -308,13 +339,20 @@ jumping around text, compared
 
     - `,ci` comments the current line
 
+    The docs recommend calling ~evilnc-default-hotkeys~ on load to set up
+    the keybindings. However, this sets ~C-c p~ which I prefer to save
+    for =projectile=.
+
+    [[https://github.com/redguardtoo/evil-nerd-commenter][Github]]
+
     #+BEGIN_SRC emacs-lisp
-(use-package evil-nerd-commenter
+    (use-package evil-nerd-commenter
       :straight t
       :after evil
-      :config
-(evilnc-default-hotkeys))
-; `,cl` in evil-mode and `M-;` in all modes
+      :bind (
+        ("C-c c ;" . evilnc-comment-or-uncomment-lines)
+        ("C-c c l" . evilnc-quick-comment-or-uncomment-to-the-line)
+        ("C-c c p" . evilnc-comment-or-uncomment-paragraphs)))
     #+END_SRC
 
 ** Aligning
@@ -375,6 +413,23 @@ jumping around text, compared
        ("C-c g" . magit-status)))
    #+END_SRC
 
+
+** Buffers
+
+   Group buffers in ibuffer list by projectile project with *ibuffer-projectile*.
+
+   - [[https://github.com/purcell/ibuffer-projectile][Github]]
+
+   #+BEGIN_SRC emacs-lisp
+   (use-package ibuffer-projectile
+     :straight t
+     :config
+     (add-hook 'ibuffer-hook
+       (lambda ()
+         (ibuffer-projectile-set-filter-groups)
+         (unless (eq ibuffer-sorting-mode 'alphabetic)
+           (ibuffer-do-sort-by-alphabetic)))))
+   #+END_SRC
 
 * General packages
 
