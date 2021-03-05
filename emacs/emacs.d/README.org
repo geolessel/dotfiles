@@ -712,8 +712,32 @@ Things that I couldn't think of a better top-level heading for.
      )
    #+END_SRC
 
+
+* Things to check out and eventually add
+
+** Tabs
+
+   - [[https://github.com/manateelazycat/awesome-tab][awesome-tab]]
+   - [[https://github.com/ema2159/centaur-tabs][centaur-tabs]]
+
+** UI
+
+   - [[https://github.com/zk-phi/sublimity][sublimity]] - code minimap ala Sublime editor
+
+** Apps within the app
+
+   - [[https://github.com/ralesi/ranger.el][ranger]] - This is a minor mode that runs within dired, it emulates many
+              of ranger's features. This minor mode shows a stack of parent
+              directories, and updates the parent buffers, while you're navigating
+              the file system. The preview window takes some of the ideas from
+              Peep-Dired, to display previews for the selected files, in the
+              primary dired buffer.
+
+
 * References
 
   Helpful things I've found while researching configs.
+
+  - [[https://github.com/emacs-tw/awesome-emacs][Awesome Emacs]] - categorized packages
 
   - https://jamiecollinson.com/blog/my-emacs-config/
