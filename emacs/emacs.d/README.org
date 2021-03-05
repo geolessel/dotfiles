@@ -1,6 +1,5 @@
 #+TITLE: Geo's emacs config
 #+AUTHOR: Geoffrey Lessel
-#+TOC: true
 
 * Startup
 
@@ -11,49 +10,48 @@ Things that need to happen right away.
    Before we're done with the config though, we need to put it back down.
 
     #+BEGIN_SRC emacs-lisp
-(setq gc-cons-threshold 10000000)
-;; restore after startup
-(add-hook 'after-init-hook
-(lambda
-()
-(setq gc-cons-threshold 1000000)
-(message "gc-cons-threshold restored to %S" gc-cons-threshold)))
-#+END_SRC
+    (setq gc-cons-threshold 10000000)
+      ;; restore after startup
+      (add-hook 'after-init-hook
+        (lambda ()
+          (setq gc-cons-threshold 1000000)
+            (message "gc-cons-threshold restored to %S" gc-cons-threshold)))
+    #+END_SRC
 
 ** Bootstrap `straight` package manager
     #+BEGIN_SRC emacs-lisp
-(defvar bootstrap-version)
-(let
-((bootstrap-file
-(expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-(bootstrap-version 5))
-(unless
-(file-exists-p bootstrap-file)
-(with-current-buffer
-(url-retrieve-synchronously
-            "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-            'silent 'inhibit-cookies)
-(goto-char
-(point-max))
-(eval-print-last-sexp)))
-(load bootstrap-file nil 'nomessage))
-#+END_SRC
+    (defvar bootstrap-version)
+    (let
+    ((bootstrap-file
+    (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+    (bootstrap-version 5))
+    (unless
+    (file-exists-p bootstrap-file)
+    (with-current-buffer
+    (url-retrieve-synchronously
+                "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+                'silent 'inhibit-cookies)
+    (goto-char
+    (point-max))
+    (eval-print-last-sexp)))
+    (load bootstrap-file nil 'nomessage))
+    #+END_SRC
 
 ** `use-package`
     #+BEGIN_SRC emacs-lisp
-(straight-use-package 'use-package)
-#+END_SRC
+    (straight-use-package 'use-package)
+    #+END_SRC
 
 *** Syntax example
     #+BEGIN_SRC emacs-lisp :tangle no
-(use-package package-name              ; use the package package-name
-    :straight t                          ; use straight to manage it
-    :init                                ; execute code BEFORE package load
-(setq foo-variable t)
-:config                              ; execute code AFTER package load
-(foo-mode 1)
-)
-#+END_SRC
+    (use-package package-name      ; use the package package-name
+      :straight t                  ; use straight to manage it
+      :init                        ; execute code BEFORE package load
+      (setq foo-variable t)
+      :config                      ; execute code AFTER package load
+      (foo-mode 1)
+    )
+    #+END_SRC
 
 *** Always install a package if it's not available
     #+BEGIN_SRC emacs-lisp
@@ -64,82 +62,89 @@ Things that need to happen right away.
 
 * Emacs general system settings
 
-Configurations around Emacs itself
-(i.e. not from a package)
-.
+Configurations around Emacs itself (i.e. not from a package).
 
 ** Don't show startup message
     #+BEGIN_SRC emacs-lisp
-(setq inhibit-startup-message t)
-#+END_SRC
+    (setq inhibit-startup-message t)
+    #+END_SRC
 
 ** Specify backup directory
     #+BEGIN_SRC emacs-lisp
-(setq backup-directory-alist
-'(("." . "~/.emacs-backups"))
-backup-by-copying t   ; don't delink hardlinks
+    (setq backup-directory-alist
+      '(("." . "~/.emacs-backups"))
+      backup-by-copying t   ; don't delink hardlinks
       version-control t     ; use version numbers on backups
       delete-old-versions t ; automatically delete excess backups
       kept-new-versions 20  ; how many of the newest versions to keep
       kept-old-versions 5   ; how many of the old versions to keep
       )
-#+END_SRC
+    #+END_SRC
 
 ** Use a custom location for "customize" settings
 
    #+BEGIN_SRC emacs-lisp
-(setq custom-file "~/.emacs.d/custom.el")
-#+END_SRC
+   (setq custom-file "~/.emacs.d/custom.el")
+   #+END_SRC
 
 ** Hide the toolbar
     #+BEGIN_SRC emacs-lisp
-(tool-bar-mode -1)
-#+END_SRC
+    (tool-bar-mode -1)
+    #+END_SRC
 
 ** Hide the menu bar
+
     #+BEGIN_SRC emacs-lisp
-(menu-bar-mode -1)
-#+END_SRC
+    (menu-bar-mode -1)
+    #+END_SRC
 
 ** Hide the scroll bar
+
     #+BEGIN_SRC emacs-lisp
-(scroll-bar-mode -1)
-#+END_SRC
+    (scroll-bar-mode -1)
+    #+END_SRC
 
 ** Show line numbers in programming mode
+
     #+BEGIN_SRC emacs-lisp
-(add-hook 'prog-mode-hook 'display-line-numbers-mode)
-#+END_SRC
+    (add-hook 'prog-mode-hook 'display-line-numbers-mode)
+    #+END_SRC
 
 ** Show the matching parens
+
     #+BEGIN_SRC emacs-lisp
-(show-paren-mode 1)
-#+END_SRC
+    (show-paren-mode 1)
+    #+END_SRC
 
 ** Set the default tab width
+
     #+BEGIN_SRC emacs-lisp
-(setq-default tab-width 2)
-#+END_SRC
+    (setq-default tab-width 2)
+    #+END_SRC
 
 ** Always use spaces for tabs
+
     #+BEGIN_SRC emacs-lisp
-(setq-default indent-tabs-mode nil)
-#+END_SRC
+    (setq-default indent-tabs-mode nil)
+    #+END_SRC
 
 ** Turn off the error bell
+
     #+BEGIN_SRC emacs-lisp
-(setq ring-bell-function 'ignore)
-#+END_SRC
+    (setq ring-bell-function 'ignore)
+    #+END_SRC
 
 ** Make the yes/no prompts accept y/n
+
     #+BEGIN_SRC emacs-lisp
-(defalias 'yes-or-no-p 'y-or-n-p)
-#+END_SRC
+    (defalias 'yes-or-no-p 'y-or-n-p)
+    #+END_SRC
 
 ** Always delete trailing whitespace
+
     #+BEGIN_SRC emacs-lisp
-(add-hook 'before-save-hook 'delete-trailing-whitespace)
-#+END_SRC
+    (add-hook 'before-save-hook 'delete-trailing-whitespace)
+    #+END_SRC
 
 
 * UI
@@ -155,7 +160,7 @@ backup-by-copying t   ; don't delink hardlinks
    Here is the theme to load for this session.
 
     #+BEGIN_SRC emacs-lisp
-    (load-theme 'doom-laserwave t) ; t treats it as safe
+    (load-theme 'doom-one-light t) ; t treats it as safe
     #+END_SRC
 
 ** Font
@@ -181,6 +186,7 @@ backup-by-copying t   ; don't delink hardlinks
    #+END_SRC
 
 ** Modeline
+
    Doom emacs also provides a pretty slick mode line. Let's use that, too.
 
     #+BEGIN_SRC emacs-lisp
@@ -194,38 +200,40 @@ backup-by-copying t   ; don't delink hardlinks
     #+END_SRC
 
 ** Dashboard
+
    Doom emacs has a great startup dashboard. Let's use it!
 
     #+BEGIN_SRC emacs-lisp
-(use-package dashboard
-    :straight t
-    :config
-(dashboard-setup-startup-hook)
-(setq dashboard-banner-logo-title "Greetings Geo. Shall we play a game?")
-; set the title
-(setq dashboard-startup-banner 'logo)
-; set the banner
 (setq dashboard-items
 '((recents . 5)))
 ; set the sections I'd like displayed
                             ;; (projects . 5)))
-; and how many of each
-(setq dashboard-center-content t)
-; center it all
-(setq dashboard-show-shortcuts nil)
-; don't show shortcut keys
-(setq dashboard-set-file-icons t)
-; use nice icons for the files
-(setq dashboard-set-heading-icons t)
-; use nice section icons
-(setq dashboard-set-footer nil))
-; disable the snarky footer
+    (use-package dashboard
+      :straight t
+      :config
+      (dashboard-setup-startup-hook)
+      ; set the title
+      (setq dashboard-banner-logo-title "Greetings Geo. Shall we play a game?")
+      ; set the banner
+      (setq dashboard-startup-banner 'logo)
+      ; set the sections I'd like displayed and how many of each
+      ; center it all
+      (setq dashboard-center-content t)
+      ; don't show shortcut keys
+      (setq dashboard-show-shortcuts nil)
+      ; use nice icons for the files
+      (setq dashboard-set-file-icons t)
+      ; use nice section icons
+      (setq dashboard-set-heading-icons t)
+      ; disable the snarky footer
+      (setq dashboard-set-footer nil))
     #+END_SRC
 
 
 * Modes
 
 ** Evil mode
+
    Make it like vim!
 
     #+BEGIN_SRC emacs-lisp
@@ -265,7 +273,7 @@ backup-by-copying t   ; don't delink hardlinks
     #+BEGIN_SRC emacs-lisp
 (use-package evil-easymotion
       :straight t
-      :after evil
+      :after (evil)
       :config
 (evilem-default-keybindings "M")
 )
@@ -280,7 +288,7 @@ jumping around text, compared
     #+BEGIN_SRC emacs-lisp
 (use-package evil-snipe
       :straight t
-      :after evil
+      :after (evil)
       :config
 (evil-snipe-mode +1)
 ; binds `s`/`S` (forward/backward)
@@ -309,7 +317,7 @@ jumping around text, compared
 ; `,cl` in evil-mode and `M-;` in all modes
     #+END_SRC
 
-** Aliging
+** Aligning
 
    *=evil-lion=* provides =gl= and =gL= align operators: ~gl MOTION CHAR~ and right-align ~gL MOTION CHAR~.
    Use ~CHAR /~ to enter regular expression if a single character wouldn't suffice.
@@ -355,7 +363,7 @@ jumping around text, compared
 
 ** Version control (git)
 
-   *=magit=* of course.
+   *magit* of course.
 
    - [[https://github.com/magit/magit][Github]]
    - [[https://magit.vc/manual/][Manual]]
@@ -387,7 +395,7 @@ Things that I couldn't think of a better top-level heading for.
 
 *** Select from a list with Ivy and Counsel
 
-    *=ivy=* is for quick and easy selection from a list. It
+    *ivy* is for quick and easy selection from a list. It
     is provided in the =counsel= package along with =swiper=.
 
     - [[https://oremacs.com/swiper/][Documentation]]
@@ -401,15 +409,12 @@ Things that I couldn't think of a better top-level heading for.
       (counsel-mode t)  ; enable counsel mode replacements
       (setq ivy-use-virtual-buffers t)
       (setq ivy-count-format "(%d/%d) ")
-      (setq ivy-initial-inputs-alist nil) ; don't start the search with ~^~
-      ;; :bind
-      ;; ("C-c b" . counsel-switch-buffer))
-      )
+      (setq ivy-initial-inputs-alist nil)) ; don't start the search with ~^~
     #+END_SRC
 
 **** Make =ivy= prettier
 
-     *=ivy-rich=* has rich transformers for commands from =ivy= and =counsel=.
+     *ivy-rich* has rich transformers for commands from =ivy= and =counsel=.
      You can defined your own transformers too.
 
      [[https://github.com/yevgnen/ivy-rich][Github]]
@@ -417,7 +422,7 @@ Things that I couldn't think of a better top-level heading for.
      #+BEGIN_SRC emacs-lisp
      (use-package ivy-rich
        :straight t
-       :after ivy counsel
+       :after (ivy counsel)
        :config
        (ivy-rich-mode 1)
        ; the docs recommend to set this as well
@@ -444,7 +449,7 @@ Things that I couldn't think of a better top-level heading for.
      #+BEGIN_SRC emacs-lisp :tangle no
      (use-package flx
        :straight t
-       :after ivy counsel
+       :after (ivy counsel)
        :config
        (setq ivy-re-builders-alist
          '((ivy-switch-buffer . ivy--regex-plus)
@@ -472,7 +477,7 @@ Things that I couldn't think of a better top-level heading for.
      (use-package prescient :straight t)
      (use-package ivy-prescient
        :straight t
-       :after ivy counsel prescient
+       :after (ivy counsel prescient)
        :config
        (ivy-prescient-mode t)
        ; describe-variable prescient-filter-method for docs
@@ -500,7 +505,7 @@ Things that I couldn't think of a better top-level heading for.
     #+BEGIN_SRC emacs-lisp
     (use-package amx
       :straight t
-      :after ivy counsel
+      :after (ivy counsel)
       :config
       (amx-mode t))   ; it auto-detects ivy-mode
     #+END_SRC
@@ -516,7 +521,7 @@ Things that I couldn't think of a better top-level heading for.
     #+BEGIN_SRC emacs-lisp :tangle no
     (use-package ivy-posframe
       :straight t
-      :after ivy)
+      :after (ivy)
     #+END_SRC
 
 *** Add icons to Ivy
@@ -534,6 +539,7 @@ Things that I couldn't think of a better top-level heading for.
 
 
 * References
+
   Helpful things I've found while researching configs.
 
   - https://jamiecollinson.com/blog/my-emacs-config/
