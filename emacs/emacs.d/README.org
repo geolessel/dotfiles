@@ -146,6 +146,15 @@ Configurations around Emacs itself (i.e. not from a package).
     (add-hook 'before-save-hook 'delete-trailing-whitespace)
     #+END_SRC
 
+** Turn on the column display in the modeline
+
+   Sometimes errors report the column as well as the line. So let's
+   view the column number we are on!
+
+   #+begin_src emacs-lisp
+   (column-number-mode)
+   #+end_src
+
 
 * UI
 
