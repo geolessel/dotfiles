@@ -253,6 +253,30 @@ Configurations around Emacs itself (i.e. not from a package).
 
 ** Workspaces
 
+   I can use this to work in one project in one perspective/workspace
+   and others kept open in other perspectives. After some looking and
+   reading, I've decided on `perspective`.
+
+   - [[https://github.com/nex3/perspective-el][Github]]
+
+   Some alternatives I considered:
+
+   - [[https://github.com/Bad-ptr/persp-mode.el][persp-mode]] - a fork of =perspective= and used by Doom Emacs. It is
+     possible it will be merged with =perspective= at some point. After
+     trying to get keybinding working and failing after a while, I gave up
+     on it and preferred =perspective= for its more informative README.
+   - [[https://github.com/wasamasa/eyebrowse][eyebrowse]] - supports window layounts but no buffer lists. After I gave
+     up on =persp-mode= this was initially my preference.
+
+   #+begin_src emacs-lisp
+   (use-package perspective
+     :straight t
+     :config
+     (persp-mode)
+     ; sort perspectives by most recently accessed (others: 'name, 'created)
+     (setq persp-sort 'access)
+     )
+   #+end_src
 
 
 * Modes
@@ -738,12 +762,26 @@ Things that I couldn't think of a better top-level heading for.
 
   Make it mine.
 
-** Buffer management
+** Buffer/window management
 
    #+BEGIN_SRC emacs-lisp
    (evil-leader/set-key
      "b b" 'counsel-switch-buffer
      "b i" 'ibuffer
+
+     "TAB s" 'persp-switch          ; query a persp to switch to or create
+     "TAB n" 'persp-switch
+     "TAB c" 'persp-kill            ; query a persp to kill
+     "TAB r" 'persp-rename          ; rename current perspective
+     "TAB i" 'persp-import          ; import a persp from another frame
+     "TAB <right>" 'persp-next      ; switch to next perspective
+     "TAB <left>" 'persp-prev       ; switch to previous perspective
+     "TAB w" 'persp-state-save      ; save all persps in all frames to a file
+     "TAB l" 'persp-state-load      ; load all persps from a file
+     "TAB b k" 'persp-remove-buffer ; query a buffer to remove from current persp
+     "TAB b a" 'persp-add-buffer    ; query and open buffer to add to current persp
+     "TAB b s" 'persp-set-buffer    ; move buffer to current persp
+     "TAB b b" 'persp-counsel-switch-buffer ; swicth to buffer filtered by current persp
      )
    #+END_SRC
 
