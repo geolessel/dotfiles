@@ -568,6 +568,31 @@ jumping around text, compared
      )
    #+END_SRC
 
+** Snippets
+
+   Make repetitive work faster by using snippets! This uses the
+   *yasnippet* package. There are libraries out there that contain
+   snippets for all sorts of situations (like [[http://github.com/AndreaCrotti/yasnippet-snippets][yasnippet-snippets]], but
+   I prefer to make my own when I need them.
+
+   - [[https://github.com/joaotavora/yasnippet][Github]]
+
+   Stuff I forget and need to be reminded of regularly:
+
+   - ~name~ is the description of the snippet
+   - ~key~ is the snippet abbreviation
+   - ~$1~ is the first tab stop field
+   - ~$0~ is the exit point of the snippet
+   - ~${1:default}~ sets a default value
+
+   #+begin_src emacs-lisp
+   (use-package yasnippet
+     :straight t
+     :config
+     (yas-global-mode 1)
+     )
+   #+end_src
+
 
 * General packages
 
@@ -831,6 +856,8 @@ Things that I couldn't think of a better top-level heading for.
 ** Editor
 
    - [[https://github.com/iqbalansari/emacs-emojify][emojify]] - better (?) emoji support
+   - [[https://github.com/abo-abo/auto-yasnippet][auto-yasnippet]] - create snippets on the go without and use them
+     in-place. Kind of like temporary macros.
 
 ** Org Mode
 
