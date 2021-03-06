@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: add a src block
+# key: <s
+# --
+#+begin_src ${1:emacs-lisp}
+$0
+#+end_src
