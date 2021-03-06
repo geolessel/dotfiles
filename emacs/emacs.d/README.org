@@ -812,7 +812,11 @@ Things that I couldn't think of a better top-level heading for.
 ** UI
 
    - [[https://github.com/zk-phi/sublimity][sublimity]] - code minimap ala Sublime editor
-   - [[https://github.com/emacsorphanage/anzu][anzu]] and [[https://github.com/emacsorphanage/evil-anzu][evil-anzu]] to display match count in the modeline (e.g. =(13/45)=)
+   - [[https://github.com/emacsorphanage/anzu][anzu]] and [[https://github.com/emacsorphanage/evil-anzu][evil-anzu]] to display match count in the modeline
+     (e.g. =(13/45)=)
+   - [[https://github.com/joostkremers/writeroom-mode][writeroom-mode]] to change the editor into a distraction-free
+     editor (for blog posts). [[https://gitlab.com/jabranham/mixed-pitch][mixed-pitch]] to display both variable-
+     and fixed-width fonts at the same time would be a good companion.
 
 ** Apps within the app
 
