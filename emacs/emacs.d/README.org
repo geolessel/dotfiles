@@ -196,7 +196,10 @@ Configurations around Emacs itself (i.e. not from a package).
       (after-init . doom-modeline-mode)
       :config
       ; use unicode as a fallback (instead of ASCII) when not using icons
-      (setq doom-modeline-unicode-fallback t))
+      (setq doom-modeline-unicode-fallback t)
+      ; don't display the buffer encoding
+      (setq doom-modeline-buffer-encoding nil)
+      )
     #+END_SRC
 
 ** Dashboard
@@ -225,6 +228,22 @@ Configurations around Emacs itself (i.e. not from a package).
       ; disable the snarky footer
       (setq dashboard-set-footer nil))
     #+END_SRC
+
+** Visualizations
+
+   Display a visual hint when editing with *evil-goggles*.
+
+   #+BEGIN_SRC emacs-lisp
+   (use-package evil-goggles
+     :straight t
+     :after (evil)
+     :config
+     (evil-goggles-mode)
+     )
+   #+END_SRC
+
+** Workspaces
+
 
 
 * Modes
@@ -484,12 +503,35 @@ jumping around text, compared
 
    - [[https://www.dr-qubit.org/undo-tree.html][Homepage]]
 
-   #+BEGIN_SRC emacs-lisp :tangle no
+   #+BEGIN_SRC emacs-lisp
    (use-package undo-tree
      :straight t
      :config
      (global-undo-tree-mode)          ; use it everwhere!
      ;; (setq evil-undo-system 'undo-tree)
+     )
+   #+END_SRC
+
+** Emojis
+
+   *[DISABLED BECAUSE I DON'T THINK I NEED THIS]*
+   *[if I ever enable this again, also check out [[https://github.com/dunn/company-emoji][company-emoji]]]*
+
+   Emacs has pretty good support for emojis built-in. *emojify* makes it
+   even better with ascii, unicode, and/or github style emoji support.
+
+   - [[https://github.com/iqbalansari/emacs-emojify][Github]]
+
+   #+BEGIN_SRC emacs-lisp :tangle no
+   (use-package emojify
+     :straight t
+     :init
+     ; only unicode and github (not ascii [ e.g. :-) ])
+     (setq emojify-set-emoji-styles '(unicode github))
+     ; by default emojis are shown as images; I prefer unicode
+     (setq emojify-display-style 'unicode)
+     :config
+     (global-emojify-mode)
      )
    #+END_SRC
 
@@ -718,11 +760,12 @@ Things that I couldn't think of a better top-level heading for.
 ** Tabs
 
    - [[https://github.com/manateelazycat/awesome-tab][awesome-tab]]
-   - [[https://github.com/ema2159/centaur-tabs][centaur-tabs]]
+   - [[https://github.com/ema2159/centaur-tabs][centaur-tabs]] - used by doom emacs
 
 ** UI
 
    - [[https://github.com/zk-phi/sublimity][sublimity]] - code minimap ala Sublime editor
+   - [[https://github.com/emacsorphanage/anzu][anzu]] and [[https://github.com/emacsorphanage/evil-anzu][evil-anzu]] to display match count in the modeline (e.g. =(13/45)=)
 
 ** Apps within the app
 
@@ -732,6 +775,10 @@ Things that I couldn't think of a better top-level heading for.
               the file system. The preview window takes some of the ideas from
               Peep-Dired, to display previews for the selected files, in the
               primary dired buffer.
+
+** Editor
+
+   - [[https://github.com/iqbalansari/emacs-emojify][emojify]] - better (?) emoji support
 
 
 * References
