@@ -822,10 +822,16 @@ Things that I couldn't think of a better top-level heading for.
               the file system. The preview window takes some of the ideas from
               Peep-Dired, to display previews for the selected files, in the
               primary dired buffer.
+   - [[https://github.com/200ok-ch/counsel-jq][counsel-jq]] - use the =jq= json viewer through =counsel=
 
 ** Editor
 
    - [[https://github.com/iqbalansari/emacs-emojify][emojify]] - better (?) emoji support
+
+** Org Mode
+
+   - [[https://github.com/zweifisch/ob-http][ob-http]] - make http requests in =org-mode=.
+               Watch [[https://www.youtube.com/watch?v=tGgat6XJ2tk][Using org-mode as a rest client]] as a demo.
 
 
 * References
