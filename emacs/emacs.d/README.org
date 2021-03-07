@@ -155,6 +155,14 @@ Configurations around Emacs itself (i.e. not from a package).
    (column-number-mode)
    #+end_src
 
+** Highlight the current line
+
+   I like to know where I am.
+
+   #+begin_src emacs-lisp
+    (hl-line-mode t)
+   #+end_src
+
 
 * UI
 
@@ -184,14 +192,6 @@ Configurations around Emacs itself (i.e. not from a package).
 
    #+BEGIN_SRC emacs-lisp
    (mac-auto-operator-composition-mode t)
-   #+END_SRC
-
-   #+BEGIN_SRC emacs-lisp :tangle no
-   (straight-use-package
-     '(font-size :type git :host github :repo "nabeix/emacs-font-size")
-     :config
-     (font-size-init 18)
-     (define-key global-map (kbd "C-=") 'font-size-increase))
    #+END_SRC
 
 ** Modeline
@@ -288,7 +288,7 @@ Configurations around Emacs itself (i.e. not from a package).
     #+BEGIN_SRC emacs-lisp
     (use-package evil
       :straight t
-      :after (evil-leader) ; must be after to get leader available in initial buffers
+      ; :after (evil-leader) ; must be after to get leader available in initial buffers
       :init
       (setq evil-want-integration t)
       (setq evil-want-keybinding nil)
@@ -297,33 +297,6 @@ Configurations around Emacs itself (i.e. not from a package).
       (evil-mode 1)) ; use evil-mode everywhere
     #+END_SRC
 
-*** Use ~<SPC>~ as a leader key
-
-    *evil-leader* provides the =<leader>= feature from Vim that provides
-    an easy way to bind keys under a variable prefix key.
-
-    Usage example: bind several keys at once
-
-    #+BEGIN_SRC emacs-lisp :tangle no
-    (evil-leader/set-key
-      "e" 'find-file
-      "b" 'switch-to-buffer
-      "k" 'kill-buffer)
-    #+END_SRC
-
-    - [[https://github.com/cofi/evil-leader][Github]]
-
-    #+BEGIN_SRC emacs-lisp
-    (use-package evil-leader
-      :straight t
-      :init
-      (setq evil-want-integration t)
-      (setq evil-want-keybinding nil)
-      (setq evil-want-C-u-scroll t) ; use Ctrl-U to scroll up
-      :config
-      (global-evil-leader-mode)
-      (evil-leader/set-leader "<SPC>"))
-    #+END_SRC
 
 *** Extra keybindings
     A collection of Evil bindings for the parts of Emacs that Evil does not
@@ -332,7 +305,7 @@ Configurations around Emacs itself (i.e. not from a package).
     #+BEGIN_SRC emacs-lisp
     (use-package evil-collection
       :straight t
-      :after (evil evil-leader)
+      ; :after (evil evil-leader)
       :init
       (setq evil-want-keybinding nil)
       :config
@@ -496,12 +469,13 @@ jumping around text, compared
        ("C-c g" . magit-status)))
    #+END_SRC
 
-   *[DISABLED]*
-   Highlight changed lines with *diff-hl*.
+   Highlight changed lines with *diff-hl*. The changes are
+   shown via indicators on the fringe but don't refresh/update
+   until a save has occurred.
 
    - [[https://github.com/dgutov/diff-hl/][Github]]
 
-   #+BEGIN_SRC emacs-lisp :tangle no
+   #+BEGIN_SRC emacs-lisp
    (use-package diff-hl
      :straight t
      :config
@@ -525,6 +499,20 @@ jumping around text, compared
            (ibuffer-do-sort-by-alphabetic)))))
    #+END_SRC
 
+   Kill other buffers except the current one. Taken from the [[https://www.emacswiki.org/emacs/KillingBuffers#toc2][Emacs
+   Wiki]] with modifications from [[https://stackoverflow.com/questions/3417438/close-all-buffers-besides-the-current-one-in-emacs][Stack Overflow]]. The modifications make
+   it so that if the buffer is from something other than visiting a
+   file (e.g. =*scratch*= or =*Messages*=), it will stick around.
+
+   #+begin_src emacs-lisp
+   (defun geo/kill-other-buffers ()
+     "Kill all other buffers."
+     (interactive)
+     (mapc 'kill-buffer
+       (delq (current-buffer)
+             (remove-if-not 'buffer-file-name (buffer-list)))))
+   #+end_src
+
 ** Undo
 
    Even I make mistakes. Emacs' built-in undo system is pretty powerful
@@ -542,29 +530,6 @@ jumping around text, compared
      :config
      (global-undo-tree-mode)          ; use it everwhere!
      ;; (setq evil-undo-system 'undo-tree)
-     )
-   #+END_SRC
-
-** Emojis
-
-   *[DISABLED BECAUSE I DON'T THINK I NEED THIS]*
-   *[if I ever enable this again, also check out [[https://github.com/dunn/company-emoji][company-emoji]]]*
-
-   Emacs has pretty good support for emojis built-in. *emojify* makes it
-   even better with ascii, unicode, and/or github style emoji support.
-
-   - [[https://github.com/iqbalansari/emacs-emojify][Github]]
-
-   #+BEGIN_SRC emacs-lisp :tangle no
-   (use-package emojify
-     :straight t
-     :init
-     ; only unicode and github (not ascii [ e.g. :-) ])
-     (setq emojify-set-emoji-styles '(unicode github))
-     ; by default emojis are shown as images; I prefer unicode
-     (setq emojify-display-style 'unicode)
-     :config
-     (global-emojify-mode)
      )
    #+END_SRC
 
@@ -602,6 +567,10 @@ Things that I couldn't think of a better top-level heading for.
 
 *** Show available keys for a mode in a popup
 
+    Using *which-key*.
+
+    - [[https://github.com/justbur/emacs-which-key][Github]]
+
     #+BEGIN_SRC emacs-lisp
     (use-package which-key
       :straight t
@@ -635,6 +604,7 @@ Things that I couldn't think of a better top-level heading for.
       (setq counsel-describe-function-function #'helpful-callable)
       (setq counsel-describe-variable-function #'helpful-variable))
     #+END_SRC
+
 
 ** Make the minibuffer better
 
@@ -679,29 +649,6 @@ Things that I couldn't think of a better top-level heading for.
      We have two good choices for filtering results. The first is
      =flx= and the second is =prescient=.
 
-     Currently enabled: Prescient
-
-     *CURRENTLY DISABLED*
-     Use *=flx=* to provide some fuzzy matching.
-
-     The default matcher will use a ~.*~ regex wild card in place of
-     /each single space/ in the input. If you want to use the fuzzy
-     matcher and use a ~.*~ regex wild card between /each input letter/,
-     we config with fuzzy. From https://oremacs.com/2016/01/06/ivy-flx/.
-
-     - [[https://github.com/lewang/flx][Github]]
-
-     #+BEGIN_SRC emacs-lisp :tangle no
-     (use-package flx
-       :straight t
-       :after (ivy counsel)
-       :config
-       (setq ivy-re-builders-alist
-         '((ivy-switch-buffer . ivy--regex-plus)
-           (t . ivy--regex-fuzzy))))
-     #+END_SRC
-
-     *CURRENTLY ENABLED*
      Use *=prescient=* to sort and filter a list of candidates.
 
      prescient.el takes as input a list of candidates, and a query
@@ -755,32 +702,32 @@ Things that I couldn't think of a better top-level heading for.
       (amx-mode t))   ; it auto-detects ivy-mode
     #+END_SRC
 
-*** Show the ivy frame other places
 
-    *[DISABLED]*
 
-    *=ivy-posframe=* lets ivy use posframe to show its menu.
 
-    - [[https://github.com/tumashu/ivy-posframe][Github]]
+*** Use hydra for extra context/help
 
-    #+BEGIN_SRC emacs-lisp :tangle no
-    (use-package ivy-posframe
+    *hydra* can provide custom menus to describe keybinds and such.
+
+    - [[https://github.com/abo-abo/hydra][Github]]
+
+    #+begin_src emacs-lisp
+    (use-package hydra
       :straight t
-      :after (ivy)
-    #+END_SRC
+      )
+    #+end_src
 
-*** Add icons to Ivy
+    *pretty-hydra* makes it easy to define pretty hydras! It takes
+    away a lot of the manual try-and-reload usually required to define
+    nice docstrings.
 
-    *[DISABLED]*
+    - [[https://github.com/jerrypnz/major-mode-hydra.el#pretty-hydra][Github]]
 
-    Use *=all-the-icons-ivy=* to make it look prettier(?).
-    Better? More graphical at least.
-
-    #+BEGIN_SRC emacs-lisp :tangle no
-    (use-package all-the-icons-ivy
-      :init
-      (add-hook 'after-init-hook 'all-the-icons-ivy-setup))
-    #+END_SRC
+    #+begin_src emacs-lisp
+    (use-package pretty-hydra
+      :straight t
+      )
+    #+end_src
 
 
 * Personal keybindings
@@ -790,41 +737,171 @@ Things that I couldn't think of a better top-level heading for.
 ** Buffer/window management
 
    #+BEGIN_SRC emacs-lisp
-   (evil-leader/set-key
-     "b b" 'counsel-switch-buffer
-     "b i" 'ibuffer
-
-     "TAB s" 'persp-switch          ; query a persp to switch to or create
-     "TAB n" 'persp-switch
-     "TAB c" 'persp-kill            ; query a persp to kill
-     "TAB r" 'persp-rename          ; rename current perspective
-     "TAB i" 'persp-import          ; import a persp from another frame
-     "TAB <right>" 'persp-next      ; switch to next perspective
-     "TAB <left>" 'persp-prev       ; switch to previous perspective
-     "TAB w" 'persp-state-save      ; save all persps in all frames to a file
-     "TAB l" 'persp-state-load      ; load all persps from a file
-     "TAB b k" 'persp-remove-buffer ; query a buffer to remove from current persp
-     "TAB b a" 'persp-add-buffer    ; query and open buffer to add to current persp
-     "TAB b s" 'persp-set-buffer    ; move buffer to current persp
-     "TAB b b" 'persp-counsel-switch-buffer ; swicth to buffer filtered by current persp
-     )
+   ; (evil-leader/set-key
+   ;   "b b" 'counsel-switch-buffer
+   ;   "b i" 'ibuffer
+   ;   ; "TAB s" 'persp-switch          ; query a persp to switch to or create
+   ;   ; "TAB n" 'persp-switch
+   ;   ; "TAB c" 'persp-kill            ; query a persp to kill
+   ;   ; "TAB r" 'persp-rename          ; rename current perspective
+   ;   ; "TAB i" 'persp-import          ; import a persp from another frame
+   ;   ; "TAB <right>" 'persp-next      ; switch to next perspective
+   ;   ; "TAB <left>" 'persp-prev       ; switch to previous perspective
+   ;   ; "TAB w" 'persp-state-save      ; save all persps in all frames to a file
+   ;   ; "TAB l" 'persp-state-load      ; load all persps from a file
+   ;   ; "TAB b k" 'persp-remove-buffer ; query a buffer to remove from current persp
+   ;   ; "TAB b a" 'persp-add-buffer    ; query and open buffer to add to current persp
+   ;   ; "TAB b s" 'persp-set-buffer    ; move buffer to current persp
+   ;   ; "TAB b b" 'persp-counsel-switch-buffer ; swicth to buffer filtered by current persp
+   ;   )
    #+END_SRC
 
 ** Project management
 
    #+BEGIN_SRC emacs-lisp
-   (evil-leader/set-key
-     "p" 'projectile-command-map
-     )
+   ; (evil-leader/set-key
+   ;   "p" 'projectile-command-map
+   ;   )
    #+END_SRC
 
 ** Version control
 
    #+BEGIN_SRC emacs-lisp
-   (evil-leader/set-key
-     "g" 'magit-status
-     )
+   ; (evil-leader/set-key
+   ;   "g" 'magit-status
+   ;   )
    #+END_SRC
+
+** Hydra menus
+
+*** Apropros
+
+   #+begin_src emacs-lisp
+   (defhydra geo/hydra-apropos-menu (:color blue :hint nil)
+"
+_a_propos        _c_ommand
+_d_ocumentation  _l_ibrary
+_v_ariable       _u_ser-option
+^ ^          valu_e_"
+   ("a" counsel-apropos)
+   ("d" apropos-documentation)
+   ("v" apropos-variable)
+   ("c" apropos-command)
+   ("l" apropos-library)
+   ("u" apropos-user-option)
+   ("e" apropos-value))
+   #+end_src
+
+*** Workspaces
+
+   #+begin_src emacs-lisp
+   (pretty-hydra-define geo/hydra-workspace-menu (:exit t :quit-key "q")
+     ("General"
+       (("s" persp-switch "Switch/New")
+        ("k" persp-kill "Kill")
+        ("r" persp-rename "Rename")
+        ("i" persp-import "Import")
+        ("<right>" persp-next "Next →")
+        ("<left>" persp-prev "Prev ←"))
+      "Buffers"
+      (("b b" persp-counsel-switch-buffer "Switch to buffer in current perspective")
+       ("b a" persp-add-buffer "Add buffer to current perspective")
+       ("b k" persp-remove-buffer "Remove buffer from current perspective")
+       ("b s" persp-set-buffer "Move buffer to current perspective"))
+      "State Mgmt"
+      (("w" persp-state-save "Write to disk")
+       ("l" persp-state-load "Load from disk"))
+    ))
+   #+end_src
+
+*** Buffers
+
+   #+begin_src emacs-lisp
+   (pretty-hydra-define geo/hydra-buffer-menu (:exit t :quit-key "q")
+     ("Management"
+       (("b" counsel-switch-buffer "Switch")
+        ("n" evil-buffer-new "New")
+        ("k" kill-this-buffer "Kill this buffer")
+        ("K" geo/kill-other-buffers "Kill all other buffers"))
+      "Views/Modes"
+        (("i" ibuffer "ibuffer"))))
+   ; (defhydra geo/hydra-buffer-menu (:exit t)
+   ;   ("b" counsel-switch-buffer "Switch")
+   ;   ("i" ibuffer "ibuffer"))
+   #+end_src
+
+*** Preferences
+
+   #+begin_src emacs-lisp
+   (pretty-hydra-define geo/hydra-prefs-menu (:quit-key "q")
+     ("Basic"
+       (("n" linum-mode "line number" :toggle t)
+        ("w" whitespace-mode "whitespace" :toggle t)
+        ("h" hl-line-mode "highlight line" :toggle t))
+      "Editing"
+       (("p" electric-pair-mode "electric-pair" :toggle t)
+        ("d" diff-hl-mode "diff-hl" :toggle t))
+      "Modeline"
+       (("c" column-number-mode "column number" :toggle t))
+    ))
+   #+end_src
+
+*** Projectile
+
+    There's so much stuff in =projectile=. Who can keep track of it
+    all? Now I don't have to!
+
+    #+begin_src emacs-lisp
+    (pretty-hydra-define geo/hydra-projectile (:exit t :quit-key "q")
+      (
+        "Files"
+        (("f" projectile-find-file "Find file")
+         (">" projectile-toggle-between-implementation-and-test "Go to test or implementation")
+         ("d" projectile-display-buffer "Display buffer")
+         ("D" projectile-dired "dired"))
+
+        "Searching"
+        (("/" projectile-ag "ag")
+         ("g" projectile-grep "grep")
+         ("r" prejectile-ripgrep "ripgrep"))
+
+        "Management"
+        (("p" projectile-switch-project "Switch project")
+         ("i" projectile-ibuffer "ibuffer")
+         ("b" projectile-switch-to-buffer "Switch to buffer")
+         ("t" projectile-test-project "Test project"))
+
+        "Commands"
+        (("v" projectile-run-vterm "vterm")
+         ("c" projectile-run-command-in-root "Run command in root"))
+    ))
+    #+end_src
+
+*** Main
+
+    My main hydra menu that provides help and direction. Sometimes I
+    forget what to call or what keys to press. This helps immensely.
+
+    #+begin_src emacs-lisp
+    (pretty-hydra-define geo/hydra-top-menu
+      (:title "The world's your oyster"
+       :quit-key "q"
+       :foreign-keys warn
+       :exit t)
+      ("Working"
+       (("w" geo/hydra-workspace-menu/body "Workspaces")
+        ("b" geo/hydra-buffer-menu/body "Buffers")
+        ("p" geo/hydra-projectile/body "Projectile")
+        ("g" magit-status "Magit"))
+
+       "Getting Help"
+       (("a" geo/hydra-apropos-menu/body "Apropos"))
+
+       "Customizing"
+       (("," geo/hydra-prefs-menu/body "Preferences"))))
+
+    (define-key evil-normal-state-map (kbd "<f2>") 'geo/hydra-top-menu/body)
+    #+end_src
 
 
 * Things to check out and eventually add
@@ -872,3 +949,118 @@ Things that I couldn't think of a better top-level heading for.
   - [[https://github.com/emacs-tw/awesome-emacs][Awesome Emacs]] - categorized packages
 
   - https://jamiecollinson.com/blog/my-emacs-config/
+
+
+* Disabled packages
+
+  At one time or another, these were some packages I had installed. I
+  have disabled them for various reasons. I'm keeping them around
+  because I might enable them again at any time.
+
+** =emacs-font-size=
+
+   #+BEGIN_SRC emacs-lisp :tangle no
+   (straight-use-package
+     '(font-size :type git :host github :repo "nabeix/emacs-font-size")
+     :config
+     (font-size-init 18)
+     (define-key global-map (kbd "C-=") 'font-size-increase))
+   #+END_SRC
+
+** =all-the-icons-ivy=
+
+    Use *=all-the-icons-ivy=* to make it look prettier(?).
+    Better? More graphical at least.
+
+    #+BEGIN_SRC emacs-lisp :tangle no
+    (use-package all-the-icons-ivy
+      :init
+      (add-hook 'after-init-hook 'all-the-icons-ivy-setup))
+    #+END_SRC
+
+** =ivy-posframe=
+
+    *ivy-posframe* lets ivy use posframe to show its menu.
+
+    - [[https://github.com/tumashu/ivy-posframe][Github]]
+
+    #+BEGIN_SRC emacs-lisp :tangle no
+    (use-package ivy-posframe
+      :straight t
+      :after (ivy)
+    #+END_SRC
+
+** =flx=
+
+     Use *=flx=* to provide some fuzzy matching.
+
+     The default matcher will use a ~.*~ regex wild card in place of
+     /each single space/ in the input. If you want to use the fuzzy
+     matcher and use a ~.*~ regex wild card between /each input letter/,
+     we config with fuzzy. From https://oremacs.com/2016/01/06/ivy-flx/.
+
+     - [[https://github.com/lewang/flx][Github]]
+
+     #+BEGIN_SRC emacs-lisp :tangle no
+     (use-package flx
+       :straight t
+       :after (ivy counsel)
+       :config
+       (setq ivy-re-builders-alist
+         '((ivy-switch-buffer . ivy--regex-plus)
+           (t . ivy--regex-fuzzy))))
+     #+END_SRC
+
+** =emojify=
+
+   *[DISABLED BECAUSE I DON'T THINK I NEED THIS]*
+   *[if I ever enable this again, also check out [[https://github.com/dunn/company-emoji][company-emoji]]]*
+
+   Emacs has pretty good support for emojis built-in. *emojify* makes it
+   even better with ascii, unicode, and/or github style emoji support.
+
+   - [[https://github.com/iqbalansari/emacs-emojify][Github]]
+
+   #+BEGIN_SRC emacs-lisp :tangle no
+   (use-package emojify
+     :straight t
+     :init
+     ; only unicode and github (not ascii [ e.g. :-) ])
+     (setq emojify-set-emoji-styles '(unicode github))
+     ; by default emojis are shown as images; I prefer unicode
+     (setq emojify-display-style 'unicode)
+     :config
+     (global-emojify-mode)
+     )
+   #+END_SRC
+
+** =evil-leader=
+
+   Since I started using =hydra=, I haven't felt the need to add this
+   back in.
+
+   *evil-leader* provides the =<leader>= feature from Vim that
+   provides an easy way to bind keys under a variable prefix key.
+
+   Usage example: bind several keys at once
+
+   #+BEGIN_SRC emacs-lisp :tangle no
+   (evil-leader/set-key
+     "e" 'find-file
+     "b" 'switch-to-buffer
+     "k" 'kill-buffer)
+   #+END_SRC
+
+   - [[https://github.com/cofi/evil-leader][Github]]
+
+   #+BEGIN_SRC emacs-lisp :tangle no
+   (use-package evil-leader
+     :straight t
+     :init
+     (setq evil-want-integration t)
+     (setq evil-want-keybinding nil)
+     (setq evil-want-C-u-scroll t) ; use Ctrl-U to scroll up
+     :config
+     (global-evil-leader-mode)
+     (evil-leader/set-leader "<SPC>"))
+   #+END_SRC
