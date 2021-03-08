@@ -873,8 +873,8 @@ _i_nfo       valu_e_"
         ("k" persp-kill "Kill")
         ("r" persp-rename "Rename")
         ("i" persp-import "Import")
-        ("<right>" persp-next "Next →")
-        ("<left>" persp-prev "Prev ←"))
+        ("n" persp-next "Next")
+        ("p" persp-prev "Prev"))
       "Buffers"
       (("b b" persp-counsel-switch-buffer "Switch to buffer in current perspective")
        ("b a" persp-add-buffer "Add buffer to current perspective")
