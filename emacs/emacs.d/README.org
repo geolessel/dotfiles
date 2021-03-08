@@ -85,6 +85,7 @@ Configurations around Emacs itself (i.e. not from a package).
 
    #+BEGIN_SRC emacs-lisp
    (setq custom-file "~/.emacs.d/custom.el")
+   (load custom-file)
    #+END_SRC
 
 ** Hide the toolbar
@@ -365,38 +366,38 @@ Configurations around Emacs itself (i.e. not from a package).
 
 ** Moving and navigating the buffer
 
-    With *=evil-easymotion=* you can invoke =M=, and this plugin will put a
+    With *evil-easymotion* you can invoke =M=, and this plugin will put a
     target character on every possible position. Type the character on the
     target and wham! you have teleported there.
 
     #+BEGIN_SRC emacs-lisp
-(use-package evil-easymotion
-      :straight t
-      :after (evil)
-      :config
-(evilem-default-keybindings "M")
-)
-#+END_SRC
+    (use-package evil-easymotion
+          :straight t
+          :after (evil)
+          :config
+    (evilem-default-keybindings "M")
+    )
+    #+END_SRC
 
-    *=evil-snipe=* emulates =vim-seek= and/or =vim-sneak= in =evil-mode=.
-    It provides 2-character motions for quickly
-(and more accurately)
-jumping around text, compared
-    to evil's built-in f/F/t/T motions, incrementally highlighting candidate targets as you type.
+    *=evil-snipe=* emulates =vim-seek= and/or =vim-sneak= in
+    =evil-mode=.  It provides 2-character motions for quickly (and
+    more accurately) jumping around text, compared to evil's built-in
+    f/F/t/T motions, incrementally highlighting candidate targets as
+    you type.
 
     #+BEGIN_SRC emacs-lisp
-(use-package evil-snipe
-      :straight t
-      :after (evil)
-      :config
-(evil-snipe-mode +1)
-; binds `s`/`S` (forward/backward)
-(evil-snipe-override-mode +1)
-; binds `f`, `F`, `t`, `T` overrides
-(setq evil-snipe-scope 'visible)
-; highlights all forward matches in visible buffer
+    (use-package evil-snipe
+          :straight t
+          :after (evil)
+          :config
+      (evil-snipe-mode +1)
+      ; binds `s`/`S` (forward/backward)
+      (evil-snipe-override-mode +1)
+      ; binds `f`, `F`, `t`, `T` overrides
+      (setq evil-snipe-scope 'visible)
+      ; highlights all forward matches in visible buffer
     )
-#+END_SRC
+    #+END_SRC
 
 ** Projects
 
