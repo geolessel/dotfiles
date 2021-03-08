@@ -110,6 +110,14 @@ Configurations around Emacs itself (i.e. not from a package).
     (add-hook 'prog-mode-hook 'display-line-numbers-mode)
     #+END_SRC
 
+** Show the fill-line column indicator
+
+   Set the column to show it at with =set-fill-column=.
+
+   #+begin_src emacs-lisp
+   (setq global-display-fill-column-indicator-mode t)
+   #+end_src
+
 ** Show the matching parens
 
     #+BEGIN_SRC emacs-lisp
