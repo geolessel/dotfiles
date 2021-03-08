@@ -348,6 +348,16 @@ Configurations around Emacs itself (i.e. not from a package).
       (evil-collection-init))
     #+END_SRC
 
+** YAML mode
+
+   #+begin_src emacs-lisp
+   (use-package yaml-mode
+     :straight t
+     :config
+     (add-to-list 'auto-mode-alist '("\\.ya?ml$" . yaml-mode))
+     )
+   #+end_src
+
 
 * Editing
 
