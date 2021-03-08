@@ -652,6 +652,18 @@ Things that I couldn't think of a better top-level heading for.
       (setq counsel-describe-variable-function #'helpful-variable))
     #+END_SRC
 
+** Searching
+
+   I've always enjoyed =ag= as my searcher of choice. Let's get it
+   into Emacs.
+
+   #+begin_src emacs-lisp
+   (use-package ag
+     :straight t
+     :config
+     (setq ag-highlight-search t) ; highlight results
+     )
+   #+end_src
 
 ** Make the minibuffer better
 
@@ -818,6 +830,18 @@ Things that I couldn't think of a better top-level heading for.
    ;   "g" 'magit-status
    ;   )
    #+END_SRC
+
+** Editing tasks
+
+*** Search with =counsel-ag=
+
+    Since ~/~ is search in =evil-mode=, I like binding ~C-/~ to search
+    the entire project.
+
+    #+begin_src emacs-lisp
+    (define-key evil-normal-state-map (kbd "C-/") 'counsel-ag)
+    #+end_src
+
 
 ** Hydra menus
 
