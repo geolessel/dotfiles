@@ -124,6 +124,13 @@ Configurations around Emacs itself (i.e. not from a package).
     (show-paren-mode 1)
     #+END_SRC
 
+    If the matching paren isn't visible, highlight the entire
+    expression.
+
+    #+begin_src emacs-lisp
+    (setq show-paren-style "mixed")
+    #+end_src
+
 ** Set the default tab width
 
     #+BEGIN_SRC emacs-lisp
