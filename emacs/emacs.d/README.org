@@ -364,6 +364,7 @@ Configurations around Emacs itself (i.e. not from a package).
 
   Things that provide general, non-language specific editing functionality.
 
+
 ** Moving and navigating the buffer
 
     With *evil-easymotion* you can invoke =M=, and this plugin will put a
@@ -763,7 +764,6 @@ Things that I couldn't think of a better top-level heading for.
 
 
 
-
 *** Use hydra for extra context/help
 
     *hydra* can provide custom menus to describe keybinds and such.
@@ -832,16 +832,23 @@ Things that I couldn't think of a better top-level heading for.
    #+END_SRC
 
 ** Editing tasks
-
 *** Search with =counsel-ag=
 
     Since ~/~ is search in =evil-mode=, I like binding ~C-/~ to search
     the entire project.
 
-    #+begin_src emacs-lisp
-    (define-key evil-normal-state-map (kbd "C-/") 'counsel-ag)
-    #+end_src
+    I have to wrap =counsel-ag= with a ~let~ in order to restrict
+    which completion modes are available to ag. I want to either be
+    specific (~literal~) or be able to input a regex (`regexp`).
 
+    #+begin_src emacs-lisp
+    (defun geo/counsel-ag ()
+      (interactive)
+      (let* ((prescient-filter-method '(literal regexp)))
+        (counsel-ag)))
+
+    (define-key evil-normal-state-map (kbd "C-/") 'geo/counsel-ag)
+    #+end_src
 
 ** Hydra menus
 
