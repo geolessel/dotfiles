@@ -184,10 +184,34 @@ Configurations around Emacs itself (i.e. not from a package).
       :straight t)
     #+END_SRC
 
+   I love the monokai theme and would like to use it. Bring it in.
+
+   #+begin_src emacs-lisp
+   (use-package monokai-theme
+     :straight t)
+   #+end_src
+
+   Other cool theme packages I've found.
+
+   #+begin_src emacs-lisp
+   (use-package tron-legacy-theme
+     :straight t
+     :config
+     (setq tron-legacy-theme-vidid-cursor t))
+
+   (use-package kaolin-themes
+     :straight t)
+
+   (use-package modus-themes
+     :straight t
+     :init
+     (modus-themes-load-themes))
+   #+end_src
+
    Here is the theme to load for this session.
 
     #+BEGIN_SRC emacs-lisp
-    (load-theme 'doom-one-light t) ; t treats it as safe
+    (load-theme 'monokai t) ; t treats it as safe
     #+END_SRC
 
 ** Font
