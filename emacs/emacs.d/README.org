@@ -105,12 +105,6 @@ Configurations around Emacs itself (i.e. not from a package).
     (scroll-bar-mode -1)
     #+END_SRC
 
-** Show line numbers in programming mode
-
-    #+BEGIN_SRC emacs-lisp
-    (add-hook 'prog-mode-hook 'display-line-numbers-mode)
-    #+END_SRC
-
 ** Show the fill-line column indicator
 
    Set the column to show it at with =set-fill-column=.
@@ -176,7 +170,7 @@ Configurations around Emacs itself (i.e. not from a package).
    I like to know where I am.
 
    #+begin_src emacs-lisp
-    (global-hl-line-mode t)
+   (global-hl-line-mode t)
    #+end_src
 
 
@@ -276,8 +270,7 @@ Configurations around Emacs itself (i.e. not from a package).
     #+END_SRC
 
 ** Visualizations
-
-   Display a visual hint when editing with *evil-goggles*.
+*** Display a visual hint when editing with *evil-goggles*.
 
    #+BEGIN_SRC emacs-lisp
    (use-package evil-goggles
@@ -1175,33 +1168,8 @@ T - tag prefix
      )
    #+END_SRC
 
-** =evil-leader=
+** Show line numbers in programming mode
 
-   Since I started using =hydra=, I haven't felt the need to add this
-   back in.
-
-   *evil-leader* provides the =<leader>= feature from Vim that
-   provides an easy way to bind keys under a variable prefix key.
-
-   Usage example: bind several keys at once
-
-   #+BEGIN_SRC emacs-lisp :tangle no
-   (evil-leader/set-key
-     "e" 'find-file
-     "b" 'switch-to-buffer
-     "k" 'kill-buffer)
-   #+END_SRC
-
-   - [[https://github.com/cofi/evil-leader][Github]]
-
-   #+BEGIN_SRC emacs-lisp :tangle no
-   (use-package evil-leader
-     :straight t
-     :init
-     (setq evil-want-integration t)
-     (setq evil-want-keybinding nil)
-     (setq evil-want-C-u-scroll t) ; use Ctrl-U to scroll up
-     :config
-     (global-evil-leader-mode)
-     (evil-leader/set-leader "<SPC>"))
-   #+END_SRC
+    #+BEGIN_SRC emacs-lisp :tangle no
+    (add-hook 'prog-mode-hook 'display-line-numbers-mode)
+    #+END_SRC
