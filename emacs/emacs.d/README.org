@@ -1002,11 +1002,12 @@ _i_nfo       valu_e_"
      ("Basic"
        (("n" linum-mode "line number" :toggle t)
         ("w" whitespace-mode "whitespace" :toggle t)
-        ("h" global-hl-line-mode "highlight line" :toggle t))
-      "Editing"
+        ("h" global-hl-line-mode "highlight line" :toggle t)
+        ("H" highlight-indent-guides-mode "highlight indents" :toggle t))
+      ""
        (("p" electric-pair-mode "electric-pair" :toggle t)
         ("d" diff-hl-mode "diff-hl" :toggle t)
-        ("c" global-display-fill-column-indicator-mode :toggle t)
+        ("c" global-display-fill-column-indicator-mode "show fill column" :toggle t)
         (")" geo/toggle-show-paren-style "show-paren style"))
       "Modeline"
        (("m c" column-number-mode "column number" :toggle t))
