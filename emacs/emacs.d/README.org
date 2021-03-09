@@ -352,6 +352,25 @@ Configurations around Emacs itself (i.e. not from a package).
      )
    #+end_src
 
+** Org mode
+
+   Some little things to make =org-mode= better.
+
+*** Show bullets as utf-8 characters
+
+    #+begin_src emacs-lisp
+    (use-package org-bullets
+      :straight t)
+    #+end_src
+
+** JS mode
+
+   The default for =js-mode= is to indent at 4 spaces. NOPE.
+
+   #+begin_src emacs-lisp
+   (setq js-indent-level 2)
+   #+end_src
+
 
 * Editing
 
