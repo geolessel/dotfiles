@@ -781,6 +781,19 @@ Things that I couldn't think of a better top-level heading for.
       )
     #+end_src
 
+** Better terminal emulation
+
+   I've heard that *vterm* is the bee's knees.
+
+   - [[https://github.com/akermu/emacs-libvterm][Github]]
+
+   #+begin_src emacs-lisp
+   (use-package vterm
+     :straight t
+     :init
+     (setq vterm-always-compile-module t))
+   #+end_src
+
 
 * Personal keybindings
 
