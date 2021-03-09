@@ -281,6 +281,43 @@ Configurations around Emacs itself (i.e. not from a package).
      )
    #+END_SRC
 
+*** Show indentation guides
+
+    It is sometimes helpful to visualize how many indents you are
+    currently in while editing. *highlight-indent-guides* will put a
+    subtle line every indentation to give you a hint as to where you
+    are.
+
+    - [[https://github.com/DarthFennec/highlight-indent-guides][Github]]
+
+    Alternatives (taken from the =highlight-indent-guides= Github:
+
+    | Name                    | Widths  | Hard tabs | Other notes          |
+    |-------------------------+---------+-----------+----------------------|
+    | [[https://github.com/antonj/Highlight-Indentation-for-Emacs][highlight-indentation]]   | Fixed   | No        | Very popular         |
+    | [[https://github.com/zk-phi/indent-guide][indent-guide]]            | Dynamic | Yes       | Fairly slow, jittery |
+    | [[https://github.com/ikirill/hl-indent][hl-indent]]               | Dynamic | No        | Slow for large files |
+    | [[https://github.com/skeeto/visual-indentation-mode][visual-indentation-mode]] | Fixed   | No        | Fast and slim        |
+
+    #+begin_src emacs-lisp
+    (use-package highlight-indent-guides
+      :straight t
+      :init
+      (setq highlight-indent-guides-mode 'character
+            highlight-indent-guides-responve 'top)
+      :config
+      (add-hook 'prog-mode-hook 'highlight-indent-guides-mode))
+    #+end_src
+*** Show rainbow delimeter colors for parens
+
+    #+begin_src emacs-lisp
+    (use-package rainbow-delimiters
+      :straight t
+      :config
+      (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
+      )
+    #+end_src
+
 ** Workspaces
 
    I can use this to work in one project in one perspective/workspace
