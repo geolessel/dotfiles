@@ -18,7 +18,7 @@ Things that need to happen right away.
             (message "gc-cons-threshold restored to %S" gc-cons-threshold)))
     #+END_SRC
 
-** Bootstrap `straight` package manager
+** Bootstrap =straight= package manager
     #+BEGIN_SRC emacs-lisp
     (defvar bootstrap-version)
     (let
@@ -37,7 +37,7 @@ Things that need to happen right away.
     (load bootstrap-file nil 'nomessage))
     #+END_SRC
 
-** `use-package`
+** =use-package=
     #+BEGIN_SRC emacs-lisp
     (straight-use-package 'use-package)
     #+END_SRC
@@ -58,6 +58,21 @@ Things that need to happen right away.
 (require 'use-package-ensure)
 (setq use-package-always-ensure t)
 #+END_SRC
+
+** Make sure $PATH is correct
+
+   There are some packages that query and use the $PATH variable. This
+   can be a problem on the Mac since GUI Emacs does not inherit the
+   environment variables. =exec-path-from-shell= works around this
+   issue.
+
+   #+begin_src emacs-lisp
+   (use-package exec-path-from-shell
+     :straight t
+     :config
+     (when (memq window-system '(mac ns x))
+       (exec-path-from-shell-initialize)))
+   #+end_src
 
 
 * Emacs general system settings
