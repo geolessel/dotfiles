@@ -693,6 +693,61 @@ Configurations around Emacs itself (i.e. not from a package).
      )
    #+end_src
 
+** Autoformatting
+
+*** eslintd-fix
+
+    Some of the apps I work in have prettier configured through the
+    elist configuration. Because of this, and because we run eslint in
+    those apps, I have =eslint_d= running when I work on those apps. We
+    can utilize that server to make fixes in our javascript files.
+
+    [[https://github.com/aaronjensen/eslintd-fix][Github]]
+
+    #+begin_src emacs-lisp
+    (defvar geo/eslint_d-exec-path "~/.config/yarn/global/node_modules/.bin")
+
+    (use-package eslintd-fix
+      :straight t
+      :config
+      (add-hook 'js-mode-hook 'eslintd-fix-mode)
+      ; we need the location of eslint_d
+      (add-to-list 'exec-path geo/eslint_d-exec-path))
+    #+end_src
+
+*** format-all
+
+   Using =format-all=. To manually format the buffer, run
+   ~format-all-buffer~. To auto-format, use the minor mode
+   ~format-all-mode~.
+
+   Settings:
+
+   - Control displaying the formatting errors buffer
+     - ~'always~ - shows errors buffer regardless of errors or
+       warnigns
+     - ~'warnings~ - shows error sbuffer for warnings and errors
+     - ~'errors~ - shows error buffer only on errors
+     - ~'never~ - never show the error buffer
+   - Ensure a default formatter is selected:
+     ~format-all-ensure-formatter~
+
+   [[https://github.com/lassik/emacs-format-all-the-code][Github]]
+
+   #+begin_src emacs-lisp
+   (use-package format-all
+     :straight t
+     :config
+     ; autoformaat programming buffers
+     (add-hook 'prog-mode-hook 'format-all-mode)
+     ; ensure a default formatter is set
+     (add-hook 'format-all-mode-hook 'format-all-ensure-formatter)
+
+     ; disable this mode in js files since we'll be running eslintd-fix-mode
+     (add-hook 'js-mode-hook (lambda () (format-all-mode 0)))
+   )
+   #+end_src
+
 ** Syntax checking
 
    With =flycheck=.
