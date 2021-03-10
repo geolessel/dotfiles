@@ -452,7 +452,6 @@ Configurations around Emacs itself (i.e. not from a package).
 
   Things that provide general, non-language specific editing functionality.
 
-
 ** Moving and navigating the buffer
 
     With *evil-easymotion* you can invoke =M=, and this plugin will put a
@@ -692,6 +691,50 @@ Configurations around Emacs itself (i.e. not from a package).
      :config
      (yas-global-mode 1)
      )
+   #+end_src
+
+** Syntax checking
+
+   With =flycheck=.
+
+   [[https://www.flycheck.org/en/latest/][Homepage]]
+
+   #+begin_src emacs-lisp
+   (use-package flycheck
+     :straight t
+     :custom
+     (flycheck-highlighting-mode 'lines)
+     :config
+     (global-flycheck-mode))
+   #+end_src
+
+   Sometimes I don't see the errors as they are highlighted. Maybe
+   it'll help if the whole status line was colored.
+
+   [[https://github.com/flycheck/flycheck-color-mode-line][Github]]
+
+   #+begin_src emacs-lisp
+   (use-package flycheck-color-mode-line
+     :straight t
+     :after (flycheck)
+     :config
+     (eval-after-load "flycheck"
+       '(add-hook 'flycheck-mode-hook 'flycheck-color-mode-line-mode)))
+   #+end_src
+
+   Furthermore, sometimes the modeline has other useful information
+   that I don't want =flycheck= to overwrite. Instead, display the
+   messages inline with =flycheck-inline=.
+
+   [[https://github.com/flycheck/flycheck-inline][Github]]
+
+   #+begin_src emacs-lisp
+   (use-package flycheck-inline
+     :straight t
+     :after (flycheck)
+     :config
+     (with-eval-after-load 'flycheck
+       (add-hook 'flycheck-mode-hook #'flycheck-inline-mode)))
    #+end_src
 
 
@@ -1178,6 +1221,8 @@ T - tag prefix
    - [[https://github.com/iqbalansari/emacs-emojify][emojify]] - better (?) emoji support
    - [[https://github.com/abo-abo/auto-yasnippet][auto-yasnippet]] - create snippets on the go without and use them
      in-place. Kind of like temporary macros.
+   - [[https://github.com/liblit/flycheck-status-emoji][flycheck-status-emoji]] - display emojis on the modeline to indicate
+     status in the buffer
 
 ** Org Mode
 
