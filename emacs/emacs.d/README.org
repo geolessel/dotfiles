@@ -342,8 +342,8 @@ Configurations around Emacs itself (i.e. not from a package).
     (use-package highlight-indent-guides
       :straight t
       :init
-      (setq highlight-indent-guides-mode 'character
-            highlight-indent-guides-responve 'top)
+      (setq highlight-indent-guides-method 'character
+            highlight-indent-guides-responsive 'top)
       :config
       (add-hook 'prog-mode-hook 'highlight-indent-guides-mode))
     #+end_src
