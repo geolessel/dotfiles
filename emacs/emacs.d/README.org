@@ -229,6 +229,8 @@ Configurations around Emacs itself (i.e. not from a package).
     (load-theme 'monokai t) ; t treats it as safe
     #+END_SRC
 
+    A good source of themes with previews is [[https://peach-melpa.org/][peach-melpa.org]].
+
 ** Font
 
    When you have the best font, use the best font.
@@ -242,6 +244,19 @@ Configurations around Emacs itself (i.e. not from a package).
    #+BEGIN_SRC emacs-lisp
    (mac-auto-operator-composition-mode t)
    #+END_SRC
+
+   By default Emacs scales fonts with =text-scale-increase= and
+   =text-scale-decrease= per buffer. I'd rather have every buffer
+   scaled at the same time. =default-text-scale= provides
+   this. According to the docs, "it is like an Emacs-wide version of
+   =text-scale-mode=.
+
+   [[https://github.com/purcell/default-text-scale][Github]]
+
+   #+begin_src emacs-lisp
+   (use-package default-text-scale
+     :straight t)
+   #+end_src
 
 ** Modeline
 
@@ -444,7 +459,24 @@ Configurations around Emacs itself (i.e. not from a package).
    The default for =js-mode= is to indent at 4 spaces. NOPE.
 
    #+begin_src emacs-lisp
-   (setq js-indent-level 2)
+   (setq-default js-indent-level 2)
+   #+end_src
+
+** Web mode
+
+   #+begin_src emacs-lisp
+   (use-package web-mode
+     :straight t
+     :config
+     (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
+     )
+   #+end_src
+
+** Slim mode
+
+   #+begin_src emacs-lisp
+   (use-package slim-mode
+     :straight t)
    #+end_src
 
 
@@ -752,15 +784,20 @@ Configurations around Emacs itself (i.e. not from a package).
 
    With =flycheck=.
 
+   I don't use =ruby-reek= as a checker, so explicitly disable that
+   since it is enabled for Ruby buffers by default.
+
    [[https://www.flycheck.org/en/latest/][Homepage]]
 
    #+begin_src emacs-lisp
    (use-package flycheck
      :straight t
-     :custom
-     (flycheck-highlighting-mode 'lines)
      :config
-     (global-flycheck-mode))
+     (setq-default flycheck-highlighting-mode 'lines)
+     (global-flycheck-mode)
+     (add-hook 'ruby-mode-hook
+       (lambda ()
+         (setq flycheck-disabled-checkers '(ruby-reek)))))
    #+end_src
 
    Sometimes I don't see the errors as they are highlighted. Maybe
@@ -790,6 +827,111 @@ Configurations around Emacs itself (i.e. not from a package).
      :config
      (with-eval-after-load 'flycheck
        (add-hook 'flycheck-mode-hook #'flycheck-inline-mode)))
+   #+end_src
+
+** Documentation and code completion
+
+*** lsp-mode
+
+    #+begin_src emacs-lisp
+    (use-package lsp-mode
+      :straight t
+      :init
+      (setq lsp-keymap-prefix "C-c l")
+      :hook (
+        (js-mode . lsp-deferred)
+        (lsp-mode . lsp-enable-which-key-integration))
+      :commands (lsp lsp-deferred)
+      )
+    #+end_src
+
+*** lsp-ui
+
+    Some nice ui-related things including:
+
+    - =lsp-ui-sideline=
+    - =lsp-ui-peek=
+    - =lsp-ui-doc=
+    - =lsp-ui-imenu=
+
+    [[https://emacs-lsp.github.io/lsp-ui/#intro][Github]]
+    [[https://emacs-lsp.github.io/lsp-mode/tutorials/how-to-turn-off/][A good guide on which ui element is what]]
+
+    #+begin_src emacs-lisp
+    (use-package lsp-ui
+      :straight t
+      :config
+      (setq lsp-ui-doc-enable nil)
+      (setq lsp-ui-sideline-show-hover nil)
+      (setq lsp-ui-sideline-show-code-actions nil)
+      (setq lsp-headerline-breadcrumb-enable nil)
+      (setq lsp-modeline-code-actions-enable t)
+      )
+    #+end_src
+
+*** lsp-ivy
+
+    =lsp-ivy= really only provides =ivy= completion for workspace
+    symbols through ~lsp-ivy-workspace-symbol~ and
+    ~lsp-ivy-global-workspace-symbol~.
+
+    [[https://github.com/emacs-lsp/lsp-ivy][Github]]
+
+    #+begin_src emacs-lisp
+    (use-package lsp-ivy
+        :straight t
+        )
+    #+end_src
+
+*** Company
+
+    =company-mode= provides auto complete functions.
+
+    #+begin_src emacs-lisp
+    (use-package company
+      :straight t
+      :init
+      (add-hook 'after-init-hook 'global-company-mode))
+    #+end_src
+
+    =company-box= makes the autocomplete dropdown much nicer.
+
+    #+begin_src emacs-lisp
+    (use-package company-box
+      :straight t
+      :after company
+      :hook (company-mode . company-box-mode))
+    #+end_src
+
+** Code folding
+
+   =evil-vimish-fold= provides vim-like code folding for a large
+   variety of code types.
+
+   Quick usage tips:
+
+   - ~zf~ create a fold
+   - ~zd~ delete a fold
+   - ~za~ toggle
+   - ~zo~ open
+   - ~zc~ close
+   - ~zj~ navigate down a fold
+   - ~zk~ navigate up a fold
+
+   [[https://github.com/alexmurray/evil-vimish-fold][Github]]
+
+   #+begin_src emacs-lisp
+   (use-package vimish-fold
+     :straight t
+     :after evil)
+
+   (use-package evil-vimish-fold
+     :straight t
+     :after vimish-fold
+     :init
+     (setq evil-vimish-fold-target-modes '(prog-mode conf-mode text-mode))
+     :config
+     (global-evil-vimish-fold-mode))
    #+end_src
 
 
@@ -1121,7 +1263,9 @@ _i_nfo       valu_e_"
        (("p" electric-pair-mode "electric-pair" :toggle t)
         ("d" diff-hl-mode "diff-hl" :toggle t)
         ("c" global-display-fill-column-indicator-mode "show fill column" :toggle t)
-        (")" geo/toggle-show-paren-style "show-paren style"))
+        (")" geo/toggle-show-paren-style "show-paren style")
+        ("+" default-text-scale-increase "increase font size")
+        ("-" default-text-scale-decrease "decrease font size"))
       "Modeline"
        (("m c" column-number-mode "column number" :toggle t))
     ))
@@ -1278,11 +1422,32 @@ T - tag prefix
      in-place. Kind of like temporary macros.
    - [[https://github.com/liblit/flycheck-status-emoji][flycheck-status-emoji]] - display emojis on the modeline to indicate
      status in the buffer
+   - [[https://github.com/felipeochoa/rjsx-mode][rjsx-mode]] - for now, the built-in `js-mode` seems fine but this
+     package may add some nice things
+   - [[https://github.com/Malabarba/aggressive-indent-mode][aggressive-indent-mode]] - =electric-indent-mode= is enough to keep
+     your code nicely aligned when all you do is type. However, once
+     you start shifting blocks around, transposing lines, or slurping
+     and barfing sexps, indentation is bound to go wrong.
+
+     =aggressive-indent-mode= is a minor mode that keeps your code always
+     indented. It reindents after every change, making it more reliable
+     than electric-indent-mode.
+   - [[https://github.com/abo-abo/avy][avy]] - jump to visible text using a char-based decision tree
 
 ** Org Mode
 
    - [[https://github.com/zweifisch/ob-http][ob-http]] - make http requests in =org-mode=.
                Watch [[https://www.youtube.com/watch?v=tGgat6XJ2tk][Using org-mode as a rest client]] as a demo.
+
+** Other?
+
+   I can't think of categories for these.
+
+   - [[https://github.com/edrx/eev][eev]] - "a library for Emacs that lets us create executable logs of
+     what we do in a format that is reasonably easy to read and to
+     modify, and that lets us “play back” those logs step by step in
+     any order." Could be interesting in reproducing debugging or
+     something.
 
 
 * References
