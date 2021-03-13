@@ -415,7 +415,10 @@ Configurations around Emacs itself (i.e. not from a package).
       (setq evil-want-keybinding nil)
       (setq evil-want-C-u-scroll t) ; use Ctrl-U to scroll up
       :config
-      (evil-mode 1)) ; use evil-mode everywhere
+      ; use evil-mode everywhere
+      (evil-mode 1)
+      ; use C-g to exit insert mode reinforcing Emacs-ism
+      (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state))
     #+END_SRC
 
 
@@ -460,6 +463,33 @@ Configurations around Emacs itself (i.e. not from a package).
 
    #+begin_src emacs-lisp
    (setq-default js-indent-level 2)
+   #+end_src
+
+** RJSX mode
+
+   After some testing, I've found that =rjsx-mode= is better than
+   =js-mode= even if only considering syntax highlighting.
+
+   By default, =rjsx-mode= has electric-behaviour in that in tries to
+   auto-close whatever tags you are opening. I find this entirely
+   annoying. Thankfully the docs tell you how to disable it, which
+   I've done by redefining keys to ~nil~.
+
+   =rjsx-mode= is based off of =js2-mode= which has all sorts of
+   warnings and errors that are really annoying since we use
+   =flycheck=. I disable all of those as well.
+
+   [[https://github.com/felipeochoa/rjsx-mode][Github]]
+
+   #+begin_src emacs-lisp
+   (use-package rjsx-mode
+     :straight t
+     :config
+     (with-eval-after-load 'rjsx-mode
+       (define-key rjsx-mode-map "<" nil)
+       (define-key rjsx-mode-map (kbd "C-d") nil)
+       (define-key rjsx-mode-map ">" nil))
+     (js2-mode-hide-warnings-and-errors))
    #+end_src
 
 ** Web mode
@@ -1422,8 +1452,6 @@ T - tag prefix
      in-place. Kind of like temporary macros.
    - [[https://github.com/liblit/flycheck-status-emoji][flycheck-status-emoji]] - display emojis on the modeline to indicate
      status in the buffer
-   - [[https://github.com/felipeochoa/rjsx-mode][rjsx-mode]] - for now, the built-in `js-mode` seems fine but this
-     package may add some nice things
    - [[https://github.com/Malabarba/aggressive-indent-mode][aggressive-indent-mode]] - =electric-indent-mode= is enough to keep
      your code nicely aligned when all you do is type. However, once
      you start shifting blocks around, transposing lines, or slurping
