@@ -701,6 +701,33 @@ Configurations around Emacs itself (i.e. not from a package).
      (global-diff-hl-mode))
    #+END_SRC
 
+   Go back in time in a file with =git-timemachine=. =evil= mode
+   doesn't play well with the default keybindings which are just fine,
+   so we need to make an override map. I found this out [[http://blog.binchen.org/posts/use-git-timemachine-with-evil.html][in this post]].
+
+   Keys:
+   - `p` Visit previous historic version
+   - `n` Visit next historic version
+   - `w` Copy the abbreviated hash of the current historic version
+   - `W` Copy the full hash of the current historic version
+   - `g` Goto nth revision
+   - `t` Goto revision by selected commit message
+   - `q` Exit the time machine.
+   - `b` Run `magit-blame` on the currently visited revision (if magit available).
+   - `c` Show current commit using magit (if magit available).
+
+   [[https://github.com/emacsmirror/git-timemachine][Github]]
+
+   #+begin_src emacs-lisp
+   (use-package git-timemachine
+     :straight t
+     :config
+     (with-eval-after-load 'git-timemachine
+       (evil-make-overriding-map git-timemachine-mode-map 'normal)
+       ;; force update evil keymaps after git-timemachine-mode is loaded
+       (add-hook 'git-timemachine-mode-hook #'evil-normalize-keymaps)))
+   #+end_src
+
 ** Buffers
 
    Group buffers in ibuffer list by projectile project with *ibuffer-projectile*.
