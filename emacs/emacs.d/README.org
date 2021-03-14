@@ -577,6 +577,16 @@ Configurations around Emacs itself (i.e. not from a package).
      (projectile-mode +1))
    #+END_SRC
 
+**** Extra goodies from =counsel-projectile=
+
+     [[https://github.com/ericdanan/counsel-projectile][Github]]
+
+     #+begin_src emacs-lisp
+     (use-package counsel-projectile
+       :straight t
+       )
+     #+end_src
+
 *** Group buffers by project
 
     Sometimes it's helpful to see the buffers open grouped by project.
@@ -1071,7 +1081,8 @@ Things that I couldn't think of a better top-level heading for.
        :config
        (ivy-rich-mode 1)
        ; the docs recommend to set this as well
-       (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line))
+       (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line)
+       (ivy-set-display-transformer 'ivy-switch-buffer 'ivy-rich--ivy-switch-buffer-transformer))
      #+END_SRC
 
 **** Use fuzzy finding for counsel
@@ -1322,21 +1333,22 @@ _i_nfo       valu_e_"
     (pretty-hydra-define geo/hydra-projectile (:exit t :quit-key "q")
       (
         "Files"
-        (("f" projectile-find-file "Find file")
+        (("f" counsel-projectile-find-file "Find file")
          (">" projectile-toggle-between-implementation-and-test
            "Go to test/impl")
          ("d" projectile-display-buffer "Display buffer")
-         ("D" projectile-dired "dired"))
+         ("D" counsel-projectile-dired "dired"))
 
         "Searching"
         (("/" projectile-ag "ag")
+         ("?" counsel-projectile-ag "ag (with counsel)")
          ("g" projectile-grep "grep")
          ("r" prejectile-ripgrep "ripgrep"))
 
         "Management"
-        (("p" projectile-switch-project "Switch project")
+        (("p" counsel-projectile-switch-project "Switch project")
          ("i" projectile-ibuffer "ibuffer")
-         ("b" projectile-switch-to-buffer "Switch to buffer")
+         ("b" counsel-projectile-switch-to-buffer "Switch to buffer")
          ("t" projectile-test-project "Test project"))
 
         "Commands"
@@ -1449,13 +1461,16 @@ T - tag prefix
 
 ** Apps within the app
 
-   - [[https://github.com/ralesi/ranger.el][ranger]] - This is a minor mode that runs within dired, it emulates many
-              of ranger's features. This minor mode shows a stack of parent
-              directories, and updates the parent buffers, while you're navigating
-              the file system. The preview window takes some of the ideas from
-              Peep-Dired, to display previews for the selected files, in the
-              primary dired buffer.
+   - [[https://github.com/ralesi/ranger.el][ranger]] - This is a minor mode that runs within dired, it emulates
+     many of ranger's features. This minor mode shows a stack of
+     parent directories, and updates the parent buffers, while you're
+     navigating the file system. The preview window takes some of the
+     ideas from Peep-Dired, to display previews for the selected
+     files, in the primary dired buffer.
    - [[https://github.com/200ok-ch/counsel-jq][counsel-jq]] - use the =jq= json viewer through =counsel=
+   - [[https://magit.vc/manual/forge/][magit forge]] - pull requests, issues, and more through magit. This
+     looks like it could be useful in order to keep up with
+     notifications.
 
 ** Editor
 
