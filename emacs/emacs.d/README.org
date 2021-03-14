@@ -452,9 +452,22 @@ Configurations around Emacs itself (i.e. not from a package).
 
 *** Show bullets as utf-8 characters
 
+    I've also customized which characters the bullets are.
+
+    [[https://github.com/sabof/org-bullets][Github]]
+
     #+begin_src emacs-lisp
     (use-package org-bullets
-      :straight t)
+      :straight t
+      :hook (org-mode . org-bullets-mode)
+      :custom
+      (org-bullets-bullet-list '("⦿" "○" "●" "○" "●" "○" "●")))
+    #+end_src
+
+*** Change the default ellipsis on collapsed headings
+
+    #+begin_src emacs-lisp
+    (setq org-ellipsis " ⏷")
     #+end_src
 
 ** JS mode
@@ -550,7 +563,6 @@ Configurations around Emacs itself (i.e. not from a package).
     #+END_SRC
 
 ** Projects
-
 *** Use *projectile* to manage projects.
 
    - [[https://projectile.mx/][Home page]]
