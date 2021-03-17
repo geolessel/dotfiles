@@ -170,13 +170,14 @@ If the matching paren isn't visible, highlight the entire expression.
   (add-hook 'before-save-hook 'delete-trailing-whitespace)
 #+END_SRC
 
-** Turn on the column display in the modeline
+** Turn on the row and column display in the modeline
 
 Sometimes errors report the column as well as the line. So let's
-view the column number we are on!
+view the column number we are on with the row!
 
 #+begin_src emacs-lisp
-  (column-number-mode)
+  (line-number-mode t)
+  (column-number-mode t)
 #+end_src
 
 ** Highlight the current line
@@ -341,6 +342,9 @@ currently in while editing. *highlight-indent-guides* will put a
 subtle line every indentation to give you a hint as to where you
 are.
 
+I don't want this on by default, but it should be available as a
+toggle in my preferences hydra.
+
 - [[https://github.com/DarthFennec/highlight-indent-guides][Github]]
 
 Alternatives (taken from the =highlight-indent-guides= Github:
@@ -356,10 +360,10 @@ Alternatives (taken from the =highlight-indent-guides= Github:
   (use-package highlight-indent-guides
     :straight t
     :init
-    (setq highlight-indent-guides-method 'character
-          highlight-indent-guides-responsive 'top)
-    :config
-    (add-hook 'prog-mode-hook 'highlight-indent-guides-mode))
+    ;; I would much prefer to use 'character as the method, but
+    ;; it appears it has some performance hits when doing so
+    (setq highlight-indent-guides-method 'column
+          highlight-indent-guides-responsive 'stack))
 #+end_src
 *** Show rainbow delimeter colors for parens
 
@@ -479,6 +483,15 @@ is nicely indented without me having to think too much about it.
   (add-hook 'org-mode-hook 'org-indent-mode)
 #+end_src
 
+** Ruby mode
+By default, a magic comment is inserted at the top of any file that
+Emacs detects is using utf-8 encoding. Since I'm not the only one
+editing these files, I find it annoying to add this for other people
+to have to ignore. TURN IT OFF.
+
+#+begin_src emacs-lisp
+  (setq ruby-insert-encoding-magic-comment nil)
+#+end_src
 ** JS mode
 
 The default for =js-mode= is to indent at 4 spaces. NOPE.
@@ -529,6 +542,14 @@ warnings and errors that are really annoying since we use
 #+begin_src emacs-lisp
   (use-package slim-mode
     :straight t)
+#+end_src
+
+** Elixir mode
+
+#+begin_src emacs-lisp
+  (use-package elixir-mode
+    :straight t
+    )
 #+end_src
 
 
@@ -1150,8 +1171,8 @@ prescient-filter-method.
     :after (ivy counsel prescient)
     :config
     (ivy-prescient-mode t)
-                                          ; describe-variable prescient-filter-method for docs
-    (setq prescient-filter-method '(literal regexp fuzzy initialism)))
+    ;; describe-variable prescient-filter-method for docs
+    (setq prescient-filter-method '(literal regexp initialism)))
 #+END_SRC
 
 *** Replace M-x with Amx
@@ -1180,7 +1201,6 @@ Some tips:
     (amx-mode t))   ; it auto-detects ivy-mode
 #+END_SRC
 
-
 *** Use hydra for extra context/help
 
 *hydra* can provide custom menus to describe keybinds and such.
@@ -1204,6 +1224,7 @@ nice docstrings.
    :straight t
    )
 #+end_src
+
 
 ** Better terminal emulation
 
@@ -1269,7 +1290,7 @@ the entire project.
 
 I have to wrap =counsel-ag= with a ~let~ in order to restrict
 which completion modes are available to ag. I want to either be
-specific (~literal~) or be able to input a regex (`regexp`).
+specific (~literal~) or be able to input a regex (~regexp~).
 
 #+begin_src emacs-lisp
   (defun geo/counsel-ag ()
@@ -1278,6 +1299,16 @@ specific (~literal~) or be able to input a regex (`regexp`).
       (counsel-ag)))
 
   (define-key evil-normal-state-map (kbd "C-/") 'geo/counsel-ag)
+#+end_src
+
+*** Search the buffer with =swiper=
+
+vim's keybindings are for ~/~ to search the buffer. I do like that
+keybinding, but I would like upgrade the search function to use
+=swiper=.
+
+#+begin_src emacs-lisp
+  (define-key evil-normal-state-map (kbd "/") 'swiper)
 #+end_src
 
 ** Hydra menus
@@ -1353,7 +1384,8 @@ _i_nfo       valu_e_"
       ("+" default-text-scale-increase "increase font size")
       ("-" default-text-scale-decrease "decrease font size"))
      "Modeline"
-     (("m c" column-number-mode "column number" :toggle t))
+     (("m c" column-number-mode "column number" :toggle t)
+      ("m l" line-number-mode "line number" :toggle t))
      ))
 #+end_src
 
@@ -1521,6 +1553,8 @@ forget what to call or what keys to press. This helps immensely.
   indented. It reindents after every change, making it more reliable
   than electric-indent-mode.
 - [[https://github.com/abo-abo/avy][avy]] - jump to visible text using a char-based decision tree
+- [[https://github.com/rejeep/ruby-end.el][ruby-end]] - Will I get annoyed at typing ~end~ all the time? Or is it
+  more annoying to have it typed for me even when I don't want it?
 
 ** Org Mode
 
