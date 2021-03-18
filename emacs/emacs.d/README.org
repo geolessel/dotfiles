@@ -1337,7 +1337,7 @@ _i_nfo       valu_e_"
 #+begin_src emacs-lisp
   (pretty-hydra-define geo/hydra-workspace-menu (:exit t :quit-key "q")
     ("General"
-     (("s" persp-switch "Switch/New")
+     (("w" persp-switch "Switch/New")
       ("k" persp-kill "Kill")
       ("r" persp-rename "Rename")
       ("i" persp-import "Import")
@@ -1349,7 +1349,7 @@ _i_nfo       valu_e_"
       ("b k" persp-remove-buffer "Remove buffer from current perspective")
       ("b s" persp-set-buffer "Move buffer to current perspective"))
      "State Mgmt"
-     (("w" persp-state-save "Write to disk")
+     (("W" persp-state-save "Write to disk")
       ("l" persp-state-load "Load from disk"))
      ))
 #+end_src
@@ -1555,6 +1555,8 @@ forget what to call or what keys to press. This helps immensely.
 - [[https://github.com/abo-abo/avy][avy]] - jump to visible text using a char-based decision tree
 - [[https://github.com/rejeep/ruby-end.el][ruby-end]] - Will I get annoyed at typing ~end~ all the time? Or is it
   more annoying to have it typed for me even when I don't want it?
+- [[https://github.com/crocket/dired-single][dired-single]] - keep =dired= buffers to a minimum since dired opens a
+  new buffer for every directory visited.
 
 ** Org Mode
 
