@@ -244,7 +244,7 @@ Other cool theme packages I've found.
 Here is the theme to load for this session.
 
 #+BEGIN_SRC emacs-lisp
-  (load-theme 'monokai t) ; t treats it as safe
+  (load-theme 'doom-dark+ t) ; t treats it as safe
 #+END_SRC
 
 A good source of themes with previews is [[https://peach-melpa.org/][peach-melpa.org]].
