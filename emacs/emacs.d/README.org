@@ -1858,6 +1858,9 @@ Helpful things I've found while researching configs.
 
 
 * Disabled packages
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no
+:END:
 
 At one time or another, these were some packages I had installed. I
 have disabled them for various reasons. I'm keeping them around
@@ -1865,7 +1868,7 @@ because I might enable them again at any time.
 
 ** =emacs-font-size=
 
-#+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp
   (straight-use-package
     '(font-size :type git :host github :repo "nabeix/emacs-font-size")
     :config
@@ -1878,7 +1881,7 @@ because I might enable them again at any time.
 Use *=all-the-icons-ivy=* to make it look prettier(?).
 Better? More graphical at least.
 
-#+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp
   (use-package all-the-icons-ivy
     :init
     (add-hook 'after-init-hook 'all-the-icons-ivy-setup))
@@ -1890,7 +1893,7 @@ Better? More graphical at least.
 
 - [[https://github.com/tumashu/ivy-posframe][Github]]
 
-#+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp
   (use-package ivy-posframe
     :straight t
     :after (ivy))
@@ -1907,7 +1910,7 @@ fuzzy. From https://oremacs.com/2016/01/06/ivy-flx/.
 
 - [[https://github.com/lewang/flx][Github]]
 
-#+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp
   (use-package flx
     :straight t
     :after (ivy counsel)
@@ -1927,7 +1930,7 @@ even better with ascii, unicode, and/or github style emoji support.
 
 - [[https://github.com/iqbalansari/emacs-emojify][Github]]
 
-#+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp
   (use-package emojify
     :straight t
     :init
@@ -1942,6 +1945,6 @@ even better with ascii, unicode, and/or github style emoji support.
 
 ** Show line numbers in programming mode
 
-#+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp
   (add-hook 'prog-mode-hook 'display-line-numbers-mode)
 #+END_SRC
