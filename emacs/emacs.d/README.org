@@ -206,6 +206,13 @@ I like to know where I am.
   (global-hl-line-mode t)
 #+end_src
 
+** Set the authinfo file
+This file contains authentication information for packages
+(specifically magit forge).
+
+#+begin_src emacs-lisp
+  (setq auth-sources '("~/.emacs.d/authinfo.gpg"))
+#+end_src
 
 ** Blink the cursor forever
 I like the look of the blink cursor. It invites me to put something on
