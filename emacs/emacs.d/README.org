@@ -962,7 +962,7 @@ It's easiest to explain with examples.
 #+END_SRC
 
 ** Version control (git)
-
+*** The ultimate git experience
 *magit* of course.
 
 - [[https://github.com/magit/magit][Github]]
@@ -975,6 +975,7 @@ It's easiest to explain with examples.
       ("C-c g" . magit-status)))
 #+END_SRC
 
+*** Highlight changed lines
 Highlight changed lines with *diff-hl*. The changes are
 shown via indicators on the fringe but don't refresh/update
 until a save has occurred.
@@ -988,6 +989,7 @@ until a save has occurred.
     (global-diff-hl-mode))
 #+END_SRC
 
+*** View git history and go back in time
 Go back in time in a file with =git-timemachine=. =evil= mode
 doesn't play well with the default keybindings which are just fine,
 so we need to make an override map. I found this out [[http://blog.binchen.org/posts/use-git-timemachine-with-evil.html][in this post]].
@@ -1967,3 +1969,20 @@ even better with ascii, unicode, and/or github style emoji support.
 #+BEGIN_SRC emacs-lisp
   (add-hook 'prog-mode-hook 'display-line-numbers-mode)
 #+END_SRC
+
+** Use Github from within magit
+I found this to be slow and not quite what I was hoping it would be. I
+might re-enable it at some point.
+
+#+begin_src emacs-lisp
+  (use-package forge
+    :straight t
+    :after magit
+    )
+#+end_src
+
+
+* Local variables
+# Local Variables:
+# eval: (org-content 3)
+# End:
