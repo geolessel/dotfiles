@@ -207,6 +207,18 @@ I like to know where I am.
 #+end_src
 
 
+** Blink the cursor forever
+I like the look of the blink cursor. It invites me to put something on
+the page. Also, sometimes I am thinking about something then want to
+come back and forget where I am in the editor. A constantly-blinking
+cursor helps me find my place again.
+
+A value of =0= means it'll blink forever.
+
+#+begin_src emacs-lisp
+  (setq blink-cursor-blinks 0)
+#+end_src
+
 * UI
 
 ** Themes
