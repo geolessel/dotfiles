@@ -1470,6 +1470,13 @@ I've heard that *vterm* is the bee's knees.
 Make it mine. You can find a list of all personal keybindings
 with ~describe-personal-keybindings~.
 
+** Utilities/Helpers
+*** Strip whitespace from the end of strings
+#+begin_src emacs-lisp
+  (defun geo/trim (string)
+    "Strip whitespace from the end of a string"
+    (replace-regexp-in-string "\\W\+$" "" string))
+#+end_src
 ** Buffer/window management
 *** popper
 #+begin_src emacs-lisp
@@ -1550,6 +1557,50 @@ keybinding, but I would like upgrade the search function to use
 
 #+begin_src emacs-lisp
   (define-key evil-normal-state-map (kbd "/") 'swiper)
+#+end_src
+
+*** Open the current file in Github
+When I'm working on a file or looking something up, it is sometimes
+helpful to open the file in Github in the browser. That makes it
+easily linkable.
+
+#+begin_src emacs-lisp
+(defun geo/open-in-github ()
+  "Open the current buffer's file on Github; copy the URL to the clipboard.
+
+The current line will be selected on Github. If a region is selected
+in the buffer, then that region will also be selected/highlighted
+on Github."
+  (interactive)
+  (let* ((linenum-string (if (use-region-p)
+                             (format "#L%s-L%s"
+                                     (line-number-at-pos (region-beginning) t)
+                                     (line-number-at-pos (region-end) t))
+                           (format "#L%s" (line-number-at-pos nil t))))
+         (filename (buffer-file-name))
+         (full-remote
+          (geo/trim
+           (shell-command-to-string "git remote get-url origin")))
+         (org-and-repo
+          (replace-regexp-in-string
+           "\\.git$"
+           ""
+           (replace-regexp-in-string "\\(.*\\):" "" full-remote)))
+         (branch-name
+          (geo/trim
+           (shell-command-to-string "git branch --show-current")))
+         (relative-filename
+          (file-relative-name filename (projectile-project-root)))
+         (github-url (format "https://github.com/%s/blob/%s/%s%s"
+                             org-and-repo
+                             branch-name
+                             relative-filename
+                             linenum-string)))
+    (if (eq system-type 'darwin)
+        (shell-command
+         (concat "echo " "\"" github-url "\"" " | " "/usr/bin/pbcopy")))
+    (browse-url github-url)
+    (message "opened %s" github-url)))
 #+end_src
 
 ** Hydra menus
@@ -1763,6 +1814,17 @@ T - tag prefix
 (define-key dired-mode-map (kbd "?") 'geo/hydra-dired/body)
 #+end_src
 
+*** Github
+Some functions that make working with github a little easier.
+
+#+begin_src emacs-lisp
+  (pretty-hydra-define geo/hydra-github-menu (:quit-key "q")
+    ("Github"
+     (("o" geo/open-in-github "Open file on Github")
+      )
+     ))
+#+end_src
+
 *** Main
 
 My main hydra menu that provides help and direction. Sometimes I
@@ -1778,7 +1840,8 @@ forget what to call or what keys to press. This helps immensely.
        (("w" geo/hydra-workspace-menu/body "Workspaces")
         ("b" geo/hydra-buffer-menu/body "Buffers")
         ("p" geo/hydra-projectile/body "Projectile")
-        ("g" magit-status "Magit"))
+        ("g" magit-status "Magit")
+        ("G" geo/hydra-github-menu/body "Github"))
 
        "Getting Help"
        (("a" geo/hydra-apropos-menu/body "Apropos"))
@@ -1786,6 +1849,7 @@ forget what to call or what keys to press. This helps immensely.
        "Customizing"
        (("," geo/hydra-prefs-menu/body "Preferences"))))
 
+  (define-key evil-normal-state-map (kbd "<SPC>") 'geo/hydra-top-menu/body)
   (define-key evil-normal-state-map (kbd "<SPC>") 'geo/hydra-top-menu/body)
 #+end_src
 
