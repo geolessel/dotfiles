@@ -1483,12 +1483,59 @@ Make it mine. You can find a list of all personal keybindings
 with ~describe-personal-keybindings~.
 
 ** Utilities/Helpers
+Instead of relying on external packages for everything, I've decided
+to start writing small utilities that I could use in my own functions.
+
 *** Strip whitespace from the end of strings
 #+begin_src emacs-lisp
   (defun geo/trim (string)
     "Strip whitespace from the end of a string"
     (replace-regexp-in-string "\\W\+$" "" string))
 #+end_src
+
+*** Git/Github
+A number of commands, in the =geo/git-= namespace, that can simplify
+the usage of =git= interactively or in other functions/commands.
+
+#+begin_src emacs-lisp
+(defun geo/git-run-command (command &optional show-message)
+  "Run a git command from the current shell location.
+
+The command should be the string to follow a normal 'git' command.
+For example, to run 'git branch --show-current', `command` would
+equal 'branch --show-current'."
+  (interactive "sGit command: ")
+  (let ((git-result (geo/trim
+                     (shell-command-to-string
+                      (concat "git " command)))))
+    (when (or (called-interactively-p 'interactive)
+              show-message)
+      (message git-result))
+    git-result))
+#+end_src
+
+#+begin_src emacs-lisp
+(defun geo/git-current-branch-name ()
+  "Return the visited file's git branch name."
+  (interactive)
+  (let ((current-branch-name
+         (geo/git-run-command "branch --show-current"
+                              (called-interactively-p 'interactive))))
+    current-branch-name))
+#+end_src
+
+*** Project-related
+#+begin_src emacs-lisp
+(defun geo/project-relative-filename (filename)
+  "Return the filename relative to the project root."
+  (interactive "fFile: ")
+  (let ((relative-filename
+         (file-relative-name filename (cdr (project-current)))))
+    (when (called-interactively-p 'interactive)
+      (message relative-filename))
+    relative-filename))
+#+end_src
+
 ** Buffer/window management
 *** popper
 #+begin_src emacs-lisp
@@ -1591,18 +1638,15 @@ on Github."
                            (format "#L%s" (line-number-at-pos nil t))))
          (filename (buffer-file-name))
          (full-remote
-          (geo/trim
-           (shell-command-to-string "git remote get-url origin")))
+          (geo/git-run-command "remote get-url origin"))
          (org-and-repo
           (replace-regexp-in-string
            "\\.git$"
            ""
            (replace-regexp-in-string "\\(.*\\):" "" full-remote)))
-         (branch-name
-          (geo/trim
-           (shell-command-to-string "git branch --show-current")))
-         (relative-filename
-          (file-relative-name filename (projectile-project-root)))
+         (branch-name (geo/git-current-branch-name))
+         (relative-filename (geo/project-relative-filename
+                             (buffer-file-name)))
          (github-url (format "https://github.com/%s/blob/%s/%s%s"
                              org-and-repo
                              branch-name
