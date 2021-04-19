@@ -1497,6 +1497,7 @@ to start writing small utilities that I could use in my own functions.
 A number of commands, in the =geo/git-= namespace, that can simplify
 the usage of =git= interactively or in other functions/commands.
 
+**** Run a git command
 #+begin_src emacs-lisp
 (defun geo/git-run-command (command &optional show-message)
   "Run a git command from the current shell location.
@@ -1514,6 +1515,7 @@ equal 'branch --show-current'."
     git-result))
 #+end_src
 
+**** Get the current git branch name
 #+begin_src emacs-lisp
 (defun geo/git-current-branch-name ()
   "Return the visited file's git branch name."
@@ -1522,6 +1524,80 @@ equal 'branch --show-current'."
          (geo/git-run-command "branch --show-current"
                               (called-interactively-p 'interactive))))
     current-branch-name))
+#+end_src
+
+**** List the local git branch names
+#+begin_src emacs-lisp
+(defun geo/git-list-branches ()
+  "Return the list of branches in the current repo."
+  (interactive)
+  ;; git for-each-ref --format='%(refname:short)' refs/heads/
+  (let ((branches (geo/git-run-command
+                   "for-each-ref --format='%(refname:short)' refs/heads/"
+                   (called-interactively-p 'interactive))))
+    branches))
+#+end_src
+
+**** Open a PR for a local git branch on Github
+#+begin_src emacs-lisp
+(defun geo/github-open-pr-from-branch ()
+  (interactive)
+  (let* ((branch-name (completing-read
+                       "Branch to merge: "
+                       (split-string (geo/git-list-branches))
+                       nil ;; predicate
+                       t   ;; require-match
+                       nil ;; initial
+                       nil ;; history
+                       (geo/git-current-branch-name)))
+         (full-remote
+          (geo/git-run-command "remote get-url origin"))
+         (org-and-repo
+          (replace-regexp-in-string
+           "\\.git$"
+           ""
+           (replace-regexp-in-string "\\(.*\\):" "" full-remote)))
+         (github-url (format "https://github.com/%s/compare/%s?expand=1"
+                             org-and-repo
+                             branch-name)))
+    (browse-url github-url)))
+#+end_src
+
+**** Open the current file in Github
+#+begin_src emacs-lisp
+(defun geo/github-open-in-github ()
+  "open the current buffer's file on github; copy the url to the clipboard.
+
+the current line will be selected on github. if a region is selected
+in the buffer, then that region will also be selected/highlighted
+on github."
+  (interactive)
+  (let* ((linenum-string (if (use-region-p)
+                             (format "#l%s-l%s"
+                                     (line-number-at-pos (region-beginning) t)
+                                     (line-number-at-pos (region-end) t))
+                           (format "#l%s" (line-number-at-pos nil t))))
+         (filename (buffer-file-name))
+         (full-remote
+          (geo/git-run-command "remote get-url origin"))
+         (org-and-repo
+          (replace-regexp-in-string
+           "\\.git$"
+           ""
+           (replace-regexp-in-string "\\(.*\\):" "" full-remote)))
+         (branch-name (geo/git-current-branch-name))
+         (relative-filename (geo/project-relative-filename
+                             (buffer-file-name)))
+         (github-url (format "https://github.com/%s/blob/%s/%s%s"
+                             org-and-repo
+                             branch-name
+                             relative-filename
+                             linenum-string)))
+    (if (eq system-type 'darwin)
+        (shell-command
+         (concat "echo " "\"" github-url "\"" " | " "/usr/bin/pbcopy")))
+    (browse-url github-url)
+    (message "opened %s" github-url)))
 #+end_src
 
 *** Project-related
@@ -1616,47 +1692,6 @@ keybinding, but I would like upgrade the search function to use
 
 #+begin_src emacs-lisp
   (define-key evil-normal-state-map (kbd "/") 'swiper)
-#+end_src
-
-*** Open the current file in Github
-When I'm working on a file or looking something up, it is sometimes
-helpful to open the file in Github in the browser. That makes it
-easily linkable.
-
-#+begin_src emacs-lisp
-(defun geo/github-open-in-github ()
-  "Open the current buffer's file on Github; copy the URL to the clipboard.
-
-The current line will be selected on Github. If a region is selected
-in the buffer, then that region will also be selected/highlighted
-on Github."
-  (interactive)
-  (let* ((linenum-string (if (use-region-p)
-                             (format "#L%s-L%s"
-                                     (line-number-at-pos (region-beginning) t)
-                                     (line-number-at-pos (region-end) t))
-                           (format "#L%s" (line-number-at-pos nil t))))
-         (filename (buffer-file-name))
-         (full-remote
-          (geo/git-run-command "remote get-url origin"))
-         (org-and-repo
-          (replace-regexp-in-string
-           "\\.git$"
-           ""
-           (replace-regexp-in-string "\\(.*\\):" "" full-remote)))
-         (branch-name (geo/git-current-branch-name))
-         (relative-filename (geo/project-relative-filename
-                             (buffer-file-name)))
-         (github-url (format "https://github.com/%s/blob/%s/%s%s"
-                             org-and-repo
-                             branch-name
-                             relative-filename
-                             linenum-string)))
-    (if (eq system-type 'darwin)
-        (shell-command
-         (concat "echo " "\"" github-url "\"" " | " "/usr/bin/pbcopy")))
-    (browse-url github-url)
-    (message "opened %s" github-url)))
 #+end_src
 
 ** Hydra menus
@@ -1874,11 +1909,12 @@ T - tag prefix
 Some functions that make working with github a little easier.
 
 #+begin_src emacs-lisp
-  (pretty-hydra-define geo/hydra-github-menu (:quit-key "q")
-    ("Github"
-     (("o" geo/github-open-in-github "Open file on Github")
-      )
-     ))
+(pretty-hydra-define geo/hydra-github-menu (:quit-key "q")
+  ("Github"
+   (("o" geo/github-open-in-github "Open file on Github")
+    ("p" geo/github-open-pr-from-branch "Open PR from brach")
+    )
+   ))
 #+end_src
 
 *** Main
