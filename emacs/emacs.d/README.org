@@ -1624,7 +1624,7 @@ helpful to open the file in Github in the browser. That makes it
 easily linkable.
 
 #+begin_src emacs-lisp
-(defun geo/open-in-github ()
+(defun geo/github-open-in-github ()
   "Open the current buffer's file on Github; copy the URL to the clipboard.
 
 The current line will be selected on Github. If a region is selected
@@ -1876,7 +1876,7 @@ Some functions that make working with github a little easier.
 #+begin_src emacs-lisp
   (pretty-hydra-define geo/hydra-github-menu (:quit-key "q")
     ("Github"
-     (("o" geo/open-in-github "Open file on Github")
+     (("o" geo/github-open-in-github "Open file on Github")
       )
      ))
 #+end_src
