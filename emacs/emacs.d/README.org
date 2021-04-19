@@ -596,6 +596,18 @@ To get the async execution, add the ~:async~ keyword to a code block.
 #+begin_src emacs-lisp
   (use-package ob-async :straight t)
 #+end_src
+
+*** Reduce indentation in source blocks to 0
+By default, source blocks in org-mode have an indentation of 2. While
+this is typically fine for most languages, I find it annoying when
+writing my own Emacs Lisp because it also wants to indent the
+documentation strings, which shouldn't be indented after the initial
+first line. So instead, reduce it to 0 spaces.
+
+#+begin_src emacs-lisp
+(setq org-edit-src-content-indentation 0)
+#+end_src
+
 ** Ruby
 *** Ruby mode
 By default, a magic comment is inserted at the top of any file that
