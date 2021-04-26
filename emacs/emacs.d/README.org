@@ -107,7 +107,6 @@ issue.
       (exec-path-from-shell-initialize)))
 #+end_src
 
-
 * Emacs general system settings
 
 Configurations around Emacs itself (i.e. not from a package).
@@ -531,7 +530,6 @@ Keybindings are in the personal keybindings section.
     (popper-mode +1))
 #+end_src
 
-
 * Modes
 
 ** Evil
@@ -867,7 +865,6 @@ files.
   (use-package docker-compose-mode
     :straight t)
 #+end_src
-
 
 * Editing
 
@@ -1421,7 +1418,6 @@ Quick usage tips:
     (global-evil-vimish-fold-mode))
 #+end_src
 
-
 * General packages
 
 Things that I couldn't think of a better top-level heading for.
@@ -1615,7 +1611,6 @@ I've heard that *vterm* is the bee's knees.
     (setq vterm-always-compile-module t))
 #+end_src
 
-
 * Personal functions and keybindings
 Make it mine. You can find a list of all personal keybindings
 with ~describe-personal-keybindings~.
@@ -1669,7 +1664,6 @@ equal 'branch --show-current'."
 (defun geo/git-list-branches ()
   "Return the list of branches in the current repo."
   (interactive)
-  ;; git for-each-ref --format='%(refname:short)' refs/heads/
   (let ((branches (geo/git-run-command
                    "for-each-ref --format='%(refname:short)' refs/heads/"
                    (called-interactively-p 'interactive))))
@@ -2085,7 +2079,6 @@ forget what to call or what keys to press. This helps immensely.
   (define-key evil-normal-state-map (kbd "<SPC>") 'geo/hydra-top-menu/body)
 #+end_src
 
-
 * Things to check out and eventually add
 
 ** Tabs
@@ -2164,7 +2157,6 @@ I can't think of categories for these.
   customizable fashion. Essentially allows you to use emacs in other
   apps like web browser text fields.
 
-
 * References
 
 Helpful things I've found while researching configs.
@@ -2172,7 +2164,6 @@ Helpful things I've found while researching configs.
 - [[https://github.com/emacs-tw/awesome-emacs][Awesome Emacs]] - categorized packages
 
 - https://jamiecollinson.com/blog/my-emacs-config/
-
 
 * Disabled packages
 :PROPERTIES:
@@ -2276,7 +2267,6 @@ might re-enable it at some point.
     :after magit
     )
 #+end_src
-
 
 * Local variables
 # Local Variables:
