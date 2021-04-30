@@ -76,10 +76,15 @@ Before we're done with the config though, we need to put it back down.
 #+END_SRC
 
 *** Always install a package if it's not available
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
   (require 'use-package-ensure)
   (setq use-package-always-ensure t)
 #+END_SRC
+
+*** Use =straight= unless otherwise specified
+#+begin_src emacs-lisp
+(setq straight-use-package-by-default t)
+#+end_src
 
 ** Make sure $PATH is correct
 
@@ -2076,7 +2081,7 @@ forget what to call or what keys to press. This helps immensely.
        (("," geo/hydra-prefs-menu/body "Preferences"))))
 
   (define-key evil-normal-state-map (kbd "<SPC>") 'geo/hydra-top-menu/body)
-  (define-key evil-normal-state-map (kbd "<SPC>") 'geo/hydra-top-menu/body)
+  (define-key evil-visual-state-map (kbd "<SPC>") 'geo/hydra-top-menu/body)
 #+end_src
 
 * Things to check out and eventually add
