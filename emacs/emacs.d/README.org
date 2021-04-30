@@ -264,6 +264,15 @@ A value of =0= means it'll blink forever.
   (setq blink-cursor-blinks 0)
 #+end_src
 
+** Don't display load average when display time
+In the modeline, you can display the current time. However, it also,
+by default, displays the current load average. I don't want that on
+the modeline, so disable it.
+
+#+begin_src emacs-lisp
+(setq display-time-default-load-average nil)
+#+end_src
+
 * UI
 
 ** Themes
@@ -1929,27 +1938,28 @@ the ability to toggle them.
 #+end_src
 
 #+begin_src emacs-lisp
-  (pretty-hydra-define geo/hydra-prefs-menu (:quit-key "q")
-    ("Display"
-     (("n" linum-mode "line number" :toggle t)
-      ("w" whitespace-mode "whitespace" :toggle t)
-      ("h" global-hl-line-mode "highlight line" :toggle t)
-      ("H" highlight-indent-guides-mode "highlight indents" :toggle t)
-      ("+" default-text-scale-increase "increase font size")
-      ("-" default-text-scale-decrease "decrease font size"))
-     ""
-     (("d" diff-hl-mode "diff-hl" :toggle t)
-      ("c" global-display-fill-column-indicator-mode "show fill column" :toggle t)
-      (")" geo/toggle-show-paren-style "show-paren style"))
-     "Editing"
-     (("p" electric-pair-mode "electric-pair" :toggle t)
-      ("f" auto-fill-mode "auto-fill"))
-     "Modeline"
-     (("m c" column-number-mode "column number" :toggle t)
-      ("m l" line-number-mode "line number" :toggle t)
-      ("m w" geo/doom-modeline-toggle-word-count "word count" :toggle doom-modeline-enable-word-count)
-      ("m p" geo/persp-mode-toggle-modestring "perspective list" :toggle persp-show-modestring))
-     ))
+(pretty-hydra-define geo/hydra-prefs-menu (:quit-key "q")
+  ("Display"
+   (("n" linum-mode "line number" :toggle t)
+    ("w" whitespace-mode "whitespace" :toggle t)
+    ("h" global-hl-line-mode "highlight line" :toggle t)
+    ("H" highlight-indent-guides-mode "highlight indents" :toggle t)
+    ("+" default-text-scale-increase "increase font size")
+    ("-" default-text-scale-decrease "decrease font size"))
+   ""
+   (("d" diff-hl-mode "diff-hl" :toggle t)
+    ("c" global-display-fill-column-indicator-mode "show fill column" :toggle t)
+    (")" geo/toggle-show-paren-style "show-paren style"))
+   "Editing"
+   (("p" electric-pair-mode "electric-pair" :toggle t)
+    ("f" auto-fill-mode "auto-fill"))
+   "Modeline"
+   (("m c" column-number-mode "column number" :toggle t)
+    ("m l" line-number-mode "line number" :toggle t)
+    ("m w" geo/doom-modeline-toggle-word-count "word count" :toggle doom-modeline-enable-word-count)
+    ("m p" geo/persp-mode-toggle-modestring "perspective list" :toggle persp-show-modestring)
+    ("m t" display-time-mode "display time" :toggle t))
+   ))
 #+end_src
 
 *** Projectile
