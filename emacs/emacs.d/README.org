@@ -1684,6 +1684,19 @@ equal 'branch --show-current'."
     branches))
 #+end_src
 
+**** Get the org and repo name of the remote
+#+begin_src emacs-lisp
+(defun geo/git-org-and-repo-name ()
+  "Returns the organization and repo name from remote."
+  (interactive)
+  (let ((full-remote
+         (geo/git-run-command "remote get-url origin")))
+    (message (replace-regexp-in-string
+     "\\.git$"
+     ""
+     (replace-regexp-in-string "\\(.*\\):" "" full-remote)))))
+#+end_src
+
 **** Open a PR for a local git branch on Github
 #+begin_src emacs-lisp
 (defun geo/github-open-pr-from-branch ()
@@ -1696,15 +1709,8 @@ equal 'branch --show-current'."
                        nil ;; initial
                        nil ;; history
                        (geo/git-current-branch-name)))
-         (full-remote
-          (geo/git-run-command "remote get-url origin"))
-         (org-and-repo
-          (replace-regexp-in-string
-           "\\.git$"
-           ""
-           (replace-regexp-in-string "\\(.*\\):" "" full-remote)))
          (github-url (format "https://github.com/%s/compare/%s?expand=1"
-                             org-and-repo
+                             (geo/git-org-and-repo-name)
                              branch-name)))
     (browse-url github-url)))
 #+end_src
@@ -1712,31 +1718,22 @@ equal 'branch --show-current'."
 **** Open the current file in Github
 #+begin_src emacs-lisp
 (defun geo/github-open-in-github ()
-  "open the current buffer's file on github; copy the url to the clipboard.
+  "Open the current buffer's file on github; copy the url to the clipboard.
 
-the current line will be selected on github. if a region is selected
+The current line will be selected on github. If a region is selected
 in the buffer, then that region will also be selected/highlighted
 on github."
   (interactive)
   (let* ((linenum-string (if (use-region-p)
-                             (format "#l%s-l%s"
+                             (format "#L%s-L%s"
                                      (line-number-at-pos (region-beginning) t)
                                      (line-number-at-pos (region-end) t))
-                           (format "#l%s" (line-number-at-pos nil t))))
-         (filename (buffer-file-name))
-         (full-remote
-          (geo/git-run-command "remote get-url origin"))
-         (org-and-repo
-          (replace-regexp-in-string
-           "\\.git$"
-           ""
-           (replace-regexp-in-string "\\(.*\\):" "" full-remote)))
-         (branch-name (geo/git-current-branch-name))
+                           (format "#L%s" (line-number-at-pos nil t))))
          (relative-filename (geo/project-relative-filename
                              (buffer-file-name)))
          (github-url (format "https://github.com/%s/blob/%s/%s%s"
-                             org-and-repo
-                             branch-name
+                             (geo/git-org-and-repo-name)
+                             (geo/git-current-branch-name)
                              relative-filename
                              linenum-string)))
     (if (eq system-type 'darwin)
