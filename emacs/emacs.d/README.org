@@ -1552,14 +1552,22 @@ prescient-filter-method.
 - [[https://github.com/raxod502/prescient.el][Github]]
 
 #+BEGIN_SRC emacs-lisp
-  (use-package prescient :straight t)
-  (use-package ivy-prescient
-    :straight t
-    :after (ivy counsel prescient)
-    :config
-    (ivy-prescient-mode t)
-    ;; describe-variable prescient-filter-method for docs
-    (setq prescient-filter-method '(literal regexp initialism)))
+(use-package prescient
+  :config
+  ;; save usage stats between sessions
+  (prescient-persist-mode t)
+  ;; describe-variable prescient-filter-method for docs
+  (setq prescient-filter-method '(literal regexp initialism)))
+
+(use-package ivy-prescient
+  :after (ivy counsel prescient)
+  :config
+  (ivy-prescient-mode t))
+
+(use-package company-prescient
+  :after (prescient)
+  :config
+  (company-prescient-mode t))
 #+END_SRC
 
 *** Replace M-x with Amx
