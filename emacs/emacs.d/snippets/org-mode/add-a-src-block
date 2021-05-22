@@ -1,0 +1,7 @@
+# key: <s
+# name: add a src block
+# expand-env: ((yas-indent-line 'fixed))
+# --
+#+begin_src ${1:emacs-lisp}
+  $0
+#+end_src

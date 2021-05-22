@@ -1,0 +1,12 @@
+# key: <h
+# name: http-code-block
+# expand-env: ((yas-indent-line 'fixed))
+# --
+#+begin_src http $1
+  ${2:GET} ${3:http://localhost}
+  Content-Type: application/json
+
+  ${4:{
+    $0
+  }}
+#+end_src

@@ -1,0 +1,2144 @@
+#+TITLE: Geo's emacs config
+#+AUTHOR: Geoffrey Lessel
+
+* Startup
+
+Things that need to happen right away.
+
+** Increase garbage collector threshold
+The default is 800kB and increasing it will speed up startup time.
+Before we're done with the config though, we need to put it back down.
+
+#+BEGIN_SRC emacs-lisp
+  (setq gc-cons-threshold 10000000)
+    ;; restore after startup
+    (add-hook 'after-init-hook
+      (lambda ()
+        (setq gc-cons-threshold 1000000)
+          (message "gc-cons-threshold restored to %S" gc-cons-threshold)))
+#+END_SRC
+
+** Bootstrap =straight= package manager
+#+BEGIN_SRC emacs-lisp
+  (defvar bootstrap-version)
+  (let
+      ((bootstrap-file
+        (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+       (bootstrap-version 5))
+    (unless
+        (file-exists-p bootstrap-file)
+      (with-current-buffer
+          (url-retrieve-synchronously
+           "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+           'silent 'inhibit-cookies)
+        (goto-char
+         (point-max))
+        (eval-print-last-sexp)))
+    (load bootstrap-file nil 'nomessage))
+#+END_SRC
+
+** Set preferred package repos
+#+begin_src emacs-lisp
+(setq package-archives '(("melpa" . "https://melpa.org/packages/")
+                         ("melpa-stable" . "https://stable.melpa.org/packages/")
+                         ("org" . "https://orgmode.org/elpa/")
+                         ("elpa" . "https://elpa.gnu.org/packages/")))
+#+end_src
+** =use-package=
+#+BEGIN_SRC emacs-lisp
+  (straight-use-package 'use-package)
+#+END_SRC
+
+*** Syntax example
+#+BEGIN_SRC emacs-lisp :tangle no
+  (use-package package-name      ; use the package package-name
+    :straight t                  ; use straight to manage it
+    :init                        ; execute code BEFORE package load
+    (setq foo-variable t)
+    :config                      ; execute code AFTER package load
+    (foo-mode 1)
+  )
+#+END_SRC
+
+*** Always install a package if it's not available
+#+BEGIN_SRC emacs-lisp
+  (require 'use-package-ensure)
+  (setq use-package-always-ensure t)
+#+END_SRC
+
+** Make sure $PATH is correct
+
+There are some packages that query and use the $PATH variable. This
+can be a problem on the Mac since GUI Emacs does not inherit the
+environment variables. =exec-path-from-shell= works around this
+issue.
+
+[[https://github.com/purcell/exec-path-from-shell][Github]]
+
+#+begin_src emacs-lisp
+  (use-package exec-path-from-shell
+    :straight t
+    :custom
+    ;; bring in env vars that rspec-mode needs to run tests correctly
+    ;; in pco-box
+    (exec-path-from-shell-variables
+     '("PATH"
+       "MANPATH"
+       "MYSQL_PORT_3306_TCP_ADDR"
+       "MYSQL_READER_PORT_3306_TCP_ADDR"
+       "MYSQL_READER_PORT_3306_TCP_PORT"))
+    :config
+    (when (memq window-system '(mac ns x))
+      (exec-path-from-shell-initialize)))
+#+end_src
+
+
+* Emacs general system settings
+
+Configurations around Emacs itself (i.e. not from a package).
+
+** Don't show startup message
+#+BEGIN_SRC emacs-lisp
+  (setq inhibit-startup-message t)
+#+END_SRC
+
+** Specify backup directory
+ #+BEGIN_SRC emacs-lisp
+   (setq backup-directory-alist
+     '(("." . "~/.emacs-backups"))
+     backup-by-copying t   ; don't delink hardlinks
+     version-control t     ; use version numbers on backups
+     delete-old-versions t ; automatically delete excess backups
+     kept-new-versions 20  ; how many of the newest versions to keep
+     kept-old-versions 5   ; how many of the old versions to keep
+     )
+ #+END_SRC
+
+** Use a custom location for "customize" settings
+
+#+BEGIN_SRC emacs-lisp
+  (setq custom-file "~/.emacs.d/custom.el")
+  (load custom-file)
+#+END_SRC
+
+** Hide the toolbar
+#+BEGIN_SRC emacs-lisp
+  (tool-bar-mode -1)
+#+END_SRC
+
+** Hide the menu bar
+
+#+BEGIN_SRC emacs-lisp
+  (menu-bar-mode -1)
+#+END_SRC
+
+** Hide the scroll bar
+
+#+BEGIN_SRC emacs-lisp
+  (scroll-bar-mode -1)
+#+END_SRC
+
+** Show the fill-line column indicator
+
+Set the column to show it at with =set-fill-column=.
+
+#+begin_src emacs-lisp
+  (setq global-display-fill-column-indicator-mode t)
+#+end_src
+
+** Show the matching parens
+
+#+BEGIN_SRC emacs-lisp
+  (show-paren-mode 1)
+#+END_SRC
+
+If the matching paren isn't visible, highlight the entire expression.
+
+#+begin_src emacs-lisp
+  (setq show-paren-style "mixed")
+#+end_src
+
+** Set the default tab width
+
+#+BEGIN_SRC emacs-lisp
+  (setq-default tab-width 2)
+#+END_SRC
+
+** Always use spaces for tabs
+
+#+BEGIN_SRC emacs-lisp
+  (setq-default indent-tabs-mode nil)
+#+END_SRC
+
+** Turn off the error bell
+
+#+BEGIN_SRC emacs-lisp
+  (setq ring-bell-function 'ignore)
+#+END_SRC
+
+** Make the yes/no prompts accept y/n
+
+#+BEGIN_SRC emacs-lisp
+  (defalias 'yes-or-no-p 'y-or-n-p)
+#+END_SRC
+
+** Always delete trailing whitespace
+
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'before-save-hook 'delete-trailing-whitespace)
+#+END_SRC
+
+** Turn on the row and column display in the modeline
+
+Sometimes errors report the column as well as the line. So let's
+view the column number we are on with the row!
+
+#+begin_src emacs-lisp
+  (line-number-mode t)
+  (column-number-mode t)
+#+end_src
+
+** Highlight the current line
+
+I like to know where I am.
+
+#+begin_src emacs-lisp
+  (global-hl-line-mode t)
+#+end_src
+
+** Set the authinfo file
+This file contains authentication information for packages
+(specifically magit forge).
+
+#+begin_src emacs-lisp
+  (setq auth-sources '("~/.emacs.d/authinfo.gpg"))
+#+end_src
+
+** Blink the cursor forever
+I like the look of the blink cursor. It invites me to put something on
+the page. Also, sometimes I am thinking about something then want to
+come back and forget where I am in the editor. A constantly-blinking
+cursor helps me find my place again.
+
+A value of =0= means it'll blink forever.
+
+#+begin_src emacs-lisp
+  (setq blink-cursor-blinks 0)
+#+end_src
+
+* UI
+
+** Themes
+Doom emacs has some great themes. Let's use them!
+
+#+BEGIN_SRC emacs-lisp
+  (use-package doom-themes
+    :straight t)
+#+END_SRC
+
+I love the monokai theme and would like to use it. Bring it in.
+
+#+begin_src emacs-lisp
+  (use-package monokai-theme
+    :straight t)
+#+end_src
+
+Other cool theme packages I've found.
+
+#+begin_src emacs-lisp
+  (use-package tron-legacy-theme
+    :straight t
+    :config
+    (setq tron-legacy-theme-vidid-cursor t))
+
+  (use-package kaolin-themes
+    :straight t)
+
+  (use-package modus-themes
+    :straight t
+    :init
+    (modus-themes-load-themes))
+#+end_src
+
+Here is the theme to load for this session.
+
+#+BEGIN_SRC emacs-lisp
+  (load-theme 'doom-dark+ t) ; t treats it as safe
+#+END_SRC
+
+A good source of themes with previews is [[https://peach-melpa.org/][peach-melpa.org]].
+
+** Font
+
+When you have the best font, use the best font.
+
+#+BEGIN_SRC emacs-lisp
+  (set-frame-font "PragmataPro Liga-14" nil t)
+#+END_SRC
+
+Turn on ligature support in the emacs-mac build.
+
+#+BEGIN_SRC emacs-lisp
+  (mac-auto-operator-composition-mode t)
+#+END_SRC
+
+By default Emacs scales fonts with =text-scale-increase= and
+=text-scale-decrease= per buffer. I'd rather have every buffer
+scaled at the same time. =default-text-scale= provides
+this. According to the docs, "it is like an Emacs-wide version of
+=text-scale-mode=.
+
+[[https://github.com/purcell/default-text-scale][Github]]
+
+#+begin_src emacs-lisp
+  (use-package default-text-scale
+    :straight t)
+#+end_src
+
+** Modeline
+
+Doom emacs also provides a pretty slick mode line. Let's use that, too.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package doom-modeline
+    :straight t
+    :hook
+    (after-init . doom-modeline-mode)
+    :config
+                                          ; use unicode as a fallback (instead of ASCII) when not using icons
+    (setq doom-modeline-unicode-fallback t)
+
+                                          ; don't display the buffer encoding
+    (setq doom-modeline-buffer-encoding nil)
+
+    ;; Determines the style used by `doom-modeline-buffer-file-name'.
+    ;; Given ~/Projects/FOSS/emacs/lisp/comint.el
+    ;;   auto => emacs/lisp/comint.el (in a project) or comint.el
+    ;;   truncate-upto-project => ~/P/F/emacs/lisp/comint.el
+    ;;   truncate-from-project => ~/Projects/FOSS/emacs/l/comint.el
+    ;;   truncate-with-project => emacs/l/comint.el
+    ;;   truncate-except-project => ~/P/F/emacs/l/comint.el
+    ;;   truncate-upto-root => ~/P/F/e/lisp/comint.el
+    ;;   truncate-all => ~/P/F/e/l/comint.el
+    ;;   truncate-nil => ~/Projects/FOSS/emacs/lisp/comint.el
+    ;;   relative-from-project => emacs/lisp/comint.el
+    ;;   relative-to-project => lisp/comint.el
+    ;;   file-name => comint.el
+    ;;   buffer-name => comint.el<2> (uniquify buffer name)
+    ;;
+    ;; If you are experiencing the laggy issue, especially while editing remote files
+    ;; with tramp, please try `file-name' style.
+    ;; Please refer to https://github.com/bbatsov/projectile/issues/657.
+    (setq doom-modeline-buffer-file-name-style 'truncate-with-project)
+    )
+#+END_SRC
+
+** Dashboard
+
+Doom emacs has a great startup dashboard. Let's use it!
+
+#+BEGIN_SRC emacs-lisp
+  (use-package dashboard
+    :straight t
+    :config
+    (dashboard-setup-startup-hook)
+    ; set the title
+    (setq dashboard-banner-logo-title "Greetings Geo. Shall we play a game?")
+    ; set the banner
+    (setq dashboard-startup-banner 'logo)
+    ; set the sections I'd like displayed and how many of each
+    (setq dashboard-items '((recents . 5) (projects . 5)))
+    ; center it all
+    (setq dashboard-center-content t)
+    ; don't show shortcut keys
+    (setq dashboard-show-shortcuts nil)
+    ; use nice icons for the files
+    (setq dashboard-set-file-icons t)
+    ; use nice section icons
+    (setq dashboard-set-heading-icons t)
+    ; disable the snarky footer
+    (setq dashboard-set-footer nil))
+#+END_SRC
+
+** Visualizations
+*** Display a visual hint when editing with *evil-goggles*.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package evil-goggles
+    :straight t
+    :after (evil)
+    :config
+    (evil-goggles-mode)
+    )
+#+END_SRC
+
+*** Show indentation guides
+
+It is sometimes helpful to visualize how many indents you are
+currently in while editing. *highlight-indent-guides* will put a
+subtle line every indentation to give you a hint as to where you
+are.
+
+I don't want this on by default, but it should be available as a
+toggle in my preferences hydra.
+
+- [[https://github.com/DarthFennec/highlight-indent-guides][Github]]
+
+Alternatives (taken from the =highlight-indent-guides= Github:
+
+| Name                    | Widths  | Hard tabs | Other notes          |
+|-------------------------+---------+-----------+----------------------|
+| [[https://github.com/antonj/Highlight-Indentation-for-Emacs][highlight-indentation]]   | Fixed   | No        | Very popular         |
+| [[https://github.com/zk-phi/indent-guide][indent-guide]]            | Dynamic | Yes       | Fairly slow, jittery |
+| [[https://github.com/ikirill/hl-indent][hl-indent]]               | Dynamic | No        | Slow for large files |
+| [[https://github.com/skeeto/visual-indentation-mode][visual-indentation-mode]] | Fixed   | No        | Fast and slim        |
+
+#+begin_src emacs-lisp
+  (use-package highlight-indent-guides
+    :straight t
+    :init
+    ;; I would much prefer to use 'character as the method, but
+    ;; it appears it has some performance hits when doing so
+    (setq highlight-indent-guides-method 'column
+          highlight-indent-guides-responsive 'stack))
+#+end_src
+*** Show rainbow delimeter colors for parens
+
+#+begin_src emacs-lisp
+  (use-package rainbow-delimiters
+    :straight t
+    :config
+    (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
+    )
+#+end_src
+
+** Workspaces
+
+I can use this to work in one project in one perspective/workspace
+and others kept open in other perspectives. After some looking and
+reading, I've decided on `perspective`.
+
+- [[https://github.com/nex3/perspective-el][Github]]
+
+Some alternatives I considered:
+
+- [[https://github.com/Bad-ptr/persp-mode.el][persp-mode]] - a fork of =perspective= and used by Doom Emacs. It is
+  possible it will be merged with =perspective= at some point. After
+  trying to get keybinding working and failing after a while, I gave up
+  on it and preferred =perspective= for its more informative README.
+- [[https://github.com/wasamasa/eyebrowse][eyebrowse]] - supports window layounts but no buffer lists. After I gave
+  up on =persp-mode= this was initially my preference.
+
+ #+begin_src emacs-lisp
+   (use-package perspective
+     :straight t
+     :config
+     (persp-mode)
+     ; sort perspectives by most recently accessed (others: 'name, 'created)
+     (setq persp-sort 'access)
+     )
+ #+end_src
+
+** Buffer/Popup Placement
+I want more control over how and where new buffers are displayed in my
+frame.
+
+*** popper
+Defines specific buffers to consider popups. A popup can then be
+stashed away or converted into a more first-class buffer as needed.
+
+Keybindings are in the personal keybindings section.
+
+[[https://github.com/karthink/popper][Github]]
+
+#+begin_src emacs-lisp
+  (use-package popper
+    :straight t
+    :init
+    ;; define which buffers I want to consider pop-ups
+    (setq popper-reference-buffers
+          '("\\*Messages\\*"
+            "\\*rspec-compilation\\*"
+            "\\*Org-Babel error output\\*"
+            ))
+    :config
+    (popper-mode +1))
+#+end_src
+
+
+* Modes
+
+** Evil
+
+Make it like vim!
+
+#+BEGIN_SRC emacs-lisp
+  (use-package evil
+    :straight t
+    ; :after (evil-leader) ; must be after to get leader available in initial buffers
+    :init
+    (setq evil-want-integration t)
+    (setq evil-want-keybinding nil)
+    (setq evil-want-C-u-scroll t) ; use Ctrl-U to scroll up
+    :config
+    ; use evil-mode everywhere
+    (evil-mode 1)
+    ; use C-g to exit insert mode reinforcing Emacs-ism
+    (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state))
+#+END_SRC
+
+
+*** Extra keybindings
+A collection of Evil bindings for the parts of Emacs that Evil does not
+cover properly by default, such as help-mode, M-x calendar, Eshell and more.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package evil-collection
+    :straight t
+    ; :after (evil evil-leader)
+    :init
+    (setq evil-want-keybinding nil)
+    :config
+    (evil-collection-init))
+#+END_SRC
+
+** YAML
+
+#+begin_src emacs-lisp
+  (use-package yaml-mode
+    :straight t
+    :config
+    (add-to-list 'auto-mode-alist '("\\.ya?ml$" . yaml-mode))
+    )
+#+end_src
+
+** Org
+
+Some little things to make =org-mode= better.
+
+*** Show bullets as utf-8 characters
+
+I've also customized which characters the bullets are.
+
+[[https://github.com/sabof/org-bullets][Github]]
+
+#+begin_src emacs-lisp
+  (use-package org-bullets
+    :straight t
+    :hook (org-mode . org-bullets-mode)
+    :custom
+    (org-bullets-bullet-list '("⦿" "○" "●" "○" "●" "○" "●")))
+#+end_src
+
+*** Change the default ellipsis on collapsed headings
+
+#+begin_src emacs-lisp
+  (setq org-ellipsis " ⏷")
+#+end_src
+
+*** Keep indentation consistent visually
+
+This won't chang the underyling text file, but I don't think I care
+too much about that. I only care that the resulting view in my editor
+is nicely indented without me having to think too much about it.
+
+#+begin_src emacs-lisp
+  (add-hook 'org-mode-hook 'org-indent-mode)
+#+end_src
+
+*** Enable auto-fill-mode by default
+Usually when I'm entering into an org-mode buffer, I'm going to be
+doing some writing. And when I'm doing some writing, I prefer to have
+=auto-fill-mode= on. So turn it on by default!
+
+#+begin_src emacs-lisp
+  (add-hook 'org-mode-hook 'auto-fill-mode)
+#+end_src
+
+*** http requests
+Watch [[https://www.youtube.com/watch?v=tGgat6XJ2tk][Using org-mode as a rest client]] as a demo.
+
+[[https://github.com/zweifisch/ob-http]]
+
+The github page above has some pertty good examples, but here are some
+header variables/options you can provide in a request.
+
+| option        | curl           | example                                                                                 |
+|---------------+----------------+-----------------------------------------------------------------------------------------|
+| =:proxy=      | =-x=           | =:proxy localhost:8118=                                                                 |
+| =:noproxy=    | =--noproxy *=  | N/A                                                                                     |
+| =:cookie-jar= | =--cookie-jar= | =:cookie-jar username=                                                                  |
+| =:cookie=     | =--cookie=     | =:cookie username=                                                                      |
+| =:max-time=   | =--max-time=   | default is =10=                                                                         |
+| =:user=       | =--user=       | =:user admin:passwd=                                                                    |
+| =:pretty=     | N/A            | =:pretty= use =Content-Type=, to overwrite =:pretty json=                               |
+| =:select=     | N/A            | =:select path= path will be passed to [[https://stedolan.github.io/jq/][jq]] for json or [[https://github.com/EricChiang/pup][pup]] for html or [[http://xmlstar.sourceforge.net/][xmlstarlet]] for xml |
+| =:get-header= | N/A            | =:get-header X-Subject-Token=                                                           |
+| =:curl=       | N/A            | =:curl --insecure --compressed= additional arguments for curl                           |
+| =:resolve=    | =--resolve=    | =:resolve example.com:80:127.0.0.1,example.com:443:127.0.0.1=                           |
+
+#+begin_src emacs-lisp
+  (use-package ob-http :straight t)
+#+end_src
+
+*** Enable babel modes for languages
+#+begin_src emacs-lisp
+  (org-babel-do-load-languages 'org-babel-load-languages
+                               '((emacs-lisp . t)
+                                 (shell . t)
+                                 (http . t)
+                                 (ruby . t)))
+#+end_src
+
+*** Asynchronous execution of code blocks
+To get the async execution, add the ~:async~ keyword to a code block.
+
+#+begin_src emacs-lisp
+  (use-package ob-async :straight t)
+#+end_src
+
+*** Reduce indentation in source blocks to 0
+By default, source blocks in org-mode have an indentation of 2. While
+this is typically fine for most languages, I find it annoying when
+writing my own Emacs Lisp because it also wants to indent the
+documentation strings, which shouldn't be indented after the initial
+first line. So instead, reduce it to 0 spaces.
+
+#+begin_src emacs-lisp
+(setq org-edit-src-content-indentation 0)
+#+end_src
+
+** Ruby
+*** Ruby mode
+By default, a magic comment is inserted at the top of any file that
+Emacs detects is using utf-8 encoding. Since I'm not the only one
+editing these files, I find it annoying to add this for other people
+to have to ignore. TURN IT OFF.
+
+#+begin_src emacs-lisp
+  (setq ruby-insert-encoding-magic-comment nil)
+#+end_src
+
+*** RSpec mode
+Provides some convenience functions around testing in RSpec.
+
+Some options that may be worth fiddling with in the future:
+
+- To use binding.pry or byebug, install =inf-ruby= and add this to your
+  init file:
+  #+begin_src emacs-lisp :tangle no
+    (add-hook 'after-init-hook 'inf-ruby-switch-setup)
+  #+end_src
+  When you've hit the breakpoint, hit ~C-x C-q~ to enable =inf-ruby=.
+
+- For auto-scrolling, set ~compilation-scroll-output~.
+  #+begin_src emacs-lisp :tangle no
+    (setq compilation-scroll-output t)
+  #+end_src
+
+[[https://github.com/pezra/rspec-mode][Github]]
+
+#+begin_src emacs-lisp
+  (use-package rspec-mode
+    :straight t)
+#+end_src
+** JS
+
+The default for =js-mode= is to indent at 4 spaces. NOPE.
+
+#+begin_src emacs-lisp
+  (setq-default js-indent-level 2)
+#+end_src
+** JSON
+=json-mode= extends the builtin =js-mode= to add better syntax
+highlighting for JSON and some editing keybindings.
+
+[[https://github.com/joshwnj/json-mode]]
+
+Default keybindings:
+
+- ~C-c C-f~: format the region/buffer with =json-reformat=
+  (https://github.com/gongo/json-reformat)
+- ~C-c C-p~: display a path to the object at point with
+  =json-snatcher= (https://github.com/Sterlingg/json-snatcher)
+- ~C-c P~: copy a path to the object at point to the kill ring with
+  =json-snatcher= (https://github.com/Sterlingg/json-snatcher)
+- ~C-c C-t~: Toggle between true and false at point
+- ~C-c C-k~: Replace the sexp at point with null
+- ~C-c C-i~: Increment the number at point
+- ~C-c C-d~: Decrement the number at point
+
+#+begin_src emacs-lisp
+  (use-package json-mode :straight t)
+#+end_src
+
+** RJSX
+
+After some testing, I've found that =rjsx-mode= is better than
+=js-mode= even if only considering syntax highlighting.
+
+By default, =rjsx-mode= has electric-behaviour in that in tries to
+auto-close whatever tags you are opening. I find this entirely
+annoying. Thankfully the docs tell you how to disable it, which
+I've done by redefining keys to ~nil~.
+
+=rjsx-mode= is based off of =js2-mode= which has all sorts of
+warnings and errors that are really annoying since we use
+=flycheck=. I disable all of those as well.
+
+[[https://github.com/felipeochoa/rjsx-mode][Github]]
+
+#+begin_src emacs-lisp
+  (use-package rjsx-mode
+    :straight t
+    :config
+    (with-eval-after-load 'rjsx-mode
+      (define-key rjsx-mode-map "<" nil)
+      (define-key rjsx-mode-map (kbd "C-d") nil)
+      (define-key rjsx-mode-map ">" nil))
+    (js2-mode-hide-warnings-and-errors))
+#+end_src
+
+** Web
+
+#+begin_src emacs-lisp
+  (use-package web-mode
+    :straight t
+    :config
+    (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
+    )
+#+end_src
+
+** Slim
+
+#+begin_src emacs-lisp
+  (use-package slim-mode
+    :straight t)
+#+end_src
+
+** Elixir
+
+#+begin_src emacs-lisp
+  (use-package elixir-mode
+    :straight t
+    )
+#+end_src
+
+** Docker
+*** Dockerfile
+=dockerfile-mode= adds support for syntax highlighting and the ability
+to build the image directly from the buffer.
+
+To build the image from the buffer, use ~C-c C-b~.
+
+#+begin_src emacs-lisp
+  (use-package dockerfile-mode
+    :straight t
+    :config
+    (add-to-list 'auto-mode-alist '("Dockerfile\\'" . dockerfile-mode)))
+#+end_src
+
+*** Docker compose
+=docker-compose-mode= is a major mode for editing docker-compose
+files.
+
+#+begin_src emacs-lisp
+  (use-package docker-compose-mode
+    :straight t)
+#+end_src
+
+
+* Editing
+
+  Things that provide general, non-language specific editing functionality.
+
+** Word boundaries
+When in a programming mode, don't treat the underscore character (~_~)
+as a word boundary.
+
+#+begin_src emacs-lisp
+  (add-hook 'prog-mode-hook
+            (lambda ()
+              (modify-syntax-entry ?_ "w")))
+#+end_src
+** Moving and navigating inside a buffer
+*** evil-easymotion
+With *evil-easymotion* you can invoke =M=, and this plugin will put a
+target character on every possible position. Type the character on the
+target and wham! you have teleported there.
+
+#+BEGIN_SRC emacs-lisp
+(use-package evil-easymotion
+      :straight t
+      :after (evil)
+      :config
+(evilem-default-keybindings "M")
+)
+#+END_SRC
+
+*** evil-snipe
+*=evil-snipe=* emulates =vim-seek= and/or =vim-sneak= in
+=evil-mode=.  It provides 2-character motions for quickly (and
+more accurately) jumping around text, compared to evil's built-in
+f/F/t/T motions, incrementally highlighting candidate targets as
+you type.
+
+#+BEGIN_SRC emacs-lisp
+(use-package evil-snipe
+      :straight t
+      :after (evil)
+      :config
+  (evil-snipe-mode +1)
+  ; binds `s`/`S` (forward/backward)
+  (evil-snipe-override-mode +1)
+  ; binds `f`, `F`, `t`, `T` overrides
+  (setq evil-snipe-scope 'visible)
+  ; highlights all forward matches in visible buffer
+)
+#+END_SRC
+
+** Buffers
+*** Group buffers in ibuffer
+Group buffers in ibuffer list by projectile project with *ibuffer-projectile*.
+
+- [[https://github.com/purcell/ibuffer-projectile][Github]]
+
+#+BEGIN_SRC emacs-lisp
+  (use-package ibuffer-projectile
+    :straight t
+    :config
+    (add-hook 'ibuffer-hook
+      (lambda ()
+        (ibuffer-projectile-set-filter-groups)
+        (unless (eq ibuffer-sorting-mode 'alphabetic)
+          (ibuffer-do-sort-by-alphabetic)))))
+#+END_SRC
+
+*** Kill all other buffers
+Kill other buffers except the current one. Taken from the [[https://www.emacswiki.org/emacs/KillingBuffers#toc2][Emacs Wiki]]
+with modifications from [[https://stackoverflow.com/questions/3417438/close-all-buffers-besides-the-current-one-in-emacs][Stack Overflow]]. The modifications make it so
+that if the buffer is from something other than visiting a file
+(e.g. =*scratch*= or =*Messages*=), it will stick around.
+
+#+begin_src emacs-lisp
+  (defun geo/kill-other-buffers ()
+    "Kill all other buffers."
+    (interactive)
+    (mapc 'kill-buffer
+      (delq (current-buffer)
+            (remove-if-not 'buffer-file-name (buffer-list)))))
+#+end_src
+
+** Window selection
+When there are a lot of windows open in a single frame, sometimes it
+can be quite a few keystrokes to get to the one I want. =winum=
+numbers each window (which with =doom-modeline= shows the number in
+the modeline) and allows me to jump to one directly by number.
+
+The keymap rebindings allow me to use ~M-1~ to select window 1, ~M-2~
+to select window 2, and so on. This overrides the default bindings
+which represent numeric arguments to send to interactive functions.
+
+[[https://github.com/deb0ch/emacs-winum][Github]]
+
+#+begin_src emacs-lisp
+  (use-package winum
+    :straight t
+    :init
+    (setq winum-keymap
+          (let ((map (make-sparse-keymap)))
+            (define-key map (kbd "M-0") 'winum-select-window-0-or-10)
+            (define-key map (kbd "M-1") 'winum-select-window-1)
+            (define-key map (kbd "M-2") 'winum-select-window-2)
+            (define-key map (kbd "M-3") 'winum-select-window-3)
+            (define-key map (kbd "M-4") 'winum-select-window-4)
+            (define-key map (kbd "M-5") 'winum-select-window-5)
+            (define-key map (kbd "M-6") 'winum-select-window-6)
+            (define-key map (kbd "M-7") 'winum-select-window-7)
+            (define-key map (kbd "M-8") 'winum-select-window-8)
+            map))
+    :config
+    (winum-mode))
+#+end_src
+** Projects
+*** Use *projectile* to manage projects.
+
+- [[https://projectile.mx/][Home page]]
+- [[https://docs.projectile.mx/projectile/index.html][Manual]]
+
+#+BEGIN_SRC emacs-lisp
+  (use-package projectile
+    :straight t
+    :bind-keymap
+    ("C-c p" . projectile-command-map)
+    :config
+    (projectile-mode +1))
+#+END_SRC
+
+**** Extra goodies from =counsel-projectile=
+
+[[https://github.com/ericdanan/counsel-projectile][Github]]
+
+#+begin_src emacs-lisp
+  (use-package counsel-projectile
+    :straight t
+    )
+#+end_src
+
+*** Group buffers by project
+
+Sometimes it's helpful to see the buffers open grouped by project.
+We can use *ibuffer-projectile* to do that.
+
+- [[https://github.com/purcell/ibuffer-projectile][Github]]
+
+#+BEGIN_SRC emacs-lisp
+  (use-package ibuffer-projectile
+    :straight t
+    :config
+    (add-hook 'ibuffer-hook
+      (lambda ()
+        (ibuffer-projectile-set-filter-groups)
+        (unless (eq ibuffer-sorting-mode 'alphabetic)
+          (ibuffer-do-sort-by-alphabetic)))))
+#+END_SRC
+
+** Commenting
+
+A Nerd Commenter emulation, help you comment code efficiently. For example,
+you can press =99,ci= to comment out 99 lines.
+
+Examples:
+
+- `,ci` comments the current line
+
+The docs recommend calling ~evilnc-default-hotkeys~ on load to set up
+the keybindings. However, this sets ~C-c p~ which I prefer to save
+for =projectile=.
+
+[[https://github.com/redguardtoo/evil-nerd-commenter][Github]]
+
+#+BEGIN_SRC emacs-lisp
+  (use-package evil-nerd-commenter
+    :straight t
+    :after evil
+    :bind (
+      ("C-c c ;" . evilnc-comment-or-uncomment-lines)
+      ("C-c c l" . evilnc-quick-comment-or-uncomment-to-the-line)
+      ("C-c c p" . evilnc-comment-or-uncomment-paragraphs)))
+#+END_SRC
+
+** Aligning
+
+*=evil-lion=* provides =gl= and =gL= align operators: ~gl MOTION CHAR~
+and right-align ~gL MOTION CHAR~.  Use ~CHAR /~ to enter regular
+expression if a single character wouldn't suffice.  Use ~CHAR RET~ to
+align with align.el's default rules for the active major mode.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package evil-lion
+    :straight t
+    :bind
+    (:map evil-normal-state-map
+          ("g l " . evil-lion-left)
+          ("g L " . evil-lion-right)
+          :map evil-visual-state-map
+          ("g l " . evil-lion-left)
+          ("g L " . evil-lion-right)))
+#+END_SRC
+
+** Change text surrounding selection
+
+*=evil-surround-mode=* emulates surround.vim by Tim Pope.
+Surround.vim is all about "surroundings": parentheses, brackets, quotes, XML tags, and more. The
+plugin provides mappings to easily delete, change and add such surroundings in pairs.
+
+It's easiest to explain with examples.
+
+1. Press ~cs"'~ inside ="Hello world!"= to change it to ='Hello world!'=
+2. Now press ~cs'<q>~ to change it to =<q>Hello world!</q>=
+3. To go full circle, press ~cst"~ to get ="Hello world!"=
+4. To remove the delimiters entirely, press ~ds"~. =Hello world!=
+5. Now with the cursor on ="Hello"=, press ~ysiw]~ (~iw~ is a text object). =[Hello] world!=
+6. Let's make that braces and add some space (use ~}~ instead of ~{~ for no space): ~cs]{~ ={ Hello } world!=
+7. Now wrap the entire line in parentheses with ~yssb~ or ~yss)~. =({ Hello } world!)=
+8. Revert to the original text: ~ds{ds)~ =Hello world!=
+9. Emphasize hello: ~ysiw<em>~ =<em>Hello</em> world!=
+
+#+BEGIN_SRC emacs-lisp
+  (use-package evil-surround
+    :straight t
+    :after evil
+    :config
+    (global-evil-surround-mode 1))
+#+END_SRC
+
+** Version control (git)
+*** The ultimate git experience
+*magit* of course.
+
+- [[https://github.com/magit/magit][Github]]
+- [[https://magit.vc/manual/][Manual]]
+
+#+BEGIN_SRC emacs-lisp
+  (use-package magit
+    :straight t
+    :bind (
+      ("C-c g" . magit-status)))
+#+END_SRC
+
+*** Highlight changed lines
+Highlight changed lines with *diff-hl*. The changes are
+shown via indicators on the fringe but don't refresh/update
+until a save has occurred.
+
+- [[https://github.com/dgutov/diff-hl/][Github]]
+
+#+BEGIN_SRC emacs-lisp
+  (use-package diff-hl
+    :straight t
+    :config
+    (global-diff-hl-mode))
+#+END_SRC
+
+*** View git history and go back in time
+Go back in time in a file with =git-timemachine=. =evil= mode
+doesn't play well with the default keybindings which are just fine,
+so we need to make an override map. I found this out [[http://blog.binchen.org/posts/use-git-timemachine-with-evil.html][in this post]].
+
+Keys:
+- `p` Visit previous historic version
+- `n` Visit next historic version
+- `w` Copy the abbreviated hash of the current historic version
+- `W` Copy the full hash of the current historic version
+- `g` Goto nth revision
+- `t` Goto revision by selected commit message
+- `q` Exit the time machine.
+- `b` Run `magit-blame` on the currently visited revision (if magit available).
+- `c` Show current commit using magit (if magit available).
+
+[[https://github.com/emacsmirror/git-timemachine][Github]]
+
+#+begin_src emacs-lisp
+  (use-package git-timemachine
+    :straight t
+    :config
+    (with-eval-after-load 'git-timemachine
+      (evil-make-overriding-map git-timemachine-mode-map 'normal)
+      ;; force update evil keymaps after git-timemachine-mode is loaded
+      (add-hook 'git-timemachine-mode-hook #'evil-normalize-keymaps)))
+#+end_src
+
+** Undo
+
+Even I make mistakes. Emacs' built-in undo system is pretty powerful
+but a little hard to understand. There are other undo packages that
+dumb it down at the expense of functionality, but *undo-tree* tries
+to make that power come easier, especially with tree visualization.
+
+The documentation for this one (with examples) is in the source code.
+
+- [[https://www.dr-qubit.org/undo-tree.html][Homepage]]
+
+#+BEGIN_SRC emacs-lisp
+  (use-package undo-tree
+    :straight t
+    :config
+    (global-undo-tree-mode)          ; use it everwhere!
+    ;; (setq evil-undo-system 'undo-tree)
+    )
+#+END_SRC
+
+** Snippets
+
+Make repetitive work faster by using snippets! This uses the
+*yasnippet* package. There are libraries out there that contain
+snippets for all sorts of situations (like [[http://github.com/AndreaCrotti/yasnippet-snippets][yasnippet-snippets]], but
+I prefer to make my own when I need them.
+
+- [[https://github.com/joaotavora/yasnippet][Github]]
+
+Stuff I forget and need to be reminded of regularly:
+
+- ~name~ is the description of the snippet
+- ~key~ is the snippet abbreviation
+- ~$1~ is the first tab stop field
+- ~$0~ is the exit point of the snippet
+- ~${1:default}~ sets a default value
+
+#+begin_src emacs-lisp
+  (use-package yasnippet
+    :straight t
+    :config
+    (yas-global-mode 1)
+    )
+#+end_src
+
+** Autoformatting
+
+*** eslintd-fix
+
+Some of the apps I work in have prettier configured through the
+elist configuration. Because of this, and because we run eslint in
+those apps, I have =eslint_d= running when I work on those apps. We
+can utilize that server to make fixes in our javascript files.
+
+[[https://github.com/aaronjensen/eslintd-fix][Github]]
+
+#+begin_src emacs-lisp
+  (defvar geo/eslint_d-exec-path "~/.config/yarn/global/node_modules/.bin")
+
+  (use-package eslintd-fix
+    :straight t
+    :config
+    (add-hook 'js-mode-hook 'eslintd-fix-mode)
+    ; we need the location of eslint_d
+    (add-to-list 'exec-path geo/eslint_d-exec-path))
+#+end_src
+
+*** format-all
+
+Using =format-all=. To manually format the buffer, run
+~format-all-buffer~. To auto-format, use the minor mode
+~format-all-mode~.
+
+Settings:
+
+- Control displaying the formatting errors buffer
+  - ~'always~ - shows errors buffer regardless of errors or
+       warnigns
+  - ~'warnings~ - shows error sbuffer for warnings and errors
+  - ~'errors~ - shows error buffer only on errors
+  - ~'never~ - never show the error buffer
+- Ensure a default formatter is selected:
+  ~format-all-ensure-formatter~
+
+[[https://github.com/lassik/emacs-format-all-the-code][Github]]
+
+#+begin_src emacs-lisp
+  (use-package format-all
+    :straight t
+    :config
+    ; autoformaat programming buffers
+    (add-hook 'prog-mode-hook 'format-all-mode)
+    ; ensure a default formatter is set
+    (add-hook 'format-all-mode-hook 'format-all-ensure-formatter)
+
+    ; disable this mode in js files since we'll be running eslintd-fix-mode
+    (add-hook 'js-mode-hook (lambda () (format-all-mode 0)))
+  )
+#+end_src
+
+** Syntax checking
+
+With =flycheck=.
+
+I don't use =ruby-reek= as a checker, so explicitly disable that
+since it is enabled for Ruby buffers by default.
+
+[[https://www.flycheck.org/en/latest/][Homepage]]
+
+#+begin_src emacs-lisp
+  (use-package flycheck
+    :straight t
+    :config
+    (setq-default flycheck-highlighting-mode 'lines)
+    (global-flycheck-mode)
+    (add-hook 'ruby-mode-hook
+      (lambda ()
+        (setq flycheck-disabled-checkers '(ruby-reek)))))
+#+end_src
+
+Sometimes I don't see the errors as they are highlighted. Maybe
+it'll help if the whole status line was colored.
+
+[[https://github.com/flycheck/flycheck-color-mode-line][Github]]
+
+#+begin_src emacs-lisp
+  (use-package flycheck-color-mode-line
+    :straight t
+    :after (flycheck)
+    :config
+    (eval-after-load "flycheck"
+      '(add-hook 'flycheck-mode-hook 'flycheck-color-mode-line-mode)))
+#+end_src
+
+Furthermore, sometimes the modeline has other useful information
+that I don't want =flycheck= to overwrite. Instead, display the
+messages inline with =flycheck-inline=.
+
+[[https://github.com/flycheck/flycheck-inline][Github]]
+
+#+begin_src emacs-lisp
+  (use-package flycheck-inline
+    :straight t
+    :after (flycheck)
+    :config
+    (with-eval-after-load 'flycheck
+      (add-hook 'flycheck-mode-hook #'flycheck-inline-mode)))
+#+end_src
+
+** Documentation and code completion
+
+*** lsp-mode
+
+#+begin_src emacs-lisp
+  (use-package lsp-mode
+    :straight t
+    :init
+    (setq lsp-keymap-prefix "C-c l")
+    :hook (
+      (js-mode . lsp-deferred)
+      (lsp-mode . lsp-enable-which-key-integration))
+    :commands (lsp lsp-deferred)
+    )
+#+end_src
+
+*** lsp-ui
+
+Some nice ui-related things including:
+
+- =lsp-ui-sideline=
+- =lsp-ui-peek=
+- =lsp-ui-doc=
+- =lsp-ui-imenu=
+
+[[https://emacs-lsp.github.io/lsp-ui/#intro][Github]]
+[[https://emacs-lsp.github.io/lsp-mode/tutorials/how-to-turn-off/][A good guide on which ui element is what]]
+
+#+begin_src emacs-lisp
+  (use-package lsp-ui
+    :straight t
+    :config
+    (setq lsp-ui-doc-enable nil)
+    (setq lsp-ui-sideline-show-hover nil)
+    (setq lsp-ui-sideline-show-code-actions nil)
+    (setq lsp-headerline-breadcrumb-enable nil)
+    (setq lsp-modeline-code-actions-enable t)
+    )
+#+end_src
+
+*** lsp-ivy
+
+=lsp-ivy= really only provides =ivy= completion for workspace
+symbols through ~lsp-ivy-workspace-symbol~ and
+~lsp-ivy-global-workspace-symbol~.
+
+[[https://github.com/emacs-lsp/lsp-ivy][Github]]
+
+#+begin_src emacs-lisp
+  (use-package lsp-ivy
+      :straight t
+      )
+#+end_src
+
+*** Company
+
+=company-mode= provides auto complete functions.
+
+#+begin_src emacs-lisp
+  (use-package company
+    :straight t
+    :init
+    (add-hook 'after-init-hook 'global-company-mode))
+#+end_src
+
+=company-box= makes the autocomplete dropdown much nicer.
+
+#+begin_src emacs-lisp
+  (use-package company-box
+    :straight t
+    :after company
+    :hook (company-mode . company-box-mode))
+#+end_src
+
+** Code folding
+
+=evil-vimish-fold= provides vim-like code folding for a large
+variety of code types.
+
+Quick usage tips:
+
+- ~zf~ create a fold
+- ~zd~ delete a fold
+- ~za~ toggle
+- ~zo~ open
+- ~zc~ close
+- ~zj~ navigate down a fold
+- ~zk~ navigate up a fold
+
+[[https://github.com/alexmurray/evil-vimish-fold][Github]]
+
+#+begin_src emacs-lisp :tangle no
+  (use-package vimish-fold
+    :straight t
+    :after evil)
+
+  (use-package evil-vimish-fold
+    :straight t
+    :after vimish-fold
+    :init
+    (setq evil-vimish-fold-target-modes '(prog-mode conf-mode text-mode))
+    :config
+    (global-evil-vimish-fold-mode))
+#+end_src
+
+
+* General packages
+
+Things that I couldn't think of a better top-level heading for.
+
+** Packages that provide some help
+
+*** Show available keys for a mode in a popup
+
+Using *which-key*.
+
+- [[https://github.com/justbur/emacs-which-key][Github]]
+
+#+BEGIN_SRC emacs-lisp
+  (use-package which-key
+    :straight t
+    :config
+    (which-key-mode))
+#+END_SRC
+
+*** An alternative built-in help system
+
+*helpful* is an alternative to the built-in Emacs help that
+provides much more contextual information.
+
+- [[https://github.com/Wilfred/helpful][Github]]
+
+#+BEGIN_SRC emacs-lisp
+  (use-package helpful
+    :straight t
+    :bind (
+      ; rebind help keys to use helpful
+      ("C-h f" . helpful-callable)
+      ("C-h v" . helpful-variable)
+      ("C-h k" . helpful-key)
+      ; lookup the current symbol at point
+      ("C-c C-d" . helpful-at-point)
+      ; look up functions (expluding macros)
+      ("C-h F" . helpful-function)
+      ; look up commands
+      ("C-h C" . helpful-command))
+    :config
+    ; use helpful with ivy
+    (setq counsel-describe-function-function #'helpful-callable)
+    (setq counsel-describe-variable-function #'helpful-variable))
+#+END_SRC
+
+** Searching
+
+I've always enjoyed =ag= as my searcher of choice. Let's get it into
+Emacs.
+
+#+begin_src emacs-lisp
+  (use-package ag
+    :straight t
+    :config
+    (setq ag-highlight-search t) ; highlight results
+    )
+#+end_src
+
+** Make the minibuffer better
+
+*** Select from a list with Ivy and Counsel
+
+*ivy* is for quick and easy selection from a list. It
+is provided in the =counsel= package along with =swiper=.
+
+- [[https://oremacs.com/swiper/][Documentation]]
+- [[https://github.com/abo-abo/swiper][Github]]
+
+#+BEGIN_SRC emacs-lisp
+  (use-package counsel
+    :straight t
+    :config
+    (ivy-mode t)      ; enable ivy-mode everywhere
+    (counsel-mode t)  ; enable counsel mode replacements
+    (setq ivy-use-virtual-buffers t)
+    (setq ivy-count-format "(%d/%d) ")
+    (setq ivy-initial-inputs-alist nil)) ; don't start the search with ~^~
+#+END_SRC
+
+**** Make =ivy= prettier
+
+*ivy-rich* has rich transformers for commands from =ivy= and =counsel=.
+You can defined your own transformers too.
+
+[[https://github.com/yevgnen/ivy-rich][Github]]
+
+#+BEGIN_SRC emacs-lisp
+  (use-package ivy-rich
+    :straight t
+    :after (ivy counsel)
+    :config
+    (ivy-rich-mode 1)
+    ; the docs recommend to set this as well
+    (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line)
+    (ivy-set-display-transformer 'ivy-switch-buffer 'ivy-rich--ivy-switch-buffer-transformer))
+#+END_SRC
+
+**** Use fuzzy finding for counsel
+
+We have two good choices for filtering results. The first is
+=flx= and the second is =prescient=.
+
+Use *=prescient=* to sort and filter a list of candidates.
+
+prescient.el takes as input a list of candidates, and a query
+that you type. The query is first split on spaces into subqueries
+(two consecutive spaces match a literal space). Each subquery
+filters the candidates because it must match as either a
+substring of the candidate, a regexp, or an initialism
+(e.g. ffap matches find-file-at-point, and so does fa). The last
+few candidates you selected are displayed first, followed by the
+most frequently selected ones, and then the remaining candidates
+are sorted by length. If you don't like the algorithm used for
+filtering, you can choose a different one by customizing
+prescient-filter-method.
+
+- [[https://github.com/raxod502/prescient.el][Github]]
+
+#+BEGIN_SRC emacs-lisp
+  (use-package prescient :straight t)
+  (use-package ivy-prescient
+    :straight t
+    :after (ivy counsel prescient)
+    :config
+    (ivy-prescient-mode t)
+    ;; describe-variable prescient-filter-method for docs
+    (setq prescient-filter-method '(literal regexp initialism)))
+#+END_SRC
+
+*** Replace M-x with Amx
+
+*=amx=* is an alternative interface for ~M-x~ in Emacs. Some
+enhancements include prioritizing your most-used commands in the
+completion list and showing keyboard shortcuts.
+
+- [[https://github.com/DarwinAwardWinner/amx][Github]]
+
+Some tips:
+- ~C-h f~ while Amx is active runs ~describe-function~ on the currently
+  selected command
+- ~M-.~ jumps to the definition of the selected command
+- ~C-h w~ shows the key bindings for the selected command
+- ~amx-major-mode-commands~ runs Amx limited to commands that are relevant
+  to the active major mode.
+- ~amx-show-unbound-commands~ shows frequently used commands that have
+  no keybindings.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package amx
+    :straight t
+    :after (ivy counsel)
+    :config
+    (amx-mode t))   ; it auto-detects ivy-mode
+#+END_SRC
+
+*** Use hydra for extra context/help
+
+*hydra* can provide custom menus to describe keybinds and such.
+
+- [[https://github.com/abo-abo/hydra][Github]]
+
+#+begin_src emacs-lisp
+ (use-package hydra
+   :straight t
+   )
+#+end_src
+
+*pretty-hydra* makes it easy to define pretty hydras! It takes
+away a lot of the manual try-and-reload usually required to define
+nice docstrings.
+
+- [[https://github.com/jerrypnz/major-mode-hydra.el#pretty-hydra][Github]]
+
+#+begin_src emacs-lisp
+ (use-package pretty-hydra
+   :straight t
+   )
+#+end_src
+
+** Better terminal emulation
+
+I've heard that *vterm* is the bee's knees.
+
+- [[https://github.com/akermu/emacs-libvterm][Github]]
+
+#+begin_src emacs-lisp
+  (use-package vterm
+    :straight t
+    :init
+    (setq vterm-always-compile-module t))
+#+end_src
+
+
+* Personal functions and keybindings
+Make it mine. You can find a list of all personal keybindings
+with ~describe-personal-keybindings~.
+
+** Utilities/Helpers
+Instead of relying on external packages for everything, I've decided
+to start writing small utilities that I could use in my own functions.
+
+*** Strip whitespace from the end of strings
+#+begin_src emacs-lisp
+  (defun geo/trim (string)
+    "Strip whitespace from the end of a string"
+    (replace-regexp-in-string "\\W\+$" "" string))
+#+end_src
+
+*** Git/Github
+A number of commands, in the =geo/git-= namespace, that can simplify
+the usage of =git= interactively or in other functions/commands.
+
+**** Run a git command
+#+begin_src emacs-lisp
+(defun geo/git-run-command (command &optional show-message)
+  "Run a git command from the current shell location.
+
+The command should be the string to follow a normal 'git' command.
+For example, to run 'git branch --show-current', `command` would
+equal 'branch --show-current'."
+  (interactive "sGit command: ")
+  (let ((git-result (geo/trim
+                     (shell-command-to-string
+                      (concat "git " command)))))
+    (when (or (called-interactively-p 'interactive)
+              show-message)
+      (message git-result))
+    git-result))
+#+end_src
+
+**** Get the current git branch name
+#+begin_src emacs-lisp
+(defun geo/git-current-branch-name ()
+  "Return the visited file's git branch name."
+  (interactive)
+  (let ((current-branch-name
+         (geo/git-run-command "branch --show-current"
+                              (called-interactively-p 'interactive))))
+    current-branch-name))
+#+end_src
+
+**** List the local git branch names
+#+begin_src emacs-lisp
+(defun geo/git-list-branches ()
+  "Return the list of branches in the current repo."
+  (interactive)
+  ;; git for-each-ref --format='%(refname:short)' refs/heads/
+  (let ((branches (geo/git-run-command
+                   "for-each-ref --format='%(refname:short)' refs/heads/"
+                   (called-interactively-p 'interactive))))
+    branches))
+#+end_src
+
+**** Open a PR for a local git branch on Github
+#+begin_src emacs-lisp
+(defun geo/github-open-pr-from-branch ()
+  (interactive)
+  (let* ((branch-name (completing-read
+                       "Branch to merge: "
+                       (split-string (geo/git-list-branches))
+                       nil ;; predicate
+                       t   ;; require-match
+                       nil ;; initial
+                       nil ;; history
+                       (geo/git-current-branch-name)))
+         (full-remote
+          (geo/git-run-command "remote get-url origin"))
+         (org-and-repo
+          (replace-regexp-in-string
+           "\\.git$"
+           ""
+           (replace-regexp-in-string "\\(.*\\):" "" full-remote)))
+         (github-url (format "https://github.com/%s/compare/%s?expand=1"
+                             org-and-repo
+                             branch-name)))
+    (browse-url github-url)))
+#+end_src
+
+**** Open the current file in Github
+#+begin_src emacs-lisp
+(defun geo/github-open-in-github ()
+  "open the current buffer's file on github; copy the url to the clipboard.
+
+the current line will be selected on github. if a region is selected
+in the buffer, then that region will also be selected/highlighted
+on github."
+  (interactive)
+  (let* ((linenum-string (if (use-region-p)
+                             (format "#l%s-l%s"
+                                     (line-number-at-pos (region-beginning) t)
+                                     (line-number-at-pos (region-end) t))
+                           (format "#l%s" (line-number-at-pos nil t))))
+         (filename (buffer-file-name))
+         (full-remote
+          (geo/git-run-command "remote get-url origin"))
+         (org-and-repo
+          (replace-regexp-in-string
+           "\\.git$"
+           ""
+           (replace-regexp-in-string "\\(.*\\):" "" full-remote)))
+         (branch-name (geo/git-current-branch-name))
+         (relative-filename (geo/project-relative-filename
+                             (buffer-file-name)))
+         (github-url (format "https://github.com/%s/blob/%s/%s%s"
+                             org-and-repo
+                             branch-name
+                             relative-filename
+                             linenum-string)))
+    (if (eq system-type 'darwin)
+        (shell-command
+         (concat "echo " "\"" github-url "\"" " | " "/usr/bin/pbcopy")))
+    (browse-url github-url)
+    (message "opened %s" github-url)))
+#+end_src
+
+*** Project-related
+#+begin_src emacs-lisp
+(defun geo/project-relative-filename (filename)
+  "Return the filename relative to the project root."
+  (interactive "fFile: ")
+  (let ((relative-filename
+         (file-relative-name filename (cdr (project-current)))))
+    (when (called-interactively-p 'interactive)
+      (message relative-filename))
+    relative-filename))
+#+end_src
+
+** Buffer/window management
+*** popper
+#+begin_src emacs-lisp
+  (evil-define-key 'normal 'global
+    (kbd "C-p") nil ;; unbind C-p first
+    (kbd "C-p p") 'popper-toggle-latest
+    (kbd "C-p c") 'popper-cycle
+    (kbd "C-p t") 'popper-toggle-type
+    )
+#+end_src
+
+** File management
+*** Rename file in buffer
+The =rename-file= function does a file job renaming a file but it
+prompts for the name of the file to rename and then the new file
+name. Almost always, I'm renaming the file in the buffer I'm working
+in. When using this workflow, this also leaves the current buffer
+pointing to a filename that no longer exists. There have been many
+times in which I've renamed the file and left the buffer open. The
+next time I saved, it created a new file with the old file name.
+
+To combat this, this function:
+
+1. ASSUMES you want to rename the file the current buffer is visiting.
+2. Prompts you to enter the new name of the file.
+3. Renames the file.
+4. Changes the active buffer to point to the new file name.
+
+#+begin_src emacs-lisp
+  (defun geo/rename-file-and-visit ()
+    "Rename file in current buffer and point the buffer to the renamed version."
+    (interactive)
+    (let* ((orig-name (buffer-file-name))
+           (new-name (read-file-name "Rename to: " orig-name)))
+      (rename-file orig-name new-name)
+      ;; * second arg means don't prompt if a similarly-named buffer
+      ;;   already exists
+      ;; * third arg means to assume that the former
+      ;;   visited file has been renamed to filename
+      (set-visited-file-name new-name t t)
+      (message "Renamed %s to %s" orig-name new-name)))
+#+end_src
+
+** Editing tasks
+*** Search with =counsel-ag=
+
+Since ~/~ is search in =evil-mode=, I like binding ~C-/~ to search the
+entire project. To help seed the search, use ~C-?~ on a word to open
+counsel with that word pre-filled.
+
+I have to wrap =counsel-ag= with a ~let~ in order to restrict
+which completion modes are available to ag. I want to either be
+specific (~literal~) or be able to input a regex (~regexp~).
+
+I'd also like to seed =counsel-ag= with the word underneath the
+cursor. I can do that by getting the word with ~thing-at-point~.
+
+#+begin_src emacs-lisp
+  (defun geo/counsel-ag (&optional seed-word)
+      (interactive)
+      (let ((prescient-filter-method '(literal regexp)))
+      (counsel-ag seed-word)))
+
+  (defun geo/counsel-ag-thing-at-point ()
+      (interactive)
+      (let ((seed-word (thing-at-point 'word t)))
+      (geo/counsel-ag seed-word)))
+
+  (define-key evil-normal-state-map (kbd "C-/") 'geo/counsel-ag)
+  (define-key evil-normal-state-map (kbd "C-?") 'geo/counsel-ag-thing-at-point)
+#+end_src
+
+*** Search the buffer with =swiper=
+
+vim's keybindings are for ~/~ to search the buffer. I do like that
+keybinding, but I would like upgrade the search function to use
+=swiper=.
+
+#+begin_src emacs-lisp
+  (define-key evil-normal-state-map (kbd "/") 'swiper)
+#+end_src
+
+** Hydra menus
+*** Apropros
+
+#+begin_src emacs-lisp
+  (defhydra geo/hydra-apropos-menu (:color blue :hint nil)
+"
+_a_propos        _c_ommand
+_d_ocumentation  _l_ibrary
+_v_ariable       _u_ser-option
+_i_nfo       valu_e_"
+    ("a" counsel-apropos)
+    ("d" apropos-documentation)
+    ("v" apropos-variable)
+    ("i" info-apropos)
+    ("c" apropos-command)
+    ("l" apropos-library)
+    ("u" apropos-user-option)
+    ("e" apropos-value))
+#+end_src
+
+*** Workspaces
+#+begin_src emacs-lisp
+  (pretty-hydra-define geo/hydra-workspace-menu (:exit t :quit-key "q")
+    ("General"
+     (("w" persp-switch "Switch/New")
+      ("k" persp-kill "Kill")
+      ("r" persp-rename "Rename")
+      ("i" persp-import "Import")
+      ("n" persp-next "Next")
+      ("p" persp-prev "Prev"))
+     "Buffers"
+     (("b b" persp-counsel-switch-buffer "Switch to buffer in current perspective")
+      ("b a" persp-add-buffer "Add buffer to current perspective")
+      ("b k" persp-remove-buffer "Remove buffer from current perspective")
+      ("b s" persp-set-buffer "Move buffer to current perspective"))
+     "State Mgmt"
+     (("W" persp-state-save "Write to disk")
+      ("l" persp-state-load "Load from disk"))
+     ))
+#+end_src
+
+*** Buffers/Files
+#+begin_src emacs-lisp
+  (pretty-hydra-define geo/hydra-buffer-menu (:exit t :quit-key "q")
+    ("Buffers"
+      (("b" counsel-switch-buffer "Switch")
+       ("n" evil-buffer-new "New")
+       ("R" rename-buffer "Rename buffer")
+       ("k" kill-this-buffer "Kill this buffer")
+       ("K" geo/kill-other-buffers "Kill all other buffers"))
+     "Files"
+       (("r" geo/rename-file-and-visit "Rename this file"))
+     "Views/Modes"
+       (("i" ibuffer "ibuffer"))))
+#+end_src
+
+*** Preferences
+=doom-modeline= has some variables you can set explictly, but no easy
+way to toggle it on and off. So here are a few helper functions to add
+the ability to toggle them.
+
+#+begin_src emacs-lisp
+  (defun geo/doom-modeline-toggle-word-count ()
+    "Toggle doom-modeline's word count indicator on and off"
+    (interactive)
+    (if doom-modeline-enable-word-count
+        (progn
+          (setq doom-modeline-enable-word-count nil)
+          (message "Word count turned off"))
+      (progn
+        (setq doom-modeline-enable-word-count t)
+        (message "Word count turned on for modes %s" doom-modeline-continuous-word-count-modes))))
+
+  (defun geo/persp-mode-toggle-modestring ()
+    "Toggle the list of perspective names in the modeline (off/single/all)"
+    (interactive)
+    ;; it is off
+    (if (not persp-show-modestring)
+        ;; turn it on (short)
+        (progn
+          (setq persp-modestring-short t)
+          (persp-turn-on-modestring)
+          (message "Perspective names turned on (short)"))
+      ;; it is on (short)
+      (if persp-modestring-short
+          (progn
+            (setq persp-modestring-short nil)
+            (persp-turn-on-modestring)
+            (message "Perspective names turned on (long)"))
+        ;; it is on (long)
+        (progn
+          (persp-turn-off-modestring)
+          (message "Perspective names turned off")))))
+#+end_src
+
+#+begin_src emacs-lisp
+  (pretty-hydra-define geo/hydra-prefs-menu (:quit-key "q")
+    ("Display"
+     (("n" linum-mode "line number" :toggle t)
+      ("w" whitespace-mode "whitespace" :toggle t)
+      ("h" global-hl-line-mode "highlight line" :toggle t)
+      ("H" highlight-indent-guides-mode "highlight indents" :toggle t)
+      ("+" default-text-scale-increase "increase font size")
+      ("-" default-text-scale-decrease "decrease font size"))
+     ""
+     (("d" diff-hl-mode "diff-hl" :toggle t)
+      ("c" global-display-fill-column-indicator-mode "show fill column" :toggle t)
+      (")" geo/toggle-show-paren-style "show-paren style"))
+     "Editing"
+     (("p" electric-pair-mode "electric-pair" :toggle t)
+      ("f" auto-fill-mode "auto-fill"))
+     "Modeline"
+     (("m c" column-number-mode "column number" :toggle t)
+      ("m l" line-number-mode "line number" :toggle t)
+      ("m w" geo/doom-modeline-toggle-word-count "word count" :toggle doom-modeline-enable-word-count)
+      ("m p" geo/persp-mode-toggle-modestring "perspective list" :toggle persp-show-modestring))
+     ))
+#+end_src
+
+*** Projectile
+
+There's so much stuff in =projectile=. Who can keep track of it
+all? Now I don't have to!
+
+#+begin_src emacs-lisp
+  (pretty-hydra-define geo/hydra-projectile (:exit t :quit-key "q")
+    (
+      "Files"
+      (("f" counsel-projectile-find-file "Find file")
+       (">" projectile-toggle-between-implementation-and-test
+         "Go to test/impl")
+       ("d" projectile-display-buffer "Display buffer")
+       ("D" counsel-projectile-dired "dired"))
+
+      "Searching"
+      (("/" projectile-ag "ag")
+       ("?" counsel-projectile-ag "ag (with counsel)")
+       ("g" projectile-grep "grep")
+       ("r" prejectile-ripgrep "ripgrep"))
+
+      "Management"
+      (("p" counsel-projectile-switch-project "Switch project")
+       ("i" projectile-ibuffer "ibuffer")
+       ("b" counsel-projectile-switch-to-buffer "Switch to buffer")
+       ("t" projectile-test-project "Test project"))
+
+      "Commands"
+      (("v" projectile-run-vterm "vterm")
+       ("c" projectile-run-command-in-root "Run command in root"))
+  ))
+#+end_src
+
+*** Dired
+
+Taken from the [[https://github.com/abo-abo/hydra/wiki/Dired][hydra wiki]]. Activate it with =.= in a =dired= mode.
+
+#+begin_src emacs-lisp
+  (defhydra geo/hydra-dired (:hint nil :color pink)
+"
+_+_ mkdir          _v_iew           _m_ark             _(_ details        _i_nsert-subdir    wdired
+_C_opy             _O_ view other   _U_nmark all       _)_ omit-mode      _$_ hide-subdir    C-x C-q : edit
+_D_elete           _o_pen other     _u_nmark           _l_ redisplay      _w_ kill-subdir    C-c C-c : commit
+_R_ename           _M_ chmod        _t_oggle           _g_ revert buf     _e_ ediff          C-c ESC : abort
+_Y_ rel symlink    _G_ chgrp        _E_xtension mark   _s_ort             _=_ pdiff
+_S_ymlink          ^ ^              _F_ind marked      _._ toggle hydra   \\ flyspell
+_r_sync            ^ ^              ^ ^                ^ ^                _?_ summary
+_z_ compress-file  _A_ find regexp
+_Z_ compress       _Q_ repl regexp
+
+T - tag prefix
+"
+    ("\\" dired-do-ispell)
+    ("(" dired-hide-details-mode)
+    (")" dired-omit-mode)
+    ("+" dired-create-directory)
+    ("=" diredp-ediff)         ;; smart diff
+    ("?" dired-summary)
+    ("$" diredp-hide-subdir-nomove)
+    ("A" dired-do-find-regexp)
+    ("C" dired-do-copy)        ;; Copy all marked files
+    ("D" dired-do-delete)
+    ("E" dired-mark-extension)
+    ("e" dired-ediff-files)
+    ("F" dired-do-find-marked-files)
+    ("G" dired-do-chgrp)
+    ("g" revert-buffer)        ;; read all directories again (refresh)
+    ("i" dired-maybe-insert-subdir)
+    ("l" dired-do-redisplay)   ;; relist the marked or singel directory
+    ("M" dired-do-chmod)
+    ("m" dired-mark)
+    ("O" dired-display-file)
+    ("o" dired-find-file-other-window)
+    ("Q" dired-do-find-regexp-and-replace)
+    ("R" dired-do-rename)
+    ("r" dired-do-rsynch)
+    ("S" dired-do-symlink)
+    ("s" dired-sort-toggle-or-edit)
+    ("t" dired-toggle-marks)
+    ("U" dired-unmark-all-marks)
+    ("u" dired-unmark)
+    ("v" dired-view-file)      ;; q to exit, s to search, = gets line #
+    ("w" dired-kill-subdir)
+    ("Y" dired-do-relsymlink)
+    ("z" diredp-compress-this-file)
+    ("Z" dired-do-compress)
+    ("q" nil)
+    ("." nil :color blue))
+
+(define-key dired-mode-map (kbd "?") 'geo/hydra-dired/body)
+#+end_src
+
+*** Github
+Some functions that make working with github a little easier.
+
+#+begin_src emacs-lisp
+(pretty-hydra-define geo/hydra-github-menu (:quit-key "q")
+  ("Github"
+   (("o" geo/github-open-in-github "Open file on Github")
+    ("p" geo/github-open-pr-from-branch "Open PR from brach")
+    )
+   ))
+#+end_src
+
+*** Main
+
+My main hydra menu that provides help and direction. Sometimes I
+forget what to call or what keys to press. This helps immensely.
+
+#+begin_src emacs-lisp
+  (pretty-hydra-define geo/hydra-top-menu
+    (:title "The world's your oyster"
+       :quit-key "q"
+       :foreign-keys warn
+       :exit t)
+      ("Working"
+       (("w" geo/hydra-workspace-menu/body "Workspaces")
+        ("b" geo/hydra-buffer-menu/body "Buffers")
+        ("p" geo/hydra-projectile/body "Projectile")
+        ("g" magit-status "Magit")
+        ("G" geo/hydra-github-menu/body "Github"))
+
+       "Getting Help"
+       (("a" geo/hydra-apropos-menu/body "Apropos"))
+
+       "Customizing"
+       (("," geo/hydra-prefs-menu/body "Preferences"))))
+
+  (define-key evil-normal-state-map (kbd "<SPC>") 'geo/hydra-top-menu/body)
+  (define-key evil-normal-state-map (kbd "<SPC>") 'geo/hydra-top-menu/body)
+#+end_src
+
+
+* Things to check out and eventually add
+
+** Tabs
+
+- [[https://github.com/manateelazycat/awesome-tab][awesome-tab]]
+- [[https://github.com/ema2159/centaur-tabs][centaur-tabs]] - used by doom emacs
+
+** UI
+
+- [[https://github.com/zk-phi/sublimity][sublimity]] - code minimap ala Sublime editor
+- [[https://github.com/emacsorphanage/anzu][anzu]] and [[https://github.com/emacsorphanage/evil-anzu][evil-anzu]] to display match count in the modeline
+  (e.g. =(13/45)=)
+- [[https://github.com/joostkremers/writeroom-mode][writeroom-mode]] to change the editor into a distraction-free
+  editor (for blog posts). [[https://gitlab.com/jabranham/mixed-pitch][mixed-pitch]] to display both variable-
+  and fixed-width fonts at the same time would be a good companion.
+
+** Apps within the app
+
+- [[https://github.com/ralesi/ranger.el][ranger]] - This is a minor mode that runs within dired, it emulates
+  many of ranger's features. This minor mode shows a stack of parent
+  directories, and updates the parent buffers, while you're navigating
+  the file system. The preview window takes some of the ideas from
+  Peep-Dired, to display previews for the selected files, in the
+  primary dired buffer.
+- [[https://github.com/200ok-ch/counsel-jq][counsel-jq]] - use the =jq= json viewer through =counsel=
+- [[https://magit.vc/manual/forge/][magit forge]] - pull requests, issues, and more through magit. This
+  looks like it could be useful in order to keep up with
+  notifications.
+- [[https://github.com/Silex/docker.el][docker]] - Managae docker from Emacs. Supports docker containers,
+  images, volumes, networks, docker-machine and docker-compose.
+
+** Editor
+
+- [[https://github.com/iqbalansari/emacs-emojify][emojify]] - better (?) emoji support
+
+- [[https://github.com/abo-abo/auto-yasnippet][auto-yasnippet]] - create snippets on the go without and use them
+  in-place. Kind of like temporary macros.
+
+- [[https://github.com/liblit/flycheck-status-emoji][flycheck-status-emoji]] - display emojis on the modeline to indicate
+  status in the buffer
+
+- [[https://github.com/Malabarba/aggressive-indent-mode][aggressive-indent-mode]] - =electric-indent-mode= is enough to keep
+  your code nicely aligned when all you do is type. However, once you
+  start shifting blocks around, transposing lines, or slurping and
+  barfing sexps, indentation is bound to go wrong.
+
+  =aggressive-indent-mode= is a minor mode that keeps your code always
+  indented. It reindents after every change, making it more reliable
+  than electric-indent-mode.
+
+- [[https://github.com/abo-abo/avy][avy]] - jump to visible text using a char-based decision tree
+
+- [[https://github.com/rejeep/ruby-end.el][ruby-end]] - Will I get annoyed at typing ~end~ all the time? Or is it
+  more annoying to have it typed for me even when I don't want it?
+
+- [[https://github.com/nonsequitur/inf-ruby/][inf-ruby]] - provides a REPL buffer connected to a Ruby subprocess
+
+- [[https://github.com/crocket/dired-single][dired-single]] - keep =dired= buffers to a minimum since dired opens a
+  new buffer for every directory visited.
+
+- [[https://depp.brause.cc/shackle/][shackle]] - take better control of buffers and their placement.
+
+** Org Mode
+
+** Other?
+
+I can't think of categories for these.
+
+- [[https://github.com/edrx/eev][eev]] - "a library for Emacs that lets us create executable logs of
+  what we do in a format that is reasonably easy to read and to
+  modify, and that lets us “play back” those logs step by step in any
+  order." Could be interesting in reproducing debugging or something.
+
+- [[https://github.com/zachcurry/emacs-anywhere][emacs-anywhere]] - provides configurable automation and hooks
+  containing window info, so you can bust moves anywhere in a quick,
+  customizable fashion. Essentially allows you to use emacs in other
+  apps like web browser text fields.
+
+
+* References
+
+Helpful things I've found while researching configs.
+
+- [[https://github.com/emacs-tw/awesome-emacs][Awesome Emacs]] - categorized packages
+
+- https://jamiecollinson.com/blog/my-emacs-config/
+
+
+* Disabled packages
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no
+:END:
+
+At one time or another, these were some packages I had installed. I
+have disabled them for various reasons. I'm keeping them around
+because I might enable them again at any time.
+
+** =emacs-font-size=
+
+#+BEGIN_SRC emacs-lisp
+  (straight-use-package
+    '(font-size :type git :host github :repo "nabeix/emacs-font-size")
+    :config
+    (font-size-init 18)
+    (define-key global-map (kbd "C-=") 'font-size-increase))
+#+END_SRC
+
+** =all-the-icons-ivy=
+
+Use *=all-the-icons-ivy=* to make it look prettier(?).
+Better? More graphical at least.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package all-the-icons-ivy
+    :init
+    (add-hook 'after-init-hook 'all-the-icons-ivy-setup))
+#+END_SRC
+
+** =ivy-posframe=
+
+*ivy-posframe* lets ivy use posframe to show its menu.
+
+- [[https://github.com/tumashu/ivy-posframe][Github]]
+
+#+BEGIN_SRC emacs-lisp
+  (use-package ivy-posframe
+    :straight t
+    :after (ivy))
+#+END_SRC
+
+** =flx=
+
+Use *=flx=* to provide some fuzzy matching.
+
+The default matcher will use a ~.*~ regex wild card in place of /each
+single space/ in the input. If you want to use the fuzzy matcher and
+use a ~.*~ regex wild card between /each input letter/, we config with
+fuzzy. From https://oremacs.com/2016/01/06/ivy-flx/.
+
+- [[https://github.com/lewang/flx][Github]]
+
+#+BEGIN_SRC emacs-lisp
+  (use-package flx
+    :straight t
+    :after (ivy counsel)
+    :config
+    (setq ivy-re-builders-alist
+      '((ivy-switch-buffer . ivy--regex-plus)
+        (t . ivy--regex-fuzzy))))
+#+END_SRC
+
+** =emojify=
+
+*[DISABLED BECAUSE I DON'T THINK I NEED THIS]*
+*[if I ever enable this again, also check out [[https://github.com/dunn/company-emoji][company-emoji]]]*
+
+Emacs has pretty good support for emojis built-in. *emojify* makes it
+even better with ascii, unicode, and/or github style emoji support.
+
+- [[https://github.com/iqbalansari/emacs-emojify][Github]]
+
+#+BEGIN_SRC emacs-lisp
+  (use-package emojify
+    :straight t
+    :init
+    ; only unicode and github (not ascii [ e.g. :-) ])
+    (setq emojify-set-emoji-styles '(unicode github))
+    ; by default emojis are shown as images; I prefer unicode
+    (setq emojify-display-style 'unicode)
+    :config
+    (global-emojify-mode)
+    )
+#+END_SRC
+
+** Show line numbers in programming mode
+
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'prog-mode-hook 'display-line-numbers-mode)
+#+END_SRC
+
+** Use Github from within magit
+I found this to be slow and not quite what I was hoping it would be. I
+might re-enable it at some point.
+
+#+begin_src emacs-lisp
+  (use-package forge
+    :straight t
+    :after magit
+    )
+#+end_src
+
+
+* Local variables
+# Local Variables:
+# eval: (org-content 3)
+# End:
