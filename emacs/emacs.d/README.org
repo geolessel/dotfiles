@@ -22,16 +22,20 @@ For some good reading regard dynamic vs. lexical binding, I've found
 
 ** Increase garbage collector threshold
 The default is 800kB and increasing it will speed up startup time.
-Before we're done with the config though, we need to put it back down.
+Keep it high as suggested by =lsp-mode=.
 
 #+BEGIN_SRC emacs-lisp
-  (setq gc-cons-threshold 10000000)
-    ;; restore after startup
-    (add-hook 'after-init-hook
-      (lambda ()
-        (setq gc-cons-threshold 1000000)
-          (message "gc-cons-threshold restored to %S" gc-cons-threshold)))
+(setq gc-cons-threshold 10000000)
 #+END_SRC
+
+** Increase read-process-output-max
+Allows Emacs to read larger chunks of data at a time from
+subprocesses.
+
+#+begin_src emacs-lisp
+;; 1mb
+(setq read-process-output-max (* 1024 1024))
+#+end_src
 
 ** Bootstrap =straight= package manager
 #+BEGIN_SRC emacs-lisp
@@ -123,14 +127,15 @@ Configurations around Emacs itself (i.e. not from a package).
 
 ** Specify backup directory
  #+BEGIN_SRC emacs-lisp
-   (setq backup-directory-alist
-     '(("." . "~/.emacs-backups"))
-     backup-by-copying t   ; don't delink hardlinks
-     version-control t     ; use version numbers on backups
-     delete-old-versions t ; automatically delete excess backups
-     kept-new-versions 20  ; how many of the newest versions to keep
-     kept-old-versions 5   ; how many of the old versions to keep
-     )
+ (setq
+  backup-directory-alist '((".*" . "~/.emacs-backups"))
+  ;; auto-save-file-name-transforms '((".*" "~/.emacs-backups" t))
+  backup-by-copying t   ; don't delink hardlinks
+  version-control t     ; use version numbers on backups
+  delete-old-versions t ; automatically delete excess backups
+  kept-new-versions 20  ; how many of the newest versions to keep
+  kept-old-versions 5   ; how many of the old versions to keep
+  )
  #+END_SRC
 
 ** Don't create lockfiles
@@ -2177,6 +2182,8 @@ I can't think of categories for these.
   containing window info, so you can bust moves anywhere in a quick,
   customizable fashion. Essentially allows you to use emacs in other
   apps like web browser text fields.
+
+- [[https://github.com/emacscollective/no-littering][no-littering]] - keep .emacs.d clean and organized.
 
 * References
 
