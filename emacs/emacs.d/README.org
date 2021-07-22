@@ -475,6 +475,7 @@ match was found.
 (advice-add 'evil-search-previous :after
             #'geo/ui--pulse-highlight-current-line)
 #+end_src
+
 *** Dim all buffers except the active one
 It is sometimes difficult to see which buffer you are editing. The
 =dimmer= package dims the faces of other buffers to make that a bit
