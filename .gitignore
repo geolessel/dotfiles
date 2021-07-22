@@ -1,5 +1,6 @@
 *.netrwhist
 *.swp
+*.DS_Store
 
 emacs/emacs.d/auto-save-list/*
 emacs/emacs.d/backups/*
