@@ -2292,3 +2292,11 @@ might re-enable it at some point.
 # Local Variables:
 # eval: (org-content 3)
 # End:
+
+* TODO
+** Turn off flycheck for emacs lisp (or little editor buffer thing)
+** wrangle temp files
+** turn off listing killed buffers in the switch buffer list
+** minor mode / package for testing
+
+** toggle Top/Bot/30% where-are-you-in-this-file indicator on modeline
