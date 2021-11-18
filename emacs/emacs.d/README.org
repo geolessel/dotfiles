@@ -446,6 +446,22 @@ Alternatives (taken from the =highlight-indent-guides= Github:
     )
 #+end_src
 
+*** Dim all buffers except the active one
+It is sometimes difficult to see which buffer you are editing. The
+=dimmer= package dims the faces of other buffers to make that a bit
+easier.
+
+#+begin_src emacs-lisp
+(use-package dimmer
+  :config
+  (dimmer-configure-helm)
+  (dimmer-configure-hydra)
+  (dimmer-configure-company-box)
+  (dimmer-configure-magit)
+  (dimmer-configure-which-key)
+  (dimmer-mode))
+#+end_src
+
 ** Workspaces
 
 I can use this to work in one project in one perspective/workspace
