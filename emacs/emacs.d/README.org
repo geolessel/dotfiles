@@ -446,6 +446,22 @@ Alternatives (taken from the =highlight-indent-guides= Github:
     )
 #+end_src
 
+*** Highlight the matching line when searching with evil
+When using =evil-search-next= and =evil-search-previous=, sometimes
+the matched value is hard to find in the sea of text on the page. This
+will momentarily highlight the line in which the next or previous
+match was found.
+
+#+begin_src emacs-lisp
+(defun geo/ui--pulse-highlight-current-line (&rest args)
+  "Briefly highlight the current line."
+  (pulse-momentary-highlight-one-line (point)))
+
+(advice-add 'evil-search-next :after
+            #'geo/ui--pulse-highlight-current-line)
+(advice-add 'evil-search-previous :after
+            #'geo/ui--pulse-highlight-current-line)
+#+end_src
 *** Dim all buffers except the active one
 It is sometimes difficult to see which buffer you are editing. The
 =dimmer= package dims the faces of other buffers to make that a bit
