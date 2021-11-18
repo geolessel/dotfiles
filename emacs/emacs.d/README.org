@@ -5,6 +5,21 @@
 
 Things that need to happen right away.
 
+** Enable lexical binding
+Dynamic binding was the only option up until Emacs 24. However,
+lexical binding has many more benefits and will be enabled here.
+
+[[https://www.gnu.org/software/emacs/manual/html_node/elisp/Using-Lexical-Binding.html#index-lexical_002dbinding][In the documentation]] for =lexical-binding=, it says: "Note that unlike
+other such variables, this one must be set in the first line of a
+file." So here we are.
+
+For some good reading regard dynamic vs. lexical binding, I've found
+[[https://www.emacswiki.org/emacs/DynamicBindingVsLexicalBinding][this page on Emacs Wiki]] to be good.
+
+#+begin_src emacs-lisp
+(setq lexical-binding t)
+#+end_src>
+
 ** Increase garbage collector threshold
 The default is 800kB and increasing it will speed up startup time.
 Before we're done with the config though, we need to put it back down.
