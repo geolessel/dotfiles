@@ -17,6 +17,7 @@ emacs/emacs.d/core/*
 emacs/emacs.d/docs/*
 emacs/emacs.d/modules/*
 emacs/emacs.d/test/*
+emacs/emacs.d/straight
 
 vim/bundle/*
 vim/UltiSnips/*
