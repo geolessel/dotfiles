@@ -1875,17 +1875,19 @@ _i_nfo       valu_e_"
 
 *** Buffers/Files
 #+begin_src emacs-lisp
-  (pretty-hydra-define geo/hydra-buffer-menu (:exit t :quit-key "q")
-    ("Buffers"
-      (("b" counsel-switch-buffer "Switch")
-       ("n" evil-buffer-new "New")
-       ("R" rename-buffer "Rename buffer")
-       ("k" kill-this-buffer "Kill this buffer")
-       ("K" geo/kill-other-buffers "Kill all other buffers"))
-     "Files"
-       (("r" geo/rename-file-and-visit "Rename this file"))
-     "Views/Modes"
-       (("i" ibuffer "ibuffer"))))
+(pretty-hydra-define geo/hydra-buffer-menu (:exit t :quit-key "q")
+  ("Buffers"
+    (("b" persp-counsel-switch-buffer "Switch (within workspace)")
+     ("B" persp-switch-to-buffer "Switch (globally)")
+     ("n" evil-buffer-new "New")
+     ("R" rename-buffer "Rename buffer")
+     ("k" kill-this-buffer "Kill this buffer")
+     ("K" geo/kill-other-buffers "Kill all other buffers"))
+   "Files"
+     (("r" geo/rename-file-and-visit "Rename this file"))
+   "Views/Modes"
+     (("i" persp-ibuffer "ibuffer (within workspace)")
+      ("I" ibuffer "ibuffer (globally)"))))
 #+end_src
 
 *** Preferences
