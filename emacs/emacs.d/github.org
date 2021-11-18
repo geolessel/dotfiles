@@ -1,0 +1,100 @@
+* Github
+** URL notes
+According to [[https://emacs.stackexchange.com/questions/12464/go-to-body-after-url-retrieve-synchronously][this stackexchange post]], ~url-insert-file-contents~ is
+potentially a better solution than ~url-retrieve-synchronously~ along
+with ~(goto-char (url-http-end-of-headers))~.
+
+Here's a good example of retrieving a specific key's value from a json
+response.
+
+#+begin_src emacs-lisp
+(with-temp-buffer
+  (url-insert-file-contents "https://api.coinpaprika.com/v1/coins/btc-bitcoin")
+  (let* ((resp (buffer-string))
+         (resp-json (json-parse-buffer :object-type 'plist))
+         (name (plist-get resp-json ':tags))
+         )
+    (message name)))
+#+end_src
+
+For playing around and learning commands the package ~curl-to-elisp~
+seems to be helpful. [[https://github.com/xuchunyang/curl-to-elisp][Github]]
+
+Authentication info can be stored in =authinfo.gpg=. It can be searched
+like
+
+#+begin_src emacs-lisp
+(auth-source-search :host "api.github.com")
+#+end_src
+
+The ~:secret~ that is returned is actually a function (or at least it
+is for my encrypted =authinfo.gpg=). To get the actual value, you have
+to call the function with ~funcall~.
+
+#+begin_src emacs-lisp
+(let* ((creds (auth-source-search :host "api.github.com"))
+       (username (plist-get (car creds) :user))
+       (secret (plist-get (car creds) :secret)))
+  (funcall secret))
+#+end_src
+
+We can use this info to make some api calls to github.
+
+(note the usage of ~`~ instead of ~'~ for
+~url-request-extra-headers~. I'm not sure what that's about. Also
+notice the ~,~ before ~concat~. What?
+
+#+begin_src emacs-lisp
+(let* ((github-auth (auth-source-search :host "api.github.com"))
+       (username (plist-get (car github-auth) :user))
+       (secret (plist-get (car github-auth) :secret))
+       (password (base64-encode-string (concat username ":" (funcall secret))))
+       (url-request-extra-headers `(("Authorization" . ,(concat "Basic " password))))
+       )
+  (with-temp-buffer
+    (url-insert-file-contents "https://api.github.com/user")
+    (let* ((json (json-parse-buffer :object-type 'plist))
+           (name (plist-get json ':name))
+           (url (plist-get json ':html_url)))
+    (message (format "%s has repos at %s" name url)))))
+#+end_src
+
+
+** scratch
+#+begin_src emacs-lisp
+(let ((url-request-method "GET"))
+  (url-retrieve "https://api.coinpaprika.com/v1/coins/btc-bitcoin"
+                (lambda (_status) (current-buffer))))
+
+(curl-to-elisp "curl example.com")
+(url-retrieve-synchronously "http://example.com")
+(switch-to-buffer-other-window (url-retrieve-synchronously "https://api.coinpaprika.com/v1/coins/btc-bitcoin"))
+
+(url-retrieve "https://api.coinpaprika.com/v1/coins/btc-bitcoin"
+              (lambda (_status)
+                (goto-char url-http-end-of-headers)))
+
+(let ((url-request-extra-headers '(("Authentication" . "Basic "))))
+  (with-temp-buffer
+    (url-insert-file-contents "https://api.coinpaprika.com/v1/coins/btc-bitcoin")
+    (let* ((resp (buffer-string))
+           (resp-json (json-parse-buffer :object-type 'plist))
+           (name (plist-get resp-json ':name))
+           )
+      (message name))))
+
+(let ((url-request-method "GET"))
+  (url-retrieve "https://api.coindesk.com/v1/bpi/currentprice.json"
+              (lambda (status)
+                (switch-to-buffer (current-buffer)))))
+
+
+(url-retrieve
+ "https://api.coindesk.com/v1/bpi/currentprice.json"
+ (lambda (status)
+   (let ((target-buffer (get-buffer-create "*geo*"))
+         (source-buffer (current-buffer)))
+     (with-current-buffer target-buffer
+       (
+
+#+end_src
