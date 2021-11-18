@@ -129,6 +129,25 @@ Configurations around Emacs itself (i.e. not from a package).
      )
  #+END_SRC
 
+** Don't create lockfiles
+This prevents lockfiles being created when editing files. Lockfiles
+are constructed by prepending a '.#' to the name of the file. No one
+is going to be editing the same file as me at the same time, so I
+don't need this and it clutters up the filesystem and messes with
+filesystem watchers. TURN IT OFF.
+
+#+begin_src emacs-lisp
+(setq create-lockfiles nil)
+#+end_src>
+
+** Don't autosave
+Even though I customize some variables above that have to do with auto
+saving, I don't want autosaving to happen in the first place anymore.
+
+#+begin_src emacs-lisp
+(setq auto-save-default nil)
+#+end_src>
+
 ** Use a custom location for "customize" settings
 
 #+BEGIN_SRC emacs-lisp
@@ -1059,7 +1078,7 @@ The documentation for this one (with examples) is in the source code.
   (use-package undo-tree
     :straight t
     :config
-    (global-undo-tree-mode)          ; use it everwhere!
+    (global-undo-tree-mode +1)          ; use it everwhere!
     ;; (setq evil-undo-system 'undo-tree)
     )
 #+END_SRC
