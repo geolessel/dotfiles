@@ -3,5 +3,5 @@
 # expand-env: ((yas-indent-line 'fixed))
 # --
 #+begin_src ${1:emacs-lisp}
-  $0
+$0
 #+end_src

@@ -22,16 +22,20 @@ For some good reading regard dynamic vs. lexical binding, I've found
 
 ** Increase garbage collector threshold
 The default is 800kB and increasing it will speed up startup time.
-Before we're done with the config though, we need to put it back down.
+Keep it high as suggested by =lsp-mode=.
 
 #+BEGIN_SRC emacs-lisp
-  (setq gc-cons-threshold 10000000)
-    ;; restore after startup
-    (add-hook 'after-init-hook
-      (lambda ()
-        (setq gc-cons-threshold 1000000)
-          (message "gc-cons-threshold restored to %S" gc-cons-threshold)))
+(setq gc-cons-threshold 10000000)
 #+END_SRC
+
+** Increase read-process-output-max
+Allows Emacs to read larger chunks of data at a time from
+subprocesses.
+
+#+begin_src emacs-lisp
+;; 1mb
+(setq read-process-output-max (* 1024 1024))
+#+end_src
 
 ** Bootstrap =straight= package manager
 #+BEGIN_SRC emacs-lisp
@@ -76,10 +80,15 @@ Before we're done with the config though, we need to put it back down.
 #+END_SRC
 
 *** Always install a package if it's not available
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
   (require 'use-package-ensure)
   (setq use-package-always-ensure t)
 #+END_SRC
+
+*** Use =straight= unless otherwise specified
+#+begin_src emacs-lisp
+(setq straight-use-package-by-default t)
+#+end_src
 
 ** Make sure $PATH is correct
 
@@ -107,7 +116,6 @@ issue.
       (exec-path-from-shell-initialize)))
 #+end_src
 
-
 * Emacs general system settings
 
 Configurations around Emacs itself (i.e. not from a package).
@@ -119,14 +127,15 @@ Configurations around Emacs itself (i.e. not from a package).
 
 ** Specify backup directory
  #+BEGIN_SRC emacs-lisp
-   (setq backup-directory-alist
-     '(("." . "~/.emacs-backups"))
-     backup-by-copying t   ; don't delink hardlinks
-     version-control t     ; use version numbers on backups
-     delete-old-versions t ; automatically delete excess backups
-     kept-new-versions 20  ; how many of the newest versions to keep
-     kept-old-versions 5   ; how many of the old versions to keep
-     )
+ (setq
+  backup-directory-alist '((".*" . "~/.emacs-backups"))
+  ;; auto-save-file-name-transforms '((".*" "~/.emacs-backups" t))
+  backup-by-copying t   ; don't delink hardlinks
+  version-control t     ; use version numbers on backups
+  delete-old-versions t ; automatically delete excess backups
+  kept-new-versions 20  ; how many of the newest versions to keep
+  kept-old-versions 5   ; how many of the old versions to keep
+  )
  #+END_SRC
 
 ** Don't create lockfiles
@@ -260,6 +269,15 @@ A value of =0= means it'll blink forever.
   (setq blink-cursor-blinks 0)
 #+end_src
 
+** Don't display load average when display time
+In the modeline, you can display the current time. However, it also,
+by default, displays the current load average. I don't want that on
+the modeline, so disable it.
+
+#+begin_src emacs-lisp
+(setq display-time-default-load-average nil)
+#+end_src
+
 * UI
 
 ** Themes
@@ -297,7 +315,7 @@ Other cool theme packages I've found.
 Here is the theme to load for this session.
 
 #+BEGIN_SRC emacs-lisp
-  (load-theme 'doom-dark+ t) ; t treats it as safe
+(load-theme 'doom-monokai-spectrum t) ; t treats it as safe
 #+END_SRC
 
 A good source of themes with previews is [[https://peach-melpa.org/][peach-melpa.org]].
@@ -462,6 +480,7 @@ match was found.
 (advice-add 'evil-search-previous :after
             #'geo/ui--pulse-highlight-current-line)
 #+end_src
+
 *** Dim all buffers except the active one
 It is sometimes difficult to see which buffer you are editing. The
 =dimmer= package dims the faces of other buffers to make that a bit
@@ -530,7 +549,6 @@ Keybindings are in the personal keybindings section.
     :config
     (popper-mode +1))
 #+end_src
-
 
 * Modes
 
@@ -867,7 +885,6 @@ files.
   (use-package docker-compose-mode
     :straight t)
 #+end_src
-
 
 * Editing
 
@@ -1421,7 +1438,6 @@ Quick usage tips:
     (global-evil-vimish-fold-mode))
 #+end_src
 
-
 * General packages
 
 Things that I couldn't think of a better top-level heading for.
@@ -1542,14 +1558,22 @@ prescient-filter-method.
 - [[https://github.com/raxod502/prescient.el][Github]]
 
 #+BEGIN_SRC emacs-lisp
-  (use-package prescient :straight t)
-  (use-package ivy-prescient
-    :straight t
-    :after (ivy counsel prescient)
-    :config
-    (ivy-prescient-mode t)
-    ;; describe-variable prescient-filter-method for docs
-    (setq prescient-filter-method '(literal regexp initialism)))
+(use-package prescient
+  :config
+  ;; save usage stats between sessions
+  (prescient-persist-mode t)
+  ;; describe-variable prescient-filter-method for docs
+  (setq prescient-filter-method '(literal regexp initialism)))
+
+(use-package ivy-prescient
+  :after (ivy counsel prescient)
+  :config
+  (ivy-prescient-mode t))
+
+(use-package company-prescient
+  :after (prescient)
+  :config
+  (company-prescient-mode t))
 #+END_SRC
 
 *** Replace M-x with Amx
@@ -1615,7 +1639,6 @@ I've heard that *vterm* is the bee's knees.
     (setq vterm-always-compile-module t))
 #+end_src
 
-
 * Personal functions and keybindings
 Make it mine. You can find a list of all personal keybindings
 with ~describe-personal-keybindings~.
@@ -1669,11 +1692,23 @@ equal 'branch --show-current'."
 (defun geo/git-list-branches ()
   "Return the list of branches in the current repo."
   (interactive)
-  ;; git for-each-ref --format='%(refname:short)' refs/heads/
   (let ((branches (geo/git-run-command
                    "for-each-ref --format='%(refname:short)' refs/heads/"
                    (called-interactively-p 'interactive))))
     branches))
+#+end_src
+
+**** Get the org and repo name of the remote
+#+begin_src emacs-lisp
+(defun geo/git-org-and-repo-name ()
+  "Returns the organization and repo name from remote."
+  (interactive)
+  (let ((full-remote
+         (geo/git-run-command "remote get-url origin")))
+    (message (replace-regexp-in-string
+     "\\.git$"
+     ""
+     (replace-regexp-in-string "\\(.*\\):" "" full-remote)))))
 #+end_src
 
 **** Open a PR for a local git branch on Github
@@ -1688,15 +1723,8 @@ equal 'branch --show-current'."
                        nil ;; initial
                        nil ;; history
                        (geo/git-current-branch-name)))
-         (full-remote
-          (geo/git-run-command "remote get-url origin"))
-         (org-and-repo
-          (replace-regexp-in-string
-           "\\.git$"
-           ""
-           (replace-regexp-in-string "\\(.*\\):" "" full-remote)))
          (github-url (format "https://github.com/%s/compare/%s?expand=1"
-                             org-and-repo
+                             (geo/git-org-and-repo-name)
                              branch-name)))
     (browse-url github-url)))
 #+end_src
@@ -1704,31 +1732,22 @@ equal 'branch --show-current'."
 **** Open the current file in Github
 #+begin_src emacs-lisp
 (defun geo/github-open-in-github ()
-  "open the current buffer's file on github; copy the url to the clipboard.
+  "Open the current buffer's file on github; copy the url to the clipboard.
 
-the current line will be selected on github. if a region is selected
+The current line will be selected on github. If a region is selected
 in the buffer, then that region will also be selected/highlighted
 on github."
   (interactive)
   (let* ((linenum-string (if (use-region-p)
-                             (format "#l%s-l%s"
+                             (format "#L%s-L%s"
                                      (line-number-at-pos (region-beginning) t)
                                      (line-number-at-pos (region-end) t))
-                           (format "#l%s" (line-number-at-pos nil t))))
-         (filename (buffer-file-name))
-         (full-remote
-          (geo/git-run-command "remote get-url origin"))
-         (org-and-repo
-          (replace-regexp-in-string
-           "\\.git$"
-           ""
-           (replace-regexp-in-string "\\(.*\\):" "" full-remote)))
-         (branch-name (geo/git-current-branch-name))
+                           (format "#L%s" (line-number-at-pos nil t))))
          (relative-filename (geo/project-relative-filename
                              (buffer-file-name)))
          (github-url (format "https://github.com/%s/blob/%s/%s%s"
-                             org-and-repo
-                             branch-name
+                             (geo/git-org-and-repo-name)
+                             (geo/git-current-branch-name)
                              relative-filename
                              linenum-string)))
     (if (eq system-type 'darwin)
@@ -1930,27 +1949,28 @@ the ability to toggle them.
 #+end_src
 
 #+begin_src emacs-lisp
-  (pretty-hydra-define geo/hydra-prefs-menu (:quit-key "q")
-    ("Display"
-     (("n" linum-mode "line number" :toggle t)
-      ("w" whitespace-mode "whitespace" :toggle t)
-      ("h" global-hl-line-mode "highlight line" :toggle t)
-      ("H" highlight-indent-guides-mode "highlight indents" :toggle t)
-      ("+" default-text-scale-increase "increase font size")
-      ("-" default-text-scale-decrease "decrease font size"))
-     ""
-     (("d" diff-hl-mode "diff-hl" :toggle t)
-      ("c" global-display-fill-column-indicator-mode "show fill column" :toggle t)
-      (")" geo/toggle-show-paren-style "show-paren style"))
-     "Editing"
-     (("p" electric-pair-mode "electric-pair" :toggle t)
-      ("f" auto-fill-mode "auto-fill"))
-     "Modeline"
-     (("m c" column-number-mode "column number" :toggle t)
-      ("m l" line-number-mode "line number" :toggle t)
-      ("m w" geo/doom-modeline-toggle-word-count "word count" :toggle doom-modeline-enable-word-count)
-      ("m p" geo/persp-mode-toggle-modestring "perspective list" :toggle persp-show-modestring))
-     ))
+(pretty-hydra-define geo/hydra-prefs-menu (:quit-key "q")
+  ("Display"
+   (("n" linum-mode "line number" :toggle t)
+    ("w" whitespace-mode "whitespace" :toggle t)
+    ("h" global-hl-line-mode "highlight line" :toggle t)
+    ("H" highlight-indent-guides-mode "highlight indents" :toggle t)
+    ("+" default-text-scale-increase "increase font size")
+    ("-" default-text-scale-decrease "decrease font size"))
+   ""
+   (("d" diff-hl-mode "diff-hl" :toggle t)
+    ("c" global-display-fill-column-indicator-mode "show fill column" :toggle t)
+    (")" geo/toggle-show-paren-style "show-paren style"))
+   "Editing"
+   (("p" electric-pair-mode "electric-pair" :toggle t)
+    ("f" auto-fill-mode "auto-fill"))
+   "Modeline"
+   (("m c" column-number-mode "column number" :toggle t)
+    ("m l" line-number-mode "line number" :toggle t)
+    ("m w" geo/doom-modeline-toggle-word-count "word count" :toggle doom-modeline-enable-word-count)
+    ("m p" geo/persp-mode-toggle-modestring "perspective list" :toggle persp-show-modestring)
+    ("m t" display-time-mode "display time" :toggle t))
+   ))
 #+end_src
 
 *** Projectile
@@ -2082,9 +2102,8 @@ forget what to call or what keys to press. This helps immensely.
        (("," geo/hydra-prefs-menu/body "Preferences"))))
 
   (define-key evil-normal-state-map (kbd "<SPC>") 'geo/hydra-top-menu/body)
-  (define-key evil-normal-state-map (kbd "<SPC>") 'geo/hydra-top-menu/body)
+  (define-key evil-visual-state-map (kbd "<SPC>") 'geo/hydra-top-menu/body)
 #+end_src
-
 
 * Things to check out and eventually add
 
@@ -2164,6 +2183,7 @@ I can't think of categories for these.
   customizable fashion. Essentially allows you to use emacs in other
   apps like web browser text fields.
 
+- [[https://github.com/emacscollective/no-littering][no-littering]] - keep .emacs.d clean and organized.
 
 * References
 
@@ -2172,7 +2192,6 @@ Helpful things I've found while researching configs.
 - [[https://github.com/emacs-tw/awesome-emacs][Awesome Emacs]] - categorized packages
 
 - https://jamiecollinson.com/blog/my-emacs-config/
-
 
 * Disabled packages
 :PROPERTIES:
@@ -2277,8 +2296,15 @@ might re-enable it at some point.
     )
 #+end_src
 
-
 * Local variables
 # Local Variables:
 # eval: (org-content 3)
 # End:
+
+* TODO
+** Turn off flycheck for emacs lisp (or little editor buffer thing)
+** wrangle temp files
+** turn off listing killed buffers in the switch buffer list
+** minor mode / package for testing
+
+** toggle Top/Bot/30% where-are-you-in-this-file indicator on modeline
