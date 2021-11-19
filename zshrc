@@ -4,8 +4,13 @@
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
+
+if command -v brew &> /dev/null; then
+  BREW_PREFIX=$(brew --prefix)
+fi
+
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-[[ -f $(brew --prefix)/opt/powerlevel10k/powerlevel10k.zsh-theme ]] && source $(brew --prefix)/opt/powerlevel10k/powerlevel10k.zsh-theme
+[[ -f $BREW_PREFIX/opt/powerlevel10k/powerlevel10k.zsh-theme ]] && source $BREW_PREFIX/opt/powerlevel10k/powerlevel10k.zsh-theme
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 source ~/usr/dotfiles/zsh/options
