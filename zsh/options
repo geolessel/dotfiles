@@ -67,6 +67,8 @@ else
 fi
 
 unsetopt ALL_EXPORT
+autoload -U bashcompinit
+bashcompinit
 autoload -U compinit
 compinit
 bindkey "^?" backward-delete-char
