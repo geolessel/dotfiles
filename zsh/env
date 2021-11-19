@@ -3,3 +3,6 @@ export PATH=/Users/geo/bin:$PATH
 
 # build erlang docs; enables `h :random.uniform` in IEx sessions
 export KERL_BUILD_DOCS="yes"
+
+# Turn on IEx shell history
+export ERL_AFLAGS="-kernel shell_history enabled"

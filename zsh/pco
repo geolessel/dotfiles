@@ -1,0 +1,12 @@
+source $HOME/pco-box/env.sh
+# export RBENV_ROOT=$HOME/.rbenv
+# export MYSQL_PORT_3306_TCP_ADDR=127.0.0.1
+# export MYSQL_READER_PORT_3306_TCP_ADDR=127.0.0.1
+# export MYSQL_READER_PORT_3306_TCP_PORT=3307
+# export PCO_BOX_LEAVE_DOCKER_RUNNING=true
+
+eval "$($HOME/Code/pco/bin/pco init -)"
+
+# make sure to load up ssh id before pco
+ssh-add -D > /dev/null 2>&1
+ssh-add $HOME/.ssh/id_rsa $HOME/.ssh/pco_id_rsa > /dev/null 2>&1
