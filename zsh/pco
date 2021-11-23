@@ -7,7 +7,7 @@
 
 [[ -f $HOME/Code/pco/bin/pco ]] && eval "$($HOME/Code/pco/bin/pco init -)"
 
-if [[ -f $HOME.ssh/pco_id_rsa ]]; then
+if [[ -f $HOME/.ssh/pco_id_rsa ]]; then
   # make sure to load up ssh id before pco
   ssh-add -D > /dev/null 2>&1
   ssh-add $HOME/.ssh/id_rsa $HOME/.ssh/pco_id_rsa > /dev/null 2>&1
