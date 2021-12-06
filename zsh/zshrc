@@ -1,10 +1,11 @@
 export ZDOTDIR=$HOME/.config/zsh
-fpath=($ZDOTDIR/completions $fpath)
 
 # If we haven't set BREW_PREFIX yet, do it here
 if [[ ! -v BREW_PREFIX ]] && command -v brew &> /dev/null; then
   BREW_PREFIX=$(brew --prefix)
 fi
+
+fpath=($ZDOTDIR/completions $BREW_PREFIX/share/zsh/site-functions $fpath)
 
 source "$ZDOTDIR/functions"
 
