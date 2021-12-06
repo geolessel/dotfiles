@@ -1,20 +1,25 @@
-daily() {
-  days=$1
-  previousdir=`pwd`
-  cd ~/Dropbox/Documents/Personal/Dailies
-  echo "Checking if daily exists..."
-  filedate=`date -d "$days days" +%Y%m%d`
-  if [[ -f $filedate.daily ]]; then
-    echo "File exists. Opening."
-  else
-    echo "File does not exist. Creating."
-    ruby newdaily.rb $filedate.daily $days
-  fi
-  vi $filedate.daily
-  cd $previousdir
+# Ideas taken from https://github.com/ChristianChiarulli/Machfiles/tree/master/zsh/.config/zsh
+function zsh_add_config() {
+  [ -f "$ZDOTDIR/$1" ] && source "$ZDOTDIR/$1"
 }
 
-xzip() {
-  echo "RUNNING tar -c \"$1\" | xz -9 --lzma2=preset=9,dict=512Mi > \"$1.tar.xz\""
-  tar -c "$1" | xz -9 --lzma2=preset=9,dict=512Mi > "$1.tar.xz"
+function zsh_add_plugin() {
+  PLUGIN_NAME=$(echo $1 | cut -d "/" -f 2)
+  if [ -d "$ZDOTDIR/plugins/$PLUGIN_NAME" ]; then
+    zsh_add_file "plugins/$PLUGIN_NAME/$PLUGIN_NAME.plugin.zsh" || \
+      zsh_add_file "plugins/$PLUGIN_NAME/$PLUGIN_NAME.zsh"
+  else
+    mkdir -p "$ZDOTDIR/plugins"
+    git clone "https://github.com/$1.git" "$ZDOTDIR/plugins/$PLUGIN_NAME"
+    zsh_add_plugin $1
+  fi
+}
+
+function zsh_add_completion_file() {
+  local FILE_NAME="_$1"
+  local COMPLETIONS_DIR="$ZDOTDIR/completions"
+  if [ ! -f "$COMPLETIONS_DIR/$FILE_NAME" ]; then
+    mkdir -p "$COMPLETIONS_DIR"
+    curl -L $2 -o "$COMPLETIONS_DIR/$FILE_NAME"
+  fi
 }

@@ -1,6 +1,36 @@
 export ZDOTDIR=$HOME/.config/zsh
+fpath=($ZDOTDIR/completions $fpath)
 
 # If we haven't set BREW_PREFIX yet, do it here
 if [[ ! -v BREW_PREFIX ]] && command -v brew &> /dev/null; then
   BREW_PREFIX=$(brew --prefix)
 fi
+
+source "$ZDOTDIR/functions"
+
+zsh_add_config "options"
+zsh_add_config "prompt"
+zsh_add_config "completion"
+zsh_add_config "bindings"
+zsh_add_config "pco"
+zsh_add_config "env"
+zsh_add_config "aliases"
+
+zsh_add_completion_file "docker" "https://raw.githubusercontent.com/docker/cli/master/contrib/completion/zsh/_docker"
+zsh_add_completion_file "docker-compose" "https://raw.githubusercontent.com/docker/compose/master/contrib/completion/zsh/_docker-compose"
+zsh_add_completion_file "mix" "https://raw.githubusercontent.com/zsh-users/zsh-completions/master/src/_mix"
+zsh_add_completion_file "node" "https://raw.githubusercontent.com/zsh-users/zsh-completions/master/src/_node"
+zsh_add_completion_file "nvm" "https://raw.githubusercontent.com/zsh-users/zsh-completions/master/src/_nvm"
+zsh_add_completion_file "bundle" "https://raw.githubusercontent.com/zsh-users/zsh-completions/master/src/_bundle"
+
+export HISTFILE=$HOME/.zhistory
+export HISTSIZE=1000
+export SAVEHIST=1000
+export PAGER='less'
+export LC_ALL='en_US.UTF-8'
+export LANG='en_US.UTF-8'
+export LC_CTYPE=C
+export EDITOR="nvim"
+export KEYTIMEOUT=1
+
+bindkey -v # turn on VI mode with ESC
