@@ -40,10 +40,21 @@ alias by='bundle && yarn'
 alias wds='bin/webpack-dev-server'
 
 ### File System
-alias l="ls -lh --color"
-alias ll="ls -lh --color"
-alias la="ls -A --color"
-alias lla="ls -lhA --color"
+case "$(uname -s)" in
+  Darwin)
+    alias l="ls -lhG"
+    alias ll="ls -lhG"
+    alias la="ls -AG"
+    alias lla="ls -lhAG"
+    ;;
+
+  Linux)
+    alias l="ls -lh --color"
+    alias ll="ls -lh --color"
+    alias la="ls -A --color"
+    alias lla="ls -lhA --color"
+    ;;
+esac
 
 ### Files
 alias untar="tar -xvzf"
