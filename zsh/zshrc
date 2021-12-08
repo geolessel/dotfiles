@@ -1,3 +1,5 @@
+[[ $TERM == "tramp" ]] && unsetopt zle && PS1='$ ' && return
+
 export ZDOTDIR=$HOME/.config/zsh
 
 # If we haven't set BREW_PREFIX yet, do it here
