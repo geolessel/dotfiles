@@ -278,6 +278,15 @@ the modeline, so disable it.
 (setq display-time-default-load-average nil)
 #+end_src
 
+** Make =tramp= identify itself
+
+=tramp= sets the $TERM to "dumb" by default. We can use this in remote
+startup configurations to conditionally do setup specific to Emacs.
+
+#+begin_src emacs-lisp
+(setq tramp-terminal-type "tramp")
+#+end_src
+
 * UI
 
 ** Themes
