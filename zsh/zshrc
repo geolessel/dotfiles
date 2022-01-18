@@ -11,13 +11,15 @@ fpath=($ZDOTDIR/completions $BREW_PREFIX/share/zsh/site-functions $fpath)
 
 source "$ZDOTDIR/functions"
 
+bindkey -v # turn on VI mode with ESC
+
 zsh_add_config "options"
 zsh_add_config "prompt"
 zsh_add_config "completion"
-zsh_add_config "bindings"
 zsh_add_config "pco"
 zsh_add_config "env"
 zsh_add_config "aliases"
+zsh_add_config "bindings"
 
 zsh_add_completion_file "docker" "https://raw.githubusercontent.com/docker/cli/master/contrib/completion/zsh/_docker"
 zsh_add_completion_file "docker-compose" "https://raw.githubusercontent.com/docker/compose/master/contrib/completion/zsh/_docker-compose"
@@ -35,5 +37,3 @@ export LANG='en_US.UTF-8'
 export LC_CTYPE=C
 export EDITOR="nvim"
 export KEYTIMEOUT=1
-
-bindkey -v # turn on VI mode with ESC

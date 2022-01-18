@@ -9,7 +9,7 @@ zstyle ':vcs_info:*' check-for-changes true # check the repo for changes and rep
 # add a function to check for untracked files in the directory.
 # from https://github.com/zsh-users/zsh/blob/master/Misc/vcs_info-examples
 zstyle ':vcs_info:git*+set-message:*' hooks git-untracked
-# 
+#
 +vi-git-untracked(){
   if [[ $(git rev-parse --is-inside-work-tree 2> /dev/null) == 'true' ]] && \
     git status --porcelain | grep '??' &> /dev/null ; then
@@ -25,4 +25,4 @@ zstyle ':vcs_info:git:*' formats \
        "%{$fg_bold[white]%}%{%G⎇%} %{$fg_bold[magenta]%} %b%{$fg_bold[yellow]%}%m%u%c "
 precmd () { vcs_info }
 
-PROMPT=$'\n%{$fg_no_bold[cyan]%}%m:%{$fg_bold[blue]%}%3~ ${vcs_info_msg_0_}%f\n%{$fg[green]%}>%f '
+PROMPT=$'\n%{$fg_no_bold[cyan]%}%m:%{$fg_bold[blue]%}%3~ ${vcs_info_msg_0_}%f\n%{$fg[green]%}>%f%{$reset_color%} '
