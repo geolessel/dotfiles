@@ -1,0 +1,11 @@
+function fzf-history-search {
+    local selected=$(cat ~/.zhistory | sed -E 's/^[^;]+;//' | fzf --tac --no-sort)
+    # set the line buffer to the selected entry
+    LBUFFER="$selected"
+    # if you want to automatically hit enter, uncomment below
+    # zle accept-line
+}
+zle -N fzf-history-search fzf-history-search
+
+# bindkey '^r' history-incremental-search-backward
+bindkey "^R" fzf-history-search

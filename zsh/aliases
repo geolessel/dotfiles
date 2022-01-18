@@ -1,7 +1,6 @@
-# Utility
+### Utility
 alias reload="source ~/usr/dotfiles/zsh/aliases"
 alias ea="$EDITOR ~/usr/dotfiles/zsh/aliases && reload"
-alias eatm="mate -w ~/usr/dotfiles/zsh/aliases && reload"
 alias ee="$EDITOR ~/usr/dotfiles/zsh/env"
 alias c="clear"
 alias cl="clear; l"
@@ -11,11 +10,11 @@ alias ll='ls -al'
 alias ds='du -sh * | sort -rh | head 10'
 alias dirs='dirs -v' # list the dir number always
 
-# Processes
+### Processes
 alias tu='top -o cpu' # sort by cpu
 alias tm='top -o rsize' # sort by memory
 
-# Git
+### Git
 alias g="git status -sb"
 alias ga="git add"
 alias gs="git status -sb"
@@ -33,39 +32,33 @@ alias gll="git log --decorate"
 # alias sanity_check="git diff `git rev-parse HEAD`"
 alias gitclean="git branch --merged master | grep -v \"\* master\" | xargs -n 1 git branch -d"
 
-# Development
+### Development
 alias b='bundle'
 alias be='bundle exec'
-alias ber='bundle exec rake'
+alias ber='bundle exec rails'
 alias by='bundle && yarn'
 alias wds='bin/webpack-dev-server'
 
-# File System
-alias l="ls -lh"
-alias ll="ls -lh"
-alias la="ls -A"
-alias lla="ls -lhA"
+### File System
+case "$(uname -s)" in
+  Darwin)
+    alias l="ls -lhG"
+    alias ll="ls -lhG"
+    alias la="ls -AG"
+    alias lla="ls -lhAG"
+    ;;
 
-# Files
+  Linux)
+    alias l="ls -lh --color"
+    alias ll="ls -lh --color"
+    alias la="ls -A --color"
+    alias lla="ls -lhA --color"
+    ;;
+esac
+
+### Files
 alias untar="tar -xvzf"
 
-# Quick way to rebuild the Launch Services database and get rid
-# of duplicates in the Open With submenu.
+### Quick way to rebuild the Launch Services database and get rid
+### of duplicates in the Open With submenu.
 alias fixopenwith='/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user'
-
-# PCO Vagrant Box
-alias pb='pco box'
-alias pbe='pb bundle exec'
-alias pbandj='pb bundle install'
-alias pbconsole='pb rails c'
-alias pbc='pb rails c'
-alias pbrestart='touch tmp/restart.txt'
-alias pbinstall='pb bundle install'
-alias pbforeman='pb foreman start'
-alias pbmigrate='pbe rake db:migrate'
-alias pbtl='pco box tl'
-alias pbst='pco box tail -f ../**/log/development.log'
-alias pbssh='pco box ssh'
-
-bindkey "^[[1;3C" forward-word
-bindkey "^[[1;3D" backward-word

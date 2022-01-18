@@ -1,31 +1,28 @@
-autoload colors zsh/terminfo
-setopt prompt_subst
+autoload -U colors && colors
+autoload -Uz vcs_info
+setopt PROMPT_SUBST  # allows using command return in prompt (see vcs_info quickstart)
 
-colors
+# I'm not going to be using any version control systems other than git, so only enable it
+zstyle ':vcs_info:*' enable git
+zstyle ':vcs_info:*' check-for-changes true # check the repo for changes and report in prompt
 
-for color in RED GREEN YELLOW BLUE MAGENTA CYAN WHITE; do
-  eval PR_$color='%{$terminfo[bold]$fg[${(L)color}]%}'
-  eval PR_LIGHT_$color='%{$fg[${(L)color}]%}'
-  (( count = $count + 1 ))
-done
-PR_NO_COLOR="%{$terminfo[sgr0]%}"
+# add a function to check for untracked files in the directory.
+# from https://github.com/zsh-users/zsh/blob/master/Misc/vcs_info-examples
+zstyle ':vcs_info:git*+set-message:*' hooks git-untracked
+#
++vi-git-untracked(){
+  if [[ $(git rev-parse --is-inside-work-tree 2> /dev/null) == 'true' ]] && \
+    git status --porcelain | grep '??' &> /dev/null ; then
+    # This will show the marker if there are any untracked files in repo.
+    # If instead you want to show the marker only if there are untracked
+    # files in $PWD, use:
+    #[[ -n $(git ls-files --others --exclude-standard) ]] ; then
+    hook_com[staged]+='?' # signify new files with a question mark
+  fi
+}
 
-if [[ -e $HOME/bin/git-prompt ]]; then
+zstyle ':vcs_info:git:*' formats \
+       "%{$fg_bold[white]%}%{%G⎇%} %{$fg_bold[magenta]%} %b%{$fg_bold[yellow]%}%m%u%c "
+precmd () { vcs_info }
 
-PROMPT='
-%(!.$PR_RED%U%n@%m%u %6c$PR_NO_COLOR.$PR_GREEN%m$PR_NO_COLOR $PR_LIGHT_GREEN%4c$PR_NO_COLOR) $PR_LIGHT_YELLOW$($HOME/bin/git-prompt)$PR_NO_COLOR
-%(!.$PR_RED#$PR_NO_COLOR.>) '
-# PROMPT='
-# %(!.$PR_RED%U%n@%m%u %6c$PR_NO_COLOR.$PR_GREEN%m$PR_NO_COLOR $PR_LIGHT_GREEN%4c$PR_NO_COLOR)
-# %(!.$PR_RED#$PR_NO_COLOR.>) '
-RPROMPT='
-%($PR_LIGHT_GREEN$($HOME/bin/hex-time)$PR_NO_COLOR
-<)'
-
-else
-
-PROMPT="
-%(!.$PR_RED%U%n@%m%u %6c$PR_NO_COLOR.$PR_GREEN%m$PR_NO_COLOR $PR_LIGHT_GREEN%4c$PR_NO_COLOR)
-%(!.$PR_RED#$PR_NO_COLOR.>) "
-
-fi
+PROMPT=$'\n%{$fg_no_bold[cyan]%}%m:%{$fg_bold[blue]%}%3~ ${vcs_info_msg_0_}%f\n%{$fg[green]%}>%f%{$reset_color%} '

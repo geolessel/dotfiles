@@ -22,3 +22,5 @@ emacs/emacs.d/straight
 
 vim/bundle/*
 vim/UltiSnips/*
+
+zsh/completions
