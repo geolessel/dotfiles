@@ -18,7 +18,7 @@ For some good reading regard dynamic vs. lexical binding, I've found
 
 #+begin_src emacs-lisp
 (setq lexical-binding t)
-#+end_src>
+#+end_src
 
 ** Increase garbage collector threshold
 The default is 800kB and increasing it will speed up startup time.
@@ -147,7 +147,7 @@ filesystem watchers. TURN IT OFF.
 
 #+begin_src emacs-lisp
 (setq create-lockfiles nil)
-#+end_src>
+#+end_src
 
 ** Don't autosave
 Even though I customize some variables above that have to do with auto
@@ -155,7 +155,7 @@ saving, I don't want autosaving to happen in the first place anymore.
 
 #+begin_src emacs-lisp
 (setq auto-save-default nil)
-#+end_src>
+#+end_src
 
 ** Use a custom location for "customize" settings
 
