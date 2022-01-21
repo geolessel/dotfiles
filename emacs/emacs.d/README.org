@@ -337,11 +337,17 @@ When you have the best font, use the best font.
   (set-frame-font "PragmataPro Liga-14" nil t)
 #+END_SRC
 
-Turn on ligature support in the emacs-mac build.
+GNU Emacs doesn't have great support for ligatures, but I defintely
+want them. Thankfully, I came across [[https://github.com/lumiknit/emacs-pragmatapro-ligatures][pragmatapro-lig]] specifically for
+enabling PragmataPro font ligatures, so let's use it.
 
-#+BEGIN_SRC emacs-lisp
-  (mac-auto-operator-composition-mode t)
-#+END_SRC
+#+begin_src emacs-lisp
+(use-package pragmatapro-lig
+  :straight '(pragmatapro-lig :type git :host github :repo "geolessel/emacs-pragmatapro-ligatures")
+  :init
+  (require 'pragmatapro-lig)
+  (pragmatapro-lig-global-mode))
+#+end_src
 
 By default Emacs scales fonts with =text-scale-increase= and
 =text-scale-decrease= per buffer. I'd rather have every buffer
