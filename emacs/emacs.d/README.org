@@ -1992,6 +1992,18 @@ keybinding, but I would like upgrade the search function to use
   (define-key evil-normal-state-map (kbd "/") 'swiper)
 #+end_src
 
+*** Open up this config file for editing
+
+It'd be nice to jump straight into this file for editing
+purposes.
+
+#+begin_src emacs-lisp
+(defun geo/edit-config-file ()
+  "Open the Emacs configuration for editing."
+  (interactive)
+  (find-file "~/.emacs.d/README.org"))
+#+end_src
+
 ** Hydra menus
 *** Apropros
 
@@ -2224,26 +2236,27 @@ My main hydra menu that provides help and direction. Sometimes I
 forget what to call or what keys to press. This helps immensely.
 
 #+begin_src emacs-lisp
-  (pretty-hydra-define geo/hydra-top-menu
-    (:title "The world's your oyster"
-       :quit-key "q"
-       :foreign-keys warn
-       :exit t)
-      ("Working"
-       (("w" geo/hydra-workspace-menu/body "Workspaces")
-        ("b" geo/hydra-buffer-menu/body "Buffers")
-        ("p" geo/hydra-projectile/body "Projectile")
-        ("g" magit-status "Magit")
-        ("G" geo/hydra-github-menu/body "Github"))
+(pretty-hydra-define geo/hydra-top-menu
+  (:title "The world's your oyster"
+     :quit-key "q"
+     :foreign-keys warn
+     :exit t)
+    ("Working"
+     (("w" geo/hydra-workspace-menu/body "Workspaces")
+      ("b" geo/hydra-buffer-menu/body "Buffers")
+      ("p" geo/hydra-projectile/body "Projectile")
+      ("g" magit-status "Magit")
+      ("G" geo/hydra-github-menu/body "Github"))
 
-       "Getting Help"
-       (("a" geo/hydra-apropos-menu/body "Apropos"))
+     "Getting Help"
+     (("a" geo/hydra-apropos-menu/body "Apropos"))
 
-       "Customizing"
-       (("," geo/hydra-prefs-menu/body "Preferences"))))
+     "Customizing"
+     (("," geo/hydra-prefs-menu/body "Preferences")
+      ("e" geo/edit-config-file "Edit config"))))
 
-  (define-key evil-normal-state-map (kbd "<SPC>") 'geo/hydra-top-menu/body)
-  (define-key evil-visual-state-map (kbd "<SPC>") 'geo/hydra-top-menu/body)
+(define-key evil-normal-state-map (kbd "<SPC>") 'geo/hydra-top-menu/body)
+(define-key evil-visual-state-map (kbd "<SPC>") 'geo/hydra-top-menu/body)
 #+end_src
 
 * Things to check out and eventually add
