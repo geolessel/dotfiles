@@ -259,8 +259,16 @@ typerwriter in the 1950s. A single space will do fine, thank you.
 ** Always delete trailing whitespace
 
 #+BEGIN_SRC emacs-lisp
-  (add-hook 'before-save-hook 'delete-trailing-whitespace)
+(add-hook 'before-save-hook #'delete-trailing-whitespace)
 #+END_SRC
+
+** Require a newline at the end of a file
+
+I think this is true by default, but let's make it explicit.
+
+#+begin_src emacs-lisp
+(setq require-final-newline t)
+#+end_src
 
 ** Turn on the row and column display in the modeline
 
