@@ -190,6 +190,14 @@ saving, I don't want autosaving to happen in the first place anymore.
   (scroll-bar-mode -1)
 #+END_SRC
 
+** Set the fill column to 78
+
+I'm kinda old-school (at least by default).
+
+#+begin_src emacs-lisp
+(set-fill-column 78)
+#+end_src
+
 ** Show the fill-line column indicator
 
 Set the column to show it at with =set-fill-column=.
