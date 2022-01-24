@@ -983,6 +983,23 @@ files.
     :straight t)
 #+end_src
 
+** Assembly
+
+I've included my own package in a local folder, and I'd like to use it
+while writing 6502 assembly.
+
+After writing the basic functionality of my own =6502-mode=, I
+discovered that one already exists. I could have sworn I searched for
+one before I wrote mine. Regardless, writing my own major mode is a
+good enough exercise that I'll continue using my own for now.
+
+Other one: https://github.com/wendelscardua/ca65-mode
+
+#+begin_src emacs-lisp
+(require 'ca65-mode)
+(add-to-list 'auto-mode-alist '("\\.asm?$" . ca65-mode))
+#+end_src
+
 * Editing
 
   Things that provide general, non-language specific editing functionality.
