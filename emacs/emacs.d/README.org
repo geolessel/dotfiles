@@ -1535,6 +1535,19 @@ symbols through ~lsp-ivy-workspace-symbol~ and
     :hook (company-mode . company-box-mode))
 #+end_src
 
+*** Dash
+
+I use [[https://kapeli.com/dash][Dash]] for API documentation. This makes it so that I can get
+documentation on the thing under my cursor.
+
+#+begin_src emacs-lisp
+(use-package dash-at-point
+  :straight t
+  :bind
+  ("C-c d" . dash-at-point-with-docset)
+  ("C-c D" . dash-at-point))
+#+end_src
+
 ** Code folding
 
 =evil-vimish-fold= provides vim-like code folding for a large
