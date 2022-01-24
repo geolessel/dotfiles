@@ -116,6 +116,15 @@ issue.
       (exec-path-from-shell-initialize)))
 #+end_src
 
+** Add custom packages path
+
+For custom packages and things not available on melpa, this directory
+stores things I'd still like to have included when starting Emacs.
+
+#+begin_src emacs-lisp
+(add-to-list 'load-path (concat user-emacs-directory "packages/"))
+#+end_src
+
 * Emacs general system settings
 
 Configurations around Emacs itself (i.e. not from a package).
