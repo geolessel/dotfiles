@@ -349,46 +349,67 @@ I prefer to use the Command key as the meta key on Mac.
 #+end_src>
 
 * UI
-
 ** Themes
 Doom emacs has some great themes. Let's use them!
 
 #+BEGIN_SRC emacs-lisp
-  (use-package doom-themes
-    :straight t)
+(use-package doom-themes
+  :straight t)
 #+END_SRC
 
 I love the monokai theme and would like to use it. Bring it in.
 
 #+begin_src emacs-lisp
-  (use-package monokai-theme
-    :straight t)
+(use-package monokai-theme
+  :straight t)
 #+end_src
 
 Other cool theme packages I've found.
 
 #+begin_src emacs-lisp
-  (use-package tron-legacy-theme
-    :straight t
-    :config
-    (setq tron-legacy-theme-vidid-cursor t))
+(use-package tron-legacy-theme
+  :straight t
+  :config
+  (setq tron-legacy-theme-vidid-cursor t))
 
-  (use-package kaolin-themes
-    :straight t)
+(use-package kaolin-themes
+  :straight t)
 
-  (use-package modus-themes
-    :straight t
-    :init
-    (modus-themes-load-themes))
+(use-package modus-themes
+  :straight t
+  :init
+  (modus-themes-load-themes))
 #+end_src
 
 Here is the theme to load for this session.
 
 #+BEGIN_SRC emacs-lisp
-(load-theme 'doom-monokai-spectrum t) ; t treats it as safe
+(load-theme 'doom-moonlight t) ; t treats it as safe
 #+END_SRC
 
 A good source of themes with previews is [[https://peach-melpa.org/][peach-melpa.org]].
+
+*** Some other favorites
+
+Dark
+- doom-one
+- doom-laserwave
+- doom-Iosvkem
+- doom-moonlight
+- doom-horizon
+- kaolin-galaxy (kind of like a green galaga?!)
+- doom-challenger-deep
+- doom-molokai
+- doom-oceanic-next
+- doom-outrun-electric
+- doom-palenight
+- doom-spacegrey (low contrast; maybe good for night)
+
+Light
+- doom-opera-light
+- doom-one-light
+- doom-tomorrow-day (pretty bright)
+- modus-operandi
 
 ** Font
 
