@@ -828,8 +828,9 @@ Some options that may be worth fiddling with in the future:
 The default for =js-mode= is to indent at 4 spaces. NOPE.
 
 #+begin_src emacs-lisp
-  (setq-default js-indent-level 2)
+(setq-default js-indent-level 2)
 #+end_src
+
 ** JSON
 =json-mode= extends the builtin =js-mode= to add better syntax
 highlighting for JSON and some editing keybindings.
@@ -891,7 +892,6 @@ warnings and errors that are really annoying since we use
   (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
   (setq-default web-mode-code-indent-offset 2))
 #+end_src
-
 
 ** TypeScript
 
@@ -1307,12 +1307,11 @@ The documentation for this one (with examples) is in the source code.
 - [[https://www.dr-qubit.org/undo-tree.html][Homepage]]
 
 #+BEGIN_SRC emacs-lisp
-  (use-package undo-tree
-    :straight t
-    :config
-    (global-undo-tree-mode +1)          ; use it everwhere!
-    ;; (setq evil-undo-system 'undo-tree)
-    )
+(use-package undo-tree
+  :straight t
+  :config
+  (setq evil-undo-system 'undo-tree)
+  (global-undo-tree-mode))          ; use it everwhere!
 #+END_SRC
 
 ** Snippets
@@ -1399,9 +1398,6 @@ Settings:
 
 With =flycheck=.
 
-I don't use =ruby-reek= as a checker, so explicitly disable that
-since it is enabled for Ruby buffers by default.
-
 [[https://www.flycheck.org/en/latest/][Homepage]]
 
 For eslint, I'd like to use the node_modules version before any global
@@ -1419,6 +1415,9 @@ version.
     (when (and eslint (file-executable-p eslint))
       (setq-local flycheck-javascript-eslint-executable eslint))))
 #+end_src
+
+I don't use =ruby-reek= as a checker, so explicitly disable that
+since it is enabled for Ruby buffers by default.
 
 #+begin_src emacs-lisp
 (use-package flycheck
@@ -2274,6 +2273,8 @@ forget what to call or what keys to press. This helps immensely.
 - [[https://github.com/joostkremers/writeroom-mode][writeroom-mode]] to change the editor into a distraction-free
   editor (for blog posts). [[https://gitlab.com/jabranham/mixed-pitch][mixed-pitch]] to display both variable-
   and fixed-width fonts at the same time would be a good companion.
+- [[https://github.com/oantolin/embark][embark]] to run actions on a target. See the [[https://www.youtube.com/watch?v=qk2Is_sC8Lk][System Crafters video]] for
+  more info.
 
 ** Apps within the app
 
@@ -2320,6 +2321,9 @@ forget what to call or what keys to press. This helps immensely.
   new buffer for every directory visited.
 
 - [[https://depp.brause.cc/shackle/][shackle]] - take better control of buffers and their placement.
+
+- [[https://github.com/magnars/multiple-cursors.el][multiple-cursors]] - edit similar text with multiple cursors
+  simultaneously.
 
 ** Org Mode
 
