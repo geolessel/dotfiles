@@ -226,8 +226,12 @@ If the matching paren isn't visible, highlight the entire expression.
 
 ** Always use spaces for tabs
 
+Never use tabs. We need =setq-default= here because this becomes a
+buffer-local variable when set. See
+https://blog.sumtypeofway.com/posts/emacs-config.html.
+
 #+BEGIN_SRC emacs-lisp
-  (setq-default indent-tabs-mode nil)
+(setq-default indent-tabs-mode nil)
 #+END_SRC
 
 ** Turn off the error bell
