@@ -326,6 +326,16 @@ startup configurations to conditionally do setup specific to Emacs.
 (setq tramp-terminal-type "tramp")
 #+end_src
 
+** Use command as meta and option as super on Mac
+
+I prefer to use the Command key as the meta key on Mac.
+
+#+begin_src emacs-lisp
+(setq mac-option-modifier 'super)
+(setq mac-command-modifier 'meta)
+(setq mac-command-key-is-meta t)
+#+end_src
+
 * UI
 
 ** Themes
