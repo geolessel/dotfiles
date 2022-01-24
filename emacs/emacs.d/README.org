@@ -336,6 +336,18 @@ I prefer to use the Command key as the meta key on Mac.
 (setq mac-command-key-is-meta t)
 #+end_src
 
+** UTF-8 should always be the default charset
+
+#+begin_src emacs-lisp
+(set-charset-priority 'unicode 'ascii)
+(setq locale-coding-system 'utf-8)
+(set-terminal-coding-system 'utf-8)
+(set-keyboard-coding-system 'utf-8)
+(set-selection-coding-system 'utf-8)
+(prefer-coding-system 'utf-8)
+(setq default-process-coding-system '(uft-8-unix . utf-8-unix))
+#+end_src>
+
 * UI
 
 ** Themes
