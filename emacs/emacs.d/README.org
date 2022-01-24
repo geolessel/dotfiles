@@ -1049,6 +1049,20 @@ you type.
 )
 #+END_SRC
 
+*** expand-region
+
+This package gets your current place in the buffer and intellegently
+expands the selection outward. For example, if the cursor is inside a
+word, it'll first expand to contain the word, then perhaps a string
+inside quotations marks, then include the quotation marks, then out to
+the containing function, etc., etc.
+
+#+begin_src emacs-lisp
+(use-package expand-region
+  :straight t
+  :bind ("C-=" . er/expand-region))
+#+end_src
+
 ** Buffers
 *** Group buffers in ibuffer
 Group buffers in ibuffer list by projectile project with *ibuffer-projectile*.
