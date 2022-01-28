@@ -2020,8 +2020,12 @@ The executable needs to be installed in the project's node_modules."
          (executable (concat project-root-dir "node_modules/.bin/eslint")))
     (make-process :name "geo/eslint-fix"
                   :buffer buffer
-                  :command `(,executable "--fix" ,filename))
-    (revert-buffer t t t)
+                  :command `(,executable "--fix" ,filename)
+                  :sentinel (lambda (process event)
+                              (cond
+                               ((equal "finished" event)
+                                (revert-buffer t t t))
+                               (t (message "geo/eslint-fix received event: %s" event)))))
     (message "eslint formatted %s" filename)))
 #+end_src
 ** Hydra menus
