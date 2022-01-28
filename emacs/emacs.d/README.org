@@ -2003,6 +2003,27 @@ purposes.
   (find-file "~/.emacs.d/README.org"))
 #+end_src
 
+*** Run eslint --fix on the current buffer
+I've found problems with both the =eslint-fix= and =eslintd-fix=
+packages and I couldn't get them working. I swear they worked at one
+point. Regardless, this is my own simple version.
+
+#+begin_src emacs-lisp
+(defun geo/eslint-fix ()
+  "Run eslint on the current buffer.
+
+The executable needs to be installed in the project's node_modules."
+  (interactive)
+  (let* ((filename (buffer-file-name))
+         (buffer (get-buffer-create "*geo/eslint-fix*"))
+         (project-root-dir (cdr (project-current)))
+         (executable (concat project-root-dir "node_modules/.bin/eslint")))
+    (make-process :name "geo/eslint-fix"
+                  :buffer buffer
+                  :command `(,executable "--fix" ,filename))
+    (revert-buffer t t t)
+    (message "eslint formatted %s" filename)))
+#+end_src
 ** Hydra menus
 *** Apropros
 
