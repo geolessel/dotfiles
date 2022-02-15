@@ -1055,44 +1055,6 @@ as the preferred checker even in typescript files.
             (lambda () (setq flycheck-checker 'javascript-eslint))))
 #+end_src
 
-** Tide
-
-=tide= provides some pretty sweet functions for editing typescript
-files, so we will use that automatically.
-
-- ~M-.~ on a function, variable, or type (or other "thing") will jump
-  to the definition of that thing
-- ~M-,~ after arriving at the definition via ~M-.~, go back to where
-  you were previously
-
-[[https://github.com/ananthakumaran/tide/][Github]]
-
-#+begin_src emacs-lisp
-(defun geo/setup-tide-mode ()
-  (interactive)
-  (tide-setup)
-  (flycheck-mode +1)
-  (setq flycheck-check-syntax-automatically '(save mode-enabled))
-  (eldoc-mode +1)
-  (tide-hl-identifier-mode +1)
-  (company-mode +1))
-
-(add-hook 'typescript-mode-hook 'tide-format-before-save)
-
-(use-package tide
-  :ensure t
-  :after (typescript-mode company flycheck)
-  :init
-  (setq-default tide-completion-detailed t)
-  :config
-  (if (macrop 'evil-define-key)
-      (evil-define-key
-        'normal tide-mode-map (kbd "M-.") 'tide-jump-to-definition))
-  :hook ((typescript-mode . geo/setup-tide-mode)
-         (typescript-mode . tide-hl-identifier-mode)
-         (before-save . tide-format-before-save)))
-#+end_src
-
 ** Slim
 
 #+begin_src emacs-lisp
@@ -2648,6 +2610,44 @@ might re-enable it at some point.
     :straight t
     :after magit
     )
+#+end_src
+
+** Tide
+
+=tide= provides some pretty sweet functions for editing typescript
+files, so we will use that automatically.
+
+- ~M-.~ on a function, variable, or type (or other "thing") will jump
+  to the definition of that thing
+- ~M-,~ after arriving at the definition via ~M-.~, go back to where
+  you were previously
+
+[[https://github.com/ananthakumaran/tide/][Github]]
+
+#+begin_src emacs-lisp :tangle no
+(defun geo/setup-tide-mode ()
+  (interactive)
+  (tide-setup)
+  (flycheck-mode +1)
+  (setq flycheck-check-syntax-automatically '(save mode-enabled))
+  (eldoc-mode +1)
+  (tide-hl-identifier-mode +1)
+  (company-mode +1))
+
+(add-hook 'typescript-mode-hook 'tide-format-before-save)
+
+(use-package tide
+  :ensure t
+  :after (typescript-mode company flycheck)
+  :init
+  (setq-default tide-completion-detailed t)
+  :config
+  (if (macrop 'evil-define-key)
+      (evil-define-key
+        'normal tide-mode-map (kbd "M-.") 'tide-jump-to-definition))
+  :hook ((typescript-mode . geo/setup-tide-mode)
+         (typescript-mode . tide-hl-identifier-mode)
+         (before-save . tide-format-before-save)))
 #+end_src
 
 * Local variables
