@@ -1463,12 +1463,13 @@ can utilize that server to make fixes in our javascript files.
 #+begin_src emacs-lisp
 (defvar geo/eslint_d-exec-path "~/.config/yarn/global/node_modules/.bin")
 
-  (use-package eslintd-fix
-    :straight t
-    :config
-    (add-hook 'js-mode-hook 'eslintd-fix-mode)
-    ; we need the location of eslint_d
-    (add-to-list 'exec-path geo/eslint_d-exec-path))
+(use-package eslintd-fix
+  :straight t
+  :config
+  (add-hook 'js-mode-hook 'eslintd-fix-mode)
+  (add-hook 'typescript-mode-hook 'eslintd-fix-mode)
+  ; we need the location of eslint_d
+  (add-to-list 'exec-path geo/eslint_d-exec-path))
 #+end_src
 
 *** format-all
@@ -1502,6 +1503,19 @@ Settings:
     ; disable this mode in js files since we'll be running eslintd-fix-mode
     (add-hook 'js-mode-hook (lambda () (format-all-mode 0)))
   )
+#+end_src
+
+*** prettier
+
+I've had some issues with format-all-mode and have decided to go with
+tools specific to the language I'm writing. To that end, prettier will
+format js/ts code (and some others).
+
+#+begin_src emacs-lisp
+(use-package prettier
+  :straight t
+  :config
+  (add-hook 'after-init-hook #'global-prettier-mode))
 #+end_src
 
 ** Syntax checking
@@ -1575,15 +1589,15 @@ messages inline with =flycheck-inline=.
 *** lsp-mode
 
 #+begin_src emacs-lisp
-  (use-package lsp-mode
-    :straight t
-    :init
-    (setq lsp-keymap-prefix "C-c l")
-    :hook (
-      (js-mode . lsp-deferred)
-      (lsp-mode . lsp-enable-which-key-integration))
-    :commands (lsp lsp-deferred)
-    )
+(use-package lsp-mode
+  :straight t
+  :init
+  (setq lsp-keymap-prefix "C-c l")
+  :hook (
+    (typescript-mode . lsp-deferred)
+    (js-mode . lsp-deferred)
+    (lsp-mode . lsp-enable-which-key-integration))
+  :commands (lsp lsp-deferred))
 #+end_src
 
 *** lsp-ui
@@ -2141,6 +2155,9 @@ I've found problems with both the =eslint-fix= and =eslintd-fix=
 packages and I couldn't get them working. I swear they worked at one
 point. Regardless, this is my own simple version.
 
+UPDATE: I've been able to get eslintd-fix to work again, so I'm going
+back to that as it is much faster.
+
 #+begin_src emacs-lisp
 (defun geo/eslint-fix ()
   "Run eslint on the current buffer.
@@ -2151,15 +2168,20 @@ The executable needs to be installed in the project's node_modules."
          (buffer (get-buffer-create "*geo/eslint-fix*"))
          (project-root-dir (cdr (project-current)))
          (executable (concat project-root-dir "node_modules/.bin/eslint")))
-    (make-process :name "geo/eslint-fix"
-                  :buffer buffer
-                  :command `(,executable "--fix" ,filename)
-                  :sentinel (lambda (process event)
-                              (cond
-                               ((equal "finished" event)
-                                (revert-buffer t t t))
-                               (t (message "geo/eslint-fix received event: %s" event)))))
-    (message "eslint formatted %s" filename)))
+    (if (file-executable-p executable)
+        (make-process
+         :name "geo/eslint-fix"
+         :buffer buffer
+         :command `(,executable "--fix" ,filename)
+         :sentinel `(lambda (process event)
+                     (cond
+                      ((equal "finished\n" event)
+                       (revert-buffer t t t)
+                       (message "eslint formatted %s" ,filename))
+                      (t (message "geo/eslint-fix received event: %s" event)))))
+      (message "eslint executable not found: %s" executable))))
+(defun geo/eslint-fix--enable-hook () (add-hook 'after-save-hook #'geo/eslint-fix))
+;; (add-hook 'typescript-mode-hook geo/eslint-fix--enable-hook)
 #+end_src
 ** Hydra menus
 *** Apropros
