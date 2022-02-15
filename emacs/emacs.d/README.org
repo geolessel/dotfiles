@@ -782,6 +782,13 @@ cover properly by default, such as help-mode, M-x calendar, Eshell and more.
 
 Some little things to make =org-mode= better.
 
+*** Don't split a line when adding a subheading
+Why would you ever want this?
+
+#+begin_src emacs-lisp
+(setq org-M-RET-may-split-line nil)
+#+end_src
+
 *** Show bullets as utf-8 characters
 
 I've also customized which characters the bullets are.
