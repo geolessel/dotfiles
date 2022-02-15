@@ -17,7 +17,7 @@ For some good reading regard dynamic vs. lexical binding, I've found
 [[https://www.emacswiki.org/emacs/DynamicBindingVsLexicalBinding][this page on Emacs Wiki]] to be good.
 
 #+begin_src emacs-lisp
-(setq lexical-binding t)
+(setq-default lexical-binding t)
 #+end_src
 
 ** Increase garbage collector threshold
