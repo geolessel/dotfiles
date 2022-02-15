@@ -1,5 +1,5 @@
-#+TITLE: Geo's emacs config
 #+AUTHOR: Geoffrey Lessel
+#+TITLE: Geo's emacs config
 
 * Startup
 
@@ -355,6 +355,7 @@ auto-revert to the current state of the file.
 #+begin_src emacs-lisp
 (setq global-auto-revert-mode t)
 #+end_src
+
 * UI
 ** Themes
 Doom emacs has some great themes. Let's use them!
