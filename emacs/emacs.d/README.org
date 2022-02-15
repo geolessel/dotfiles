@@ -880,6 +880,62 @@ first line. So instead, reduce it to 0 spaces.
 #+begin_src emacs-lisp
 (setq org-edit-src-content-indentation 0)
 #+end_src
+*** org-capture
+**** General settings
+#+begin_src emacs-lisp
+(setq org-directory (concat user-emacs-directory "org")
+      org-default-notes-file (concat org-directory "/notes.org"))
+
+(global-set-key (kbd "C-,") #'org-capture)
+#+end_src
+
+**** My templates
+#+begin_src emacs-lisp
+(setq
+ org-capture-templates
+ '(
+   ("n" "What I'm working on now" entry (file+olp+datetree "~/.emacs.d/org/now.org")
+    "* %T %?\n%l\n%i" :tree-type week)
+   ("t" "Create a TODO for today" entry (file+olp+datetree "~/.emacs.d/org/now.org")
+    "* TODO: %?" :tree-type week)))
+#+end_src
+
+**** Auto-clock file editing
+For time-tracking purposes, I'd like to know when I switch from
+editing one file to another. In order to do this, I'm hooking into
+~window-buffer-change-hook~ which then calls my function which calls my
+org-capture-like editing function.
+
+#+begin_src emacs-lisp
+(defun geo/org-record-editing-of-file ()
+  "Clock in editing the current file."
+  (interactive)
+  (let ((filename (or (buffer-file-name) (buffer-name)))
+        (project (geo/project-name-from-directory-of-file)))
+    ;; don't record visiting "*" buffers (e.g. *Messages*, *scratch*, etc)
+    ;; as it gets too noisy (minibuffers seem to start with a space)
+    (when (and (not (string-prefix-p "*" filename))
+               (not (string-prefix-p " *" filename)))
+      (with-current-buffer
+        (find-file-noselect (concat org-directory "/auto-time-tracker.org") t t nil)
+        (org-datetree-find-iso-week-create (calendar-current-date))
+        (goto-char (point-at-eol))
+        (org-narrow-to-subtree)
+        (when (not (re-search-forward
+                    (format org-complex-heading-regexp-format
+                            (regexp-quote filename)) nil t))
+          (org-insert-subheading 0)
+          (insert filename)
+          (when project (org-set-tags project)))
+        ;; prevent stopping and starting the same file task
+        (when (not (equal org-clock-current-task filename))
+          (org-clock-out nil t)
+          (org-clock-in))
+        (widen)
+        (save-buffer)))))
+
+(add-hook 'window-state-change-hook #'geo/org-record-editing-of-file)
+#+end_src
 
 ** Ruby
 *** Ruby mode
