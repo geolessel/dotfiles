@@ -734,7 +734,6 @@ Keybindings are in the personal keybindings section.
 #+end_src
 
 * Modes
-
 ** Evil
 
 Make it like vim!
@@ -790,27 +789,27 @@ I've also customized which characters the bullets are.
 [[https://github.com/sabof/org-bullets][Github]]
 
 #+begin_src emacs-lisp
-  (use-package org-bullets
-    :straight t
-    :hook (org-mode . org-bullets-mode)
-    :custom
-    (org-bullets-bullet-list '("⦿" "○" "●" "○" "●" "○" "●")))
+(use-package org-bullets
+  :straight t
+  :hook (org-mode . org-bullets-mode)
+  :custom
+  (org-bullets-bullet-list '("⦿" "○" "●" "○" "●" "○" "●")))
 #+end_src
 
 *** Change the default ellipsis on collapsed headings
 
 #+begin_src emacs-lisp
-  (setq org-ellipsis " ⏷")
+(setq org-ellipsis " ⏷")
 #+end_src
 
 *** Keep indentation consistent visually
 
-This won't chang the underyling text file, but I don't think I care
+This won't change the underyling text file, but I don't think I care
 too much about that. I only care that the resulting view in my editor
 is nicely indented without me having to think too much about it.
 
 #+begin_src emacs-lisp
-  (add-hook 'org-mode-hook 'org-indent-mode)
+(add-hook 'org-mode-hook 'org-indent-mode)
 #+end_src
 
 *** Enable auto-fill-mode by default
@@ -819,7 +818,7 @@ doing some writing. And when I'm doing some writing, I prefer to have
 =auto-fill-mode= on. So turn it on by default!
 
 #+begin_src emacs-lisp
-  (add-hook 'org-mode-hook 'auto-fill-mode)
+(add-hook 'org-mode-hook 'auto-fill-mode)
 #+end_src
 
 *** http requests
@@ -845,23 +844,23 @@ header variables/options you can provide in a request.
 | =:resolve=    | =--resolve=    | =:resolve example.com:80:127.0.0.1,example.com:443:127.0.0.1=                           |
 
 #+begin_src emacs-lisp
-  (use-package ob-http :straight t)
+(use-package ob-http :straight t)
 #+end_src
 
 *** Enable babel modes for languages
 #+begin_src emacs-lisp
-  (org-babel-do-load-languages 'org-babel-load-languages
-                               '((emacs-lisp . t)
-                                 (shell . t)
-                                 (http . t)
-                                 (ruby . t)))
+(org-babel-do-load-languages 'org-babel-load-languages
+                             '((emacs-lisp . t)
+                               (shell . t)
+                               (http . t)
+                               (ruby . t)))
 #+end_src
 
 *** Asynchronous execution of code blocks
 To get the async execution, add the ~:async~ keyword to a code block.
 
 #+begin_src emacs-lisp
-  (use-package ob-async :straight t)
+(use-package ob-async :straight t)
 #+end_src
 
 *** Reduce indentation in source blocks to 0
@@ -1437,7 +1436,7 @@ can utilize that server to make fixes in our javascript files.
 [[https://github.com/aaronjensen/eslintd-fix][Github]]
 
 #+begin_src emacs-lisp
-  (defvar geo/eslint_d-exec-path "~/.config/yarn/global/node_modules/.bin")
+(defvar geo/eslint_d-exec-path "~/.config/yarn/global/node_modules/.bin")
 
   (use-package eslintd-fix
     :straight t
@@ -2255,7 +2254,7 @@ all? Now I don't have to!
       (("/" projectile-ag "ag")
        ("?" counsel-projectile-ag "ag (with counsel)")
        ("g" projectile-grep "grep")
-       ("r" prejectile-ripgrep "ripgrep"))
+       ("r" projectile-ripgrep "ripgrep"))
 
       "Management"
       (("p" counsel-projectile-switch-project "Switch project")
