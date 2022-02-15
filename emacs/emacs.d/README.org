@@ -348,6 +348,13 @@ I prefer to use the Command key as the meta key on Mac.
 (setq default-process-coding-system '(uft-8-unix . utf-8-unix))
 #+end_src>
 
+** Revert when a buffer's file changes
+When a buffer is pointing a file that changes underneath it, we should
+auto-revert to the current state of the file.
+
+#+begin_src emacs-lisp
+(setq global-auto-revert-mode t)
+#+end_src
 * UI
 ** Themes
 Doom emacs has some great themes. Let's use them!
