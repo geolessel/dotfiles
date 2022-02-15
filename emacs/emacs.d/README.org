@@ -1990,6 +1990,8 @@ on github."
 #+end_src
 
 *** Project-related
+**** Get filename relative to the project root.
+
 #+begin_src emacs-lisp
 (defun geo/project-relative-filename (filename)
   "Return the filename relative to the project root."
@@ -1999,6 +2001,27 @@ on github."
     (when (called-interactively-p 'interactive)
       (message relative-filename))
     relative-filename))
+#+end_src
+
+**** Get project directory name (not path)
+There are some instances in which I only want the final directory name
+that the project is in as this is typically the name of the project
+itself.
+
+#+begin_src emacs-lisp
+(defun geo/project-name-from-directory-of-file (&optional filename)
+  "Return the name of the project derived from the project directory."
+  (interactive "fFile: ")
+  (let ((proj-current (project-current)))
+    (when proj-current
+      (let ((dir
+             (file-name-nondirectory
+              (directory-file-name
+               (file-name-directory
+                (cdr (project-current)))))))
+        (when (called-interactively-p 'interactive)
+          (message dir))
+        dir))))
 #+end_src
 
 ** Buffer/window management
