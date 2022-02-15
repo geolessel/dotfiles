@@ -1,5 +1,5 @@
 function fzf-history-search {
-    local selected=$(cat ~/.zhistory | sed -E 's/^[^;]+;//' | fzf --tac --no-sort)
+    local selected=$(cat ~/.zhistory | sed -E 's/^[^;]+;//' | fzf --tac --no-sort --exact)
     # set the line buffer to the selected entry
     LBUFFER="$selected"
     # if you want to automatically hit enter, uncomment below

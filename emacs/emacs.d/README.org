@@ -17,8 +17,8 @@ For some good reading regard dynamic vs. lexical binding, I've found
 [[https://www.emacswiki.org/emacs/DynamicBindingVsLexicalBinding][this page on Emacs Wiki]] to be good.
 
 #+begin_src emacs-lisp
-(setq lexical-binding t)
-#+end_src>
+(setq-default lexical-binding t)
+#+end_src
 
 ** Increase garbage collector threshold
 The default is 800kB and increasing it will speed up startup time.
@@ -116,6 +116,15 @@ issue.
       (exec-path-from-shell-initialize)))
 #+end_src
 
+** Add custom packages path
+
+For custom packages and things not available on melpa, this directory
+stores things I'd still like to have included when starting Emacs.
+
+#+begin_src emacs-lisp
+(add-to-list 'load-path (concat user-emacs-directory "packages/"))
+#+end_src
+
 * Emacs general system settings
 
 Configurations around Emacs itself (i.e. not from a package).
@@ -147,7 +156,7 @@ filesystem watchers. TURN IT OFF.
 
 #+begin_src emacs-lisp
 (setq create-lockfiles nil)
-#+end_src>
+#+end_src
 
 ** Don't autosave
 Even though I customize some variables above that have to do with auto
@@ -155,7 +164,7 @@ saving, I don't want autosaving to happen in the first place anymore.
 
 #+begin_src emacs-lisp
 (setq auto-save-default nil)
-#+end_src>
+#+end_src
 
 ** Use a custom location for "customize" settings
 
@@ -180,6 +189,14 @@ saving, I don't want autosaving to happen in the first place anymore.
 #+BEGIN_SRC emacs-lisp
   (scroll-bar-mode -1)
 #+END_SRC
+
+** Set the fill column to 78
+
+I'm kinda old-school (at least by default).
+
+#+begin_src emacs-lisp
+(set-fill-column 78)
+#+end_src
 
 ** Show the fill-line column indicator
 
@@ -209,9 +226,23 @@ If the matching paren isn't visible, highlight the entire expression.
 
 ** Always use spaces for tabs
 
+Never use tabs. We need =setq-default= here because this becomes a
+buffer-local variable when set. See
+https://blog.sumtypeofway.com/posts/emacs-config.html.
+
 #+BEGIN_SRC emacs-lisp
-  (setq-default indent-tabs-mode nil)
+(setq-default indent-tabs-mode nil)
 #+END_SRC
+
+** Tell Emacs that a single space follows a period
+
+Emacs, by default, wants to ensure that a period that ends a sentence
+has two spaces after the period. Ummm, no. I'm not typing on a
+typerwriter in the 1950s. A single space will do fine, thank you.
+
+#+begin_src emacs-lisp
+(setq sentence-end-double-space nil)
+#+end_src>
 
 ** Turn off the error bell
 
@@ -228,8 +259,16 @@ If the matching paren isn't visible, highlight the entire expression.
 ** Always delete trailing whitespace
 
 #+BEGIN_SRC emacs-lisp
-  (add-hook 'before-save-hook 'delete-trailing-whitespace)
+(add-hook 'before-save-hook #'delete-trailing-whitespace)
 #+END_SRC
+
+** Require a newline at the end of a file
+
+I think this is true by default, but let's make it explicit.
+
+#+begin_src emacs-lisp
+(setq require-final-newline t)
+#+end_src
 
 ** Turn on the row and column display in the modeline
 
@@ -287,47 +326,176 @@ startup configurations to conditionally do setup specific to Emacs.
 (setq tramp-terminal-type "tramp")
 #+end_src
 
-* UI
+** Use command as meta and option as super on Mac
 
+I prefer to use the Command key as the meta key on Mac.
+
+#+begin_src emacs-lisp
+(setq mac-option-modifier 'super)
+(setq mac-command-modifier 'meta)
+(setq mac-command-key-is-meta t)
+#+end_src
+
+** UTF-8 should always be the default charset
+
+#+begin_src emacs-lisp
+(set-charset-priority 'unicode 'ascii)
+(setq locale-coding-system 'utf-8)
+(set-terminal-coding-system 'utf-8)
+(set-keyboard-coding-system 'utf-8)
+(set-selection-coding-system 'utf-8)
+(prefer-coding-system 'utf-8)
+(setq default-process-coding-system '(uft-8-unix . utf-8-unix))
+#+end_src>
+
+** Revert when a buffer's file changes
+When a buffer is pointing a file that changes underneath it, we should
+auto-revert to the current state of the file.
+
+#+begin_src emacs-lisp
+(setq global-auto-revert-mode t)
+#+end_src
+* UI
 ** Themes
 Doom emacs has some great themes. Let's use them!
 
 #+BEGIN_SRC emacs-lisp
-  (use-package doom-themes
-    :straight t)
+(use-package doom-themes
+  :straight t)
 #+END_SRC
 
 I love the monokai theme and would like to use it. Bring it in.
 
 #+begin_src emacs-lisp
-  (use-package monokai-theme
-    :straight t)
+(use-package monokai-theme
+  :straight t)
 #+end_src
 
 Other cool theme packages I've found.
 
 #+begin_src emacs-lisp
-  (use-package tron-legacy-theme
-    :straight t
-    :config
-    (setq tron-legacy-theme-vidid-cursor t))
+(use-package tron-legacy-theme
+  :straight t
+  :config
+  (setq tron-legacy-theme-vidid-cursor t))
 
-  (use-package kaolin-themes
-    :straight t)
+(use-package kaolin-themes
+  :straight t)
 
-  (use-package modus-themes
-    :straight t
-    :init
-    (modus-themes-load-themes))
+(use-package modus-themes
+  :straight t
+  :init
+  (modus-themes-load-themes))
 #+end_src
 
 Here is the theme to load for this session.
 
 #+BEGIN_SRC emacs-lisp
-(load-theme 'doom-monokai-spectrum t) ; t treats it as safe
+(load-theme 'doom-moonlight t) ; t treats it as safe
 #+END_SRC
 
 A good source of themes with previews is [[https://peach-melpa.org/][peach-melpa.org]].
+
+*** Modus theme customization
+The now-built-in modus themes have some intense customization options
+(view the manual with ~C-h R modus-themes~). Let's customize them!
+
+#+begin_src emacs-lisp
+(setq modus-themes-bold-constructs t ; defualt nil
+      modus-themes-italic-constructs t ; default nil
+
+      ;; Options for `modus-themes-syntax' are either nil (the default),
+      ;; or a list of properties that may include any of those symbols:
+      ;; `faint', `yellow-comments', `green-strings', `alt-syntax'
+      modus-themes-syntax '(faint green-strings alt-syntax) ; default nil
+
+      ;; Options for `modus-themes-links' are either nil (the default),
+      ;; or a list of properties that may include any of those symbols:
+      ;; `neutral-underline' OR `no-underline', `faint' OR `no-color',
+      ;; `bold', `italic', `background'
+      modus-themes-links '(neutral-underline background)
+
+      ;; Options for `modus-themes-prompts' are either nil (the
+      ;; default), or a list of properties that may include any of those
+      ;; symbols: `background', `bold', `gray', `intense', `italic'
+      modus-themes-prompts '(intense bold)
+
+      ;; Options for `modus-themes-mode-line' are either nil, or a list
+      ;; that can combine any of `3d' OR `moody', `borderless',
+      ;; `accented', and a natural number for extra padding
+      modus-themes-mode-line '(3d) ; default nil
+
+      modus-themes-completions 'moderate ; {nil,'moderate,'opinionated}
+
+      ;; Control the overall coloration of the fringes
+      ;; (nil, subtle, intense)
+      modus-themes-fringes 'subtle
+
+      ;; Control the style of in-buffer warnings and errors
+      ;; (straight-underline text-also background intense faint)
+      modus-themes-lang-checkers '(background intense)
+
+      ;; Options for `modus-themes-hl-line' are either nil (the default),
+      ;; or a list of properties that may include any of those symbols:
+      ;; `accented', `underline', `intense'
+      modus-themes-hl-line '(intense accented)
+
+      ;; Toggle subtle line numbers
+      modus-themes-subtle-line-numbers nil ; nil makes them have a background
+
+      ;; Options for `modus-themes-markup' are either nil, or a list
+      ;; that can combine any of `bold', `italic', `background',
+      ;; `intense'.
+      modus-themes-markup '(background italic)
+
+      ;; Options for `modus-themes-paren-match' are either nil (the
+      ;; default), or a list of properties that may include any of those
+      ;; symbols: `bold', `intense', `underline'
+      modus-themes-paren-match '(bold intense underline)
+
+      ;; Options for `modus-themes-region' are either nil (the default),
+      ;; or a list of properties that may include any of those symbols:
+      ;; `no-extend', `bg-only', `accented'
+      modus-themes-region '(bg-only)
+
+      ;; Options for `modus-themes-diffs': nil, 'desaturated, 'bg-only
+      modus-themes-diffs nil
+
+      modus-themes-org-blocks 'tinted-background ; {nil,'gray-background,'tinted-background}
+
+      modus-themes-org-agenda ; this is an alist: read the manual or its doc string
+      '((header-block . (variable-pitch 1.3))
+        (header-date . (grayscale workaholic bold-today 1.1))
+        (event . (accented varied))
+        (scheduled . uniform)
+        (habit . traffic-light))
+
+      modus-themes-headings ; this is an alist: read the manual or its doc string
+      '((1 . (overline background variable-pitch 1.3))
+        (2 . (rainbow overline 1.1))
+        (t . (semibold))))
+#+end_src
+*** Some other favorites
+
+Dark
+- doom-one
+- doom-laserwave
+- doom-Iosvkem
+- doom-moonlight
+- doom-horizon
+- kaolin-galaxy (kind of like a green galaga?!)
+- doom-challenger-deep
+- doom-molokai
+- doom-oceanic-next
+- doom-outrun-electric
+- doom-palenight
+- doom-spacegrey (low contrast; maybe good for night)
+
+Light
+- doom-opera-light
+- doom-one-light
+- doom-tomorrow-day (pretty bright)
+- modus-operandi
 
 ** Font
 
@@ -337,11 +505,17 @@ When you have the best font, use the best font.
   (set-frame-font "PragmataPro Liga-14" nil t)
 #+END_SRC
 
-Turn on ligature support in the emacs-mac build.
+GNU Emacs doesn't have great support for ligatures, but I defintely
+want them. Thankfully, I came across [[https://github.com/lumiknit/emacs-pragmatapro-ligatures][pragmatapro-lig]] specifically for
+enabling PragmataPro font ligatures, so let's use it.
 
-#+BEGIN_SRC emacs-lisp
-  (mac-auto-operator-composition-mode t)
-#+END_SRC
+#+begin_src emacs-lisp
+(use-package pragmatapro-lig
+  :straight '(pragmatapro-lig :type git :host github :repo "geolessel/emacs-pragmatapro-ligatures")
+  :init
+  (require 'pragmatapro-lig)
+  (pragmatapro-lig-global-mode))
+#+end_src
 
 By default Emacs scales fonts with =text-scale-increase= and
 =text-scale-decrease= per buffer. I'd rather have every buffer
@@ -560,7 +734,6 @@ Keybindings are in the personal keybindings section.
 #+end_src
 
 * Modes
-
 ** Evil
 
 Make it like vim!
@@ -609,6 +782,13 @@ cover properly by default, such as help-mode, M-x calendar, Eshell and more.
 
 Some little things to make =org-mode= better.
 
+*** Don't split a line when adding a subheading
+Why would you ever want this?
+
+#+begin_src emacs-lisp
+(setq org-M-RET-may-split-line nil)
+#+end_src
+
 *** Show bullets as utf-8 characters
 
 I've also customized which characters the bullets are.
@@ -616,27 +796,27 @@ I've also customized which characters the bullets are.
 [[https://github.com/sabof/org-bullets][Github]]
 
 #+begin_src emacs-lisp
-  (use-package org-bullets
-    :straight t
-    :hook (org-mode . org-bullets-mode)
-    :custom
-    (org-bullets-bullet-list '("⦿" "○" "●" "○" "●" "○" "●")))
+(use-package org-bullets
+  :straight t
+  :hook (org-mode . org-bullets-mode)
+  :custom
+  (org-bullets-bullet-list '("⦿" "○" "●" "○" "●" "○" "●")))
 #+end_src
 
 *** Change the default ellipsis on collapsed headings
 
 #+begin_src emacs-lisp
-  (setq org-ellipsis " ⏷")
+(setq org-ellipsis " ⏷")
 #+end_src
 
 *** Keep indentation consistent visually
 
-This won't chang the underyling text file, but I don't think I care
+This won't change the underyling text file, but I don't think I care
 too much about that. I only care that the resulting view in my editor
 is nicely indented without me having to think too much about it.
 
 #+begin_src emacs-lisp
-  (add-hook 'org-mode-hook 'org-indent-mode)
+(add-hook 'org-mode-hook 'org-indent-mode)
 #+end_src
 
 *** Enable auto-fill-mode by default
@@ -645,7 +825,7 @@ doing some writing. And when I'm doing some writing, I prefer to have
 =auto-fill-mode= on. So turn it on by default!
 
 #+begin_src emacs-lisp
-  (add-hook 'org-mode-hook 'auto-fill-mode)
+(add-hook 'org-mode-hook 'auto-fill-mode)
 #+end_src
 
 *** http requests
@@ -671,23 +851,23 @@ header variables/options you can provide in a request.
 | =:resolve=    | =--resolve=    | =:resolve example.com:80:127.0.0.1,example.com:443:127.0.0.1=                           |
 
 #+begin_src emacs-lisp
-  (use-package ob-http :straight t)
+(use-package ob-http :straight t)
 #+end_src
 
 *** Enable babel modes for languages
 #+begin_src emacs-lisp
-  (org-babel-do-load-languages 'org-babel-load-languages
-                               '((emacs-lisp . t)
-                                 (shell . t)
-                                 (http . t)
-                                 (ruby . t)))
+(org-babel-do-load-languages 'org-babel-load-languages
+                             '((emacs-lisp . t)
+                               (shell . t)
+                               (http . t)
+                               (ruby . t)))
 #+end_src
 
 *** Asynchronous execution of code blocks
 To get the async execution, add the ~:async~ keyword to a code block.
 
 #+begin_src emacs-lisp
-  (use-package ob-async :straight t)
+(use-package ob-async :straight t)
 #+end_src
 
 *** Reduce indentation in source blocks to 0
@@ -699,6 +879,62 @@ first line. So instead, reduce it to 0 spaces.
 
 #+begin_src emacs-lisp
 (setq org-edit-src-content-indentation 0)
+#+end_src
+*** org-capture
+**** General settings
+#+begin_src emacs-lisp
+(setq org-directory (concat user-emacs-directory "org")
+      org-default-notes-file (concat org-directory "/notes.org"))
+
+(global-set-key (kbd "C-,") #'org-capture)
+#+end_src
+
+**** My templates
+#+begin_src emacs-lisp
+(setq
+ org-capture-templates
+ '(
+   ("n" "What I'm working on now" entry (file+olp+datetree "~/.emacs.d/org/now.org")
+    "* %T %?\n%l\n%i" :tree-type week)
+   ("t" "Create a TODO for today" entry (file+olp+datetree "~/.emacs.d/org/now.org")
+    "* TODO: %?" :tree-type week)))
+#+end_src
+
+**** Auto-clock file editing
+For time-tracking purposes, I'd like to know when I switch from
+editing one file to another. In order to do this, I'm hooking into
+~window-buffer-change-hook~ which then calls my function which calls my
+org-capture-like editing function.
+
+#+begin_src emacs-lisp
+(defun geo/org-record-editing-of-file ()
+  "Clock in editing the current file."
+  (interactive)
+  (let ((filename (or (buffer-file-name) (buffer-name)))
+        (project (geo/project-name-from-directory-of-file)))
+    ;; don't record visiting "*" buffers (e.g. *Messages*, *scratch*, etc)
+    ;; as it gets too noisy (minibuffers seem to start with a space)
+    (when (and (not (string-prefix-p "*" filename))
+               (not (string-prefix-p " *" filename)))
+      (with-current-buffer
+        (find-file-noselect (concat org-directory "/auto-time-tracker.org") t t nil)
+        (org-datetree-find-iso-week-create (calendar-current-date))
+        (goto-char (point-at-eol))
+        (org-narrow-to-subtree)
+        (when (not (re-search-forward
+                    (format org-complex-heading-regexp-format
+                            (regexp-quote filename)) nil t))
+          (org-insert-subheading 0)
+          (insert filename)
+          (when project (org-set-tags project)))
+        ;; prevent stopping and starting the same file task
+        (when (not (equal org-clock-current-task filename))
+          (org-clock-out nil t)
+          (org-clock-in))
+        (widen)
+        (save-buffer)))))
+
+(add-hook 'window-state-change-hook #'geo/org-record-editing-of-file)
 #+end_src
 
 ** Ruby
@@ -740,8 +976,9 @@ Some options that may be worth fiddling with in the future:
 The default for =js-mode= is to indent at 4 spaces. NOPE.
 
 #+begin_src emacs-lisp
-  (setq-default js-indent-level 2)
+(setq-default js-indent-level 2)
 #+end_src
+
 ** JSON
 =json-mode= extends the builtin =js-mode= to add better syntax
 highlighting for JSON and some editing keybindings.
@@ -804,7 +1041,6 @@ warnings and errors that are really annoying since we use
   (setq-default web-mode-code-indent-offset 2))
 #+end_src
 
-
 ** TypeScript
 
 Use typescript-mode, but configure flycheck to use =javascript-eslint=
@@ -817,44 +1053,6 @@ as the preferred checker even in typescript files.
   (add-to-list 'auto-mode-alist '("\\.tsx?$" . typescript-mode))
   (add-hook 'typescript-mode-hook
             (lambda () (setq flycheck-checker 'javascript-eslint))))
-#+end_src
-
-** Tide
-
-=tide= provides some pretty sweet functions for editing typescript
-files, so we will use that automatically.
-
-- ~M-.~ on a function, variable, or type (or other "thing") will jump
-  to the definition of that thing
-- ~M-,~ after arriving at the definition via ~M-.~, go back to where
-  you were previously
-
-[[https://github.com/ananthakumaran/tide/][Github]]
-
-#+begin_src emacs-lisp
-(defun geo/setup-tide-mode ()
-  (interactive)
-  (tide-setup)
-  (flycheck-mode +1)
-  (setq flycheck-check-syntax-automatically '(save mode-enabled))
-  (eldoc-mode +1)
-  (tide-hl-identifier-mode +1)
-  (company-mode +1))
-
-(add-hook 'typescript-mode-hook 'tide-format-before-save)
-
-(use-package tide
-  :ensure t
-  :after (typescript-mode company flycheck)
-  :init
-  (setq-default tide-completion-detailed t)
-  :config
-  (if (macrop 'evil-define-key)
-      (evil-define-key
-        'normal tide-mode-map (kbd "M-.") 'tide-jump-to-definition))
-  :hook ((typescript-mode . geo/setup-tide-mode)
-         (typescript-mode . tide-hl-identifier-mode)
-         (before-save . tide-format-before-save)))
 #+end_src
 
 ** Slim
@@ -893,6 +1091,23 @@ files.
 #+begin_src emacs-lisp
   (use-package docker-compose-mode
     :straight t)
+#+end_src
+
+** Assembly
+
+I've included my own package in a local folder, and I'd like to use it
+while writing 6502 assembly.
+
+After writing the basic functionality of my own =6502-mode=, I
+discovered that one already exists. I could have sworn I searched for
+one before I wrote mine. Regardless, writing my own major mode is a
+good enough exercise that I'll continue using my own for now.
+
+Other one: https://github.com/wendelscardua/ca65-mode
+
+#+begin_src emacs-lisp
+(require 'ca65-mode)
+(add-to-list 'auto-mode-alist '("\\.asm?$" . ca65-mode))
 #+end_src
 
 * Editing
@@ -943,6 +1158,20 @@ you type.
   ; highlights all forward matches in visible buffer
 )
 #+END_SRC
+
+*** expand-region
+
+This package gets your current place in the buffer and intellegently
+expands the selection outward. For example, if the cursor is inside a
+word, it'll first expand to contain the word, then perhaps a string
+inside quotations marks, then include the quotation marks, then out to
+the containing function, etc., etc.
+
+#+begin_src emacs-lisp
+(use-package expand-region
+  :straight t
+  :bind ("C-=" . er/expand-region))
+#+end_src
 
 ** Buffers
 *** Group buffers in ibuffer
@@ -1188,12 +1417,11 @@ The documentation for this one (with examples) is in the source code.
 - [[https://www.dr-qubit.org/undo-tree.html][Homepage]]
 
 #+BEGIN_SRC emacs-lisp
-  (use-package undo-tree
-    :straight t
-    :config
-    (global-undo-tree-mode +1)          ; use it everwhere!
-    ;; (setq evil-undo-system 'undo-tree)
-    )
+(use-package undo-tree
+  :straight t
+  :config
+  (setq evil-undo-system 'undo-tree)
+  (global-undo-tree-mode))          ; use it everwhere!
 #+END_SRC
 
 ** Snippets
@@ -1233,55 +1461,33 @@ can utilize that server to make fixes in our javascript files.
 [[https://github.com/aaronjensen/eslintd-fix][Github]]
 
 #+begin_src emacs-lisp
-  (defvar geo/eslint_d-exec-path "~/.config/yarn/global/node_modules/.bin")
+(defvar geo/eslint_d-exec-path "~/.config/yarn/global/node_modules/.bin")
 
-  (use-package eslintd-fix
-    :straight t
-    :config
-    (add-hook 'js-mode-hook 'eslintd-fix-mode)
-    ; we need the location of eslint_d
-    (add-to-list 'exec-path geo/eslint_d-exec-path))
+(use-package eslintd-fix
+  :straight t
+  :config
+  (add-hook 'js-mode-hook 'eslintd-fix-mode)
+  (add-hook 'typescript-mode-hook 'eslintd-fix-mode)
+  ; we need the location of eslint_d
+  (add-to-list 'exec-path geo/eslint_d-exec-path))
 #+end_src
 
-*** format-all
+*** prettier
 
-Using =format-all=. To manually format the buffer, run
-~format-all-buffer~. To auto-format, use the minor mode
-~format-all-mode~.
-
-Settings:
-
-- Control displaying the formatting errors buffer
-  - ~'always~ - shows errors buffer regardless of errors or
-       warnigns
-  - ~'warnings~ - shows error sbuffer for warnings and errors
-  - ~'errors~ - shows error buffer only on errors
-  - ~'never~ - never show the error buffer
-- Ensure a default formatter is selected:
-  ~format-all-ensure-formatter~
-
-[[https://github.com/lassik/emacs-format-all-the-code][Github]]
+I've had some issues with format-all-mode and have decided to go with
+tools specific to the language I'm writing. To that end, prettier will
+format js/ts code (and some others).
 
 #+begin_src emacs-lisp
-  (use-package format-all
-    :straight t
-    :config
-    ; autoformaat programming buffers
-    (add-hook 'prog-mode-hook 'format-all-mode)
-    ; ensure a default formatter is set
-    (add-hook 'format-all-mode-hook 'format-all-ensure-formatter)
-
-    ; disable this mode in js files since we'll be running eslintd-fix-mode
-    (add-hook 'js-mode-hook (lambda () (format-all-mode 0)))
-  )
+(use-package prettier
+  :straight t
+  :config
+  (add-hook 'after-init-hook #'global-prettier-mode))
 #+end_src
 
 ** Syntax checking
 
 With =flycheck=.
-
-I don't use =ruby-reek= as a checker, so explicitly disable that
-since it is enabled for Ruby buffers by default.
 
 [[https://www.flycheck.org/en/latest/][Homepage]]
 
@@ -1300,6 +1506,9 @@ version.
     (when (and eslint (file-executable-p eslint))
       (setq-local flycheck-javascript-eslint-executable eslint))))
 #+end_src
+
+I don't use =ruby-reek= as a checker, so explicitly disable that
+since it is enabled for Ruby buffers by default.
 
 #+begin_src emacs-lisp
 (use-package flycheck
@@ -1347,15 +1556,15 @@ messages inline with =flycheck-inline=.
 *** lsp-mode
 
 #+begin_src emacs-lisp
-  (use-package lsp-mode
-    :straight t
-    :init
-    (setq lsp-keymap-prefix "C-c l")
-    :hook (
-      (js-mode . lsp-deferred)
-      (lsp-mode . lsp-enable-which-key-integration))
-    :commands (lsp lsp-deferred)
-    )
+(use-package lsp-mode
+  :straight t
+  :init
+  (setq lsp-keymap-prefix "C-c l")
+  :hook (
+    (typescript-mode . lsp-deferred)
+    (js-mode . lsp-deferred)
+    (lsp-mode . lsp-enable-which-key-integration))
+  :commands (lsp lsp-deferred))
 #+end_src
 
 *** lsp-ui
@@ -1381,19 +1590,6 @@ Some nice ui-related things including:
     (setq lsp-modeline-code-actions-enable t)
     )
 #+end_src
-
-*** lsp-ivy
-
-=lsp-ivy= really only provides =ivy= completion for workspace
-symbols through ~lsp-ivy-workspace-symbol~ and
-~lsp-ivy-global-workspace-symbol~.
-
-[[https://github.com/emacs-lsp/lsp-ivy][Github]]
-
-#+begin_src emacs-lisp
-  (use-package lsp-ivy
-      :straight t
-      )
 #+end_src
 
 *** Company
@@ -1414,6 +1610,19 @@ symbols through ~lsp-ivy-workspace-symbol~ and
     :straight t
     :after company
     :hook (company-mode . company-box-mode))
+#+end_src
+
+*** Dash
+
+I use [[https://kapeli.com/dash][Dash]] for API documentation. This makes it so that I can get
+documentation on the thing under my cursor.
+
+#+begin_src emacs-lisp
+(use-package dash-at-point
+  :straight t
+  :bind
+  ("C-c d" . dash-at-point-with-docset)
+  ("C-c D" . dash-at-point))
 #+end_src
 
 ** Code folding
@@ -1767,6 +1976,8 @@ on github."
 #+end_src
 
 *** Project-related
+**** Get filename relative to the project root.
+
 #+begin_src emacs-lisp
 (defun geo/project-relative-filename (filename)
   "Return the filename relative to the project root."
@@ -1776,6 +1987,27 @@ on github."
     (when (called-interactively-p 'interactive)
       (message relative-filename))
     relative-filename))
+#+end_src
+
+**** Get project directory name (not path)
+There are some instances in which I only want the final directory name
+that the project is in as this is typically the name of the project
+itself.
+
+#+begin_src emacs-lisp
+(defun geo/project-name-from-directory-of-file (&optional filename)
+  "Return the name of the project derived from the project directory."
+  (interactive "fFile: ")
+  (let ((proj-current (project-current)))
+    (when proj-current
+      (let ((dir
+             (file-name-nondirectory
+              (directory-file-name
+               (file-name-directory
+                (cdr (project-current)))))))
+        (when (called-interactively-p 'interactive)
+          (message dir))
+        dir))))
 #+end_src
 
 ** Buffer/window management
@@ -1860,6 +2092,51 @@ keybinding, but I would like upgrade the search function to use
   (define-key evil-normal-state-map (kbd "/") 'swiper)
 #+end_src
 
+*** Open up this config file for editing
+
+It'd be nice to jump straight into this file for editing
+purposes.
+
+#+begin_src emacs-lisp
+(defun geo/edit-config-file ()
+  "Open the Emacs configuration for editing."
+  (interactive)
+  (find-file "~/.emacs.d/README.org"))
+#+end_src
+
+*** Run eslint --fix on the current buffer
+I've found problems with both the =eslint-fix= and =eslintd-fix=
+packages and I couldn't get them working. I swear they worked at one
+point. Regardless, this is my own simple version.
+
+UPDATE: I've been able to get eslintd-fix to work again, so I'm going
+back to that as it is much faster.
+
+#+begin_src emacs-lisp
+(defun geo/eslint-fix ()
+  "Run eslint on the current buffer.
+
+The executable needs to be installed in the project's node_modules."
+  (interactive)
+  (let* ((filename (buffer-file-name))
+         (buffer (get-buffer-create "*geo/eslint-fix*"))
+         (project-root-dir (cdr (project-current)))
+         (executable (concat project-root-dir "node_modules/.bin/eslint")))
+    (if (file-executable-p executable)
+        (make-process
+         :name "geo/eslint-fix"
+         :buffer buffer
+         :command `(,executable "--fix" ,filename)
+         :sentinel `(lambda (process event)
+                     (cond
+                      ((equal "finished\n" event)
+                       (revert-buffer t t t)
+                       (message "eslint formatted %s" ,filename))
+                      (t (message "geo/eslint-fix received event: %s" event)))))
+      (message "eslint executable not found: %s" executable))))
+(defun geo/eslint-fix--enable-hook () (add-hook 'after-save-hook #'geo/eslint-fix))
+;; (add-hook 'typescript-mode-hook geo/eslint-fix--enable-hook)
+#+end_src
 ** Hydra menus
 *** Apropros
 
@@ -2001,7 +2278,7 @@ all? Now I don't have to!
       (("/" projectile-ag "ag")
        ("?" counsel-projectile-ag "ag (with counsel)")
        ("g" projectile-grep "grep")
-       ("r" prejectile-ripgrep "ripgrep"))
+       ("r" projectile-ripgrep "ripgrep"))
 
       "Management"
       (("p" counsel-projectile-switch-project "Switch project")
@@ -2092,26 +2369,27 @@ My main hydra menu that provides help and direction. Sometimes I
 forget what to call or what keys to press. This helps immensely.
 
 #+begin_src emacs-lisp
-  (pretty-hydra-define geo/hydra-top-menu
-    (:title "The world's your oyster"
-       :quit-key "q"
-       :foreign-keys warn
-       :exit t)
-      ("Working"
-       (("w" geo/hydra-workspace-menu/body "Workspaces")
-        ("b" geo/hydra-buffer-menu/body "Buffers")
-        ("p" geo/hydra-projectile/body "Projectile")
-        ("g" magit-status "Magit")
-        ("G" geo/hydra-github-menu/body "Github"))
+(pretty-hydra-define geo/hydra-top-menu
+  (:title "The world's your oyster"
+     :quit-key "q"
+     :foreign-keys warn
+     :exit t)
+    ("Working"
+     (("w" geo/hydra-workspace-menu/body "Workspaces")
+      ("b" geo/hydra-buffer-menu/body "Buffers")
+      ("p" geo/hydra-projectile/body "Projectile")
+      ("g" magit-status "Magit")
+      ("G" geo/hydra-github-menu/body "Github"))
 
-       "Getting Help"
-       (("a" geo/hydra-apropos-menu/body "Apropos"))
+     "Getting Help"
+     (("a" geo/hydra-apropos-menu/body "Apropos"))
 
-       "Customizing"
-       (("," geo/hydra-prefs-menu/body "Preferences"))))
+     "Customizing"
+     (("," geo/hydra-prefs-menu/body "Preferences")
+      ("e" geo/edit-config-file "Edit config"))))
 
-  (define-key evil-normal-state-map (kbd "<SPC>") 'geo/hydra-top-menu/body)
-  (define-key evil-visual-state-map (kbd "<SPC>") 'geo/hydra-top-menu/body)
+(define-key evil-normal-state-map (kbd "<SPC>") 'geo/hydra-top-menu/body)
+(define-key evil-visual-state-map (kbd "<SPC>") 'geo/hydra-top-menu/body)
 #+end_src
 
 * Things to check out and eventually add
@@ -2129,6 +2407,8 @@ forget what to call or what keys to press. This helps immensely.
 - [[https://github.com/joostkremers/writeroom-mode][writeroom-mode]] to change the editor into a distraction-free
   editor (for blog posts). [[https://gitlab.com/jabranham/mixed-pitch][mixed-pitch]] to display both variable-
   and fixed-width fonts at the same time would be a good companion.
+- [[https://github.com/oantolin/embark][embark]] to run actions on a target. See the [[https://www.youtube.com/watch?v=qk2Is_sC8Lk][System Crafters video]] for
+  more info.
 
 ** Apps within the app
 
@@ -2175,6 +2455,9 @@ forget what to call or what keys to press. This helps immensely.
   new buffer for every directory visited.
 
 - [[https://depp.brause.cc/shackle/][shackle]] - take better control of buffers and their placement.
+
+- [[https://github.com/magnars/multiple-cursors.el][multiple-cursors]] - edit similar text with multiple cursors
+  simultaneously.
 
 ** Org Mode
 
@@ -2302,6 +2585,91 @@ might re-enable it at some point.
   (use-package forge
     :straight t
     :after magit
+    )
+#+end_src
+
+** Tide
+
+=tide= provides some pretty sweet functions for editing typescript
+files, so we will use that automatically.
+
+- ~M-.~ on a function, variable, or type (or other "thing") will jump
+  to the definition of that thing
+- ~M-,~ after arriving at the definition via ~M-.~, go back to where
+  you were previously
+
+[[https://github.com/ananthakumaran/tide/][Github]]
+
+#+begin_src emacs-lisp :tangle no
+(defun geo/setup-tide-mode ()
+  (interactive)
+  (tide-setup)
+  (flycheck-mode +1)
+  (setq flycheck-check-syntax-automatically '(save mode-enabled))
+  (eldoc-mode +1)
+  (tide-hl-identifier-mode +1)
+  (company-mode +1))
+
+(add-hook 'typescript-mode-hook 'tide-format-before-save)
+
+(use-package tide
+  :ensure t
+  :after (typescript-mode company flycheck)
+  :init
+  (setq-default tide-completion-detailed t)
+  :config
+  (if (macrop 'evil-define-key)
+      (evil-define-key
+        'normal tide-mode-map (kbd "M-.") 'tide-jump-to-definition))
+  :hook ((typescript-mode . geo/setup-tide-mode)
+         (typescript-mode . tide-hl-identifier-mode)
+         (before-save . tide-format-before-save)))
+#+end_src
+
+** format-all
+
+Using =format-all=. To manually format the buffer, run
+~format-all-buffer~. To auto-format, use the minor mode
+~format-all-mode~.
+
+Settings:
+
+- Control displaying the formatting errors buffer
+  - ~'always~ - shows errors buffer regardless of errors or
+       warnigns
+  - ~'warnings~ - shows error sbuffer for warnings and errors
+  - ~'errors~ - shows error buffer only on errors
+  - ~'never~ - never show the error buffer
+- Ensure a default formatter is selected:
+  ~format-all-ensure-formatter~
+
+[[https://github.com/lassik/emacs-format-all-the-code][Github]]
+
+#+begin_src emacs-lisp
+  (use-package format-all
+    :straight t
+    :config
+    ; autoformaat programming buffers
+    (add-hook 'prog-mode-hook 'format-all-mode)
+    ; ensure a default formatter is set
+    (add-hook 'format-all-mode-hook 'format-all-ensure-formatter)
+
+    ; disable this mode in js files since we'll be running eslintd-fix-mode
+    (add-hook 'js-mode-hook (lambda () (format-all-mode 0)))
+  )
+#+end_src
+
+** lsp-ivy
+
+=lsp-ivy= really only provides =ivy= completion for workspace
+symbols through ~lsp-ivy-workspace-symbol~ and
+~lsp-ivy-global-workspace-symbol~.
+
+[[https://github.com/emacs-lsp/lsp-ivy][Github]]
+
+#+begin_src emacs-lisp
+(use-package lsp-ivy
+    :straight t
     )
 #+end_src
 
