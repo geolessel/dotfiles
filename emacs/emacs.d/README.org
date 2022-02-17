@@ -1789,7 +1789,15 @@ prefixes. By default, regexp and literal matches are enabled."
   (completion-category-defaults nil))
 #+end_src
 
+*** Persist history over Emacs restarts
+Vertico will use the history to do initial sorting.
 
+#+begin_src emacs-lisp
+(use-package savehist
+  :straight t
+  :init
+  (savehist-mode t))
+#+end_src
 
 
 
