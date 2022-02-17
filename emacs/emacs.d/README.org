@@ -1799,8 +1799,20 @@ Vertico will use the history to do initial sorting.
   (savehist-mode t))
 #+end_src
 
+*** Use marginalia to provide more context/information
+Mark up the completion candidates with extra information such as brief
+documentation, bound keyboard shortcuts, etc.
 
+- [[https://github.com/minad/marginalia][Github]]
 
+#+begin_src emacs-lisp
+(use-package marginalia
+  :straight t
+  :init
+  (marginalia-mode)
+  :bind
+  (:map minibuffer-local-map ("M-A" . marginalia-cycle)))
+#+end_src
 
 
 
