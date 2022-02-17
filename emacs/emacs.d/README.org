@@ -356,6 +356,14 @@ auto-revert to the current state of the file.
 (setq global-auto-revert-mode t)
 #+end_src
 
+** Enable recursive minibuffers
+I'm not entirely sure what this allows TBH, but it is suggested by
+vertico's readme.
+
+#+begin_src emacs-lisp
+(setq enable-recursive-minibuffers t)
+#+end_src
+
 * UI
 ** Themes
 Doom emacs has some great themes. Let's use them!
@@ -1717,109 +1725,63 @@ Emacs.
 #+end_src
 
 ** Make the minibuffer better
+*** Completion UI with vertico
+I decided to move from counsel/ivy to vertico because of vertico's
+philosophy of reusing as much as built-in Emacs as possible.
 
-*** Select from a list with Ivy and Counsel
+#+begin_src emacs-lisp
+;; we need to tell straight that these packages are bundled together
+;; see https://github.com/raxod502/straight.el/issues/819
+(straight-use-package '(vertico
+  :files (:defaults "extensions/*")
+  :includes (vertico-buffer
+             vertico-directory
+             vertico-flat
+             vertico-indexed
+             vertico-mouse
+             vertico-quick
+             vertico-repeat
+             vertico-reverse)))
 
-*ivy* is for quick and easy selection from a list. It
-is provided in the =counsel= package along with =swiper=.
+(use-package vertico
+  :straight t
+  :init
+  (vertico-mode)
+  (setq
+   vertico-scroll-margin 2
+   vertico-count 10
+   vertico-resize nil))
 
-- [[https://oremacs.com/swiper/][Documentation]]
-- [[https://github.com/abo-abo/swiper][Github]]
+;; taken from https://github.com/minad/vertico/wiki#additions-for-moving-up-and-down-directories-in-find-file
+(defun vertico-directory-delete-entry ()
+  "Delete directory or entire entry before point."
+  (interactive)
+  (when (and (> (point) (minibuffer-prompt-end))
+             (vertico-directory--completing-file-p))
+    (save-excursion
+      (goto-char (1- (point)))
+      (when (search-backward "/" (minibuffer-prompt-end) t)
+        (delete-region (1+ (point)) (point-max))
+        t))))
 
-#+BEGIN_SRC emacs-lisp
-  (use-package counsel
-    :straight t
-    :config
-    (ivy-mode t)      ; enable ivy-mode everywhere
-    (counsel-mode t)  ; enable counsel mode replacements
-    (setq ivy-use-virtual-buffers t)
-    (setq ivy-count-format "(%d/%d) ")
-    (setq ivy-initial-inputs-alist nil)) ; don't start the search with ~^~
-#+END_SRC
+(use-package vertico-directory
+  :after vertico
+  :bind
+  (:map minibuffer-local-map
+        ("s-<backspace>" . vertico-directory-delete-entry)))
+#+end_src
 
-**** Make =ivy= prettier
 
-*ivy-rich* has rich transformers for commands from =ivy= and =counsel=.
-You can defined your own transformers too.
 
-[[https://github.com/yevgnen/ivy-rich][Github]]
 
-#+BEGIN_SRC emacs-lisp
-  (use-package ivy-rich
-    :straight t
-    :after (ivy counsel)
-    :config
-    (ivy-rich-mode 1)
-    ; the docs recommend to set this as well
-    (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line)
-    (ivy-set-display-transformer 'ivy-switch-buffer 'ivy-rich--ivy-switch-buffer-transformer))
-#+END_SRC
 
-**** Use fuzzy finding for counsel
 
-We have two good choices for filtering results. The first is
-=flx= and the second is =prescient=.
 
-Use *=prescient=* to sort and filter a list of candidates.
 
-prescient.el takes as input a list of candidates, and a query
-that you type. The query is first split on spaces into subqueries
-(two consecutive spaces match a literal space). Each subquery
-filters the candidates because it must match as either a
-substring of the candidate, a regexp, or an initialism
-(e.g. ffap matches find-file-at-point, and so does fa). The last
-few candidates you selected are displayed first, followed by the
-most frequently selected ones, and then the remaining candidates
-are sorted by length. If you don't like the algorithm used for
-filtering, you can choose a different one by customizing
-prescient-filter-method.
 
-- [[https://github.com/raxod502/prescient.el][Github]]
 
-#+BEGIN_SRC emacs-lisp
-(use-package prescient
+
   :config
-  ;; save usage stats between sessions
-  (prescient-persist-mode t)
-  ;; describe-variable prescient-filter-method for docs
-  (setq prescient-filter-method '(literal regexp initialism)))
-
-(use-package ivy-prescient
-  :after (ivy counsel prescient)
-  :config
-  (ivy-prescient-mode t))
-
-(use-package company-prescient
-  :after (prescient)
-  :config
-  (company-prescient-mode t))
-#+END_SRC
-
-*** Replace M-x with Amx
-
-*=amx=* is an alternative interface for ~M-x~ in Emacs. Some
-enhancements include prioritizing your most-used commands in the
-completion list and showing keyboard shortcuts.
-
-- [[https://github.com/DarwinAwardWinner/amx][Github]]
-
-Some tips:
-- ~C-h f~ while Amx is active runs ~describe-function~ on the currently
-  selected command
-- ~M-.~ jumps to the definition of the selected command
-- ~C-h w~ shows the key bindings for the selected command
-- ~amx-major-mode-commands~ runs Amx limited to commands that are relevant
-  to the active major mode.
-- ~amx-show-unbound-commands~ shows frequently used commands that have
-  no keybindings.
-
-#+BEGIN_SRC emacs-lisp
-  (use-package amx
-    :straight t
-    :after (ivy counsel)
-    :config
-    (amx-mode t))   ; it auto-detects ivy-mode
-#+END_SRC
 
 *** Use hydra for extra context/help
 
@@ -2674,6 +2636,108 @@ symbols through ~lsp-ivy-workspace-symbol~ and
     )
 #+end_src
 
+** Select from a list with Ivy and Counsel
+
+*ivy* is for quick and easy selection from a list. It
+is provided in the =counsel= package along with =swiper=.
+
+- [[https://oremacs.com/swiper/][Documentation]]
+- [[https://github.com/abo-abo/swiper][Github]]
+
+#+BEGIN_SRC emacs-lisp
+  (use-package counsel
+    :straight t
+    :config
+    (ivy-mode t)      ; enable ivy-mode everywhere
+    (counsel-mode t)  ; enable counsel mode replacements
+    (setq ivy-use-virtual-buffers t)
+    (setq ivy-count-format "(%d/%d) ")
+    (setq ivy-initial-inputs-alist nil)) ; don't start the search with ~^~
+#+END_SRC
+
+*** Make =ivy= prettier
+
+*ivy-rich* has rich transformers for commands from =ivy= and =counsel=.
+You can defined your own transformers too.
+
+[[https://github.com/yevgnen/ivy-rich][Github]]
+
+#+BEGIN_SRC emacs-lisp
+  (use-package ivy-rich
+    :straight t
+    :after (ivy counsel)
+    :config
+    (ivy-rich-mode 1)
+    ; the docs recommend to set this as well
+    (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line)
+    (ivy-set-display-transformer 'ivy-switch-buffer 'ivy-rich--ivy-switch-buffer-transformer))
+#+END_SRC
+
+*** Use fuzzy finding for counsel
+
+We have two good choices for filtering results. The first is
+=flx= and the second is =prescient=.
+
+Use *=prescient=* to sort and filter a list of candidates.
+
+prescient.el takes as input a list of candidates, and a query
+that you type. The query is first split on spaces into subqueries
+(two consecutive spaces match a literal space). Each subquery
+filters the candidates because it must match as either a
+substring of the candidate, a regexp, or an initialism
+(e.g. ffap matches find-file-at-point, and so does fa). The last
+few candidates you selected are displayed first, followed by the
+most frequently selected ones, and then the remaining candidates
+are sorted by length. If you don't like the algorithm used for
+filtering, you can choose a different one by customizing
+prescient-filter-method.
+
+- [[https://github.com/raxod502/prescient.el][Github]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package prescient
+  :config
+  ;; save usage stats between sessions
+  (prescient-persist-mode t)
+  ;; describe-variable prescient-filter-method for docs
+  (setq prescient-filter-method '(literal regexp initialism)))
+
+(use-package ivy-prescient
+  :after (ivy counsel prescient)
+  :config
+  (ivy-prescient-mode t))
+
+(use-package company-prescient
+  :after (prescient)
+  :config
+  (company-prescient-mode t))
+#+END_SRC
+
+** Replace M-x with Amx
+
+*=amx=* is an alternative interface for ~M-x~ in Emacs. Some
+enhancements include prioritizing your most-used commands in the
+completion list and showing keyboard shortcuts.
+
+- [[https://github.com/DarwinAwardWinner/amx][Github]]
+
+Some tips:
+- ~C-h f~ while Amx is active runs ~describe-function~ on the currently
+  selected command
+- ~M-.~ jumps to the definition of the selected command
+- ~C-h w~ shows the key bindings for the selected command
+- ~amx-major-mode-commands~ runs Amx limited to commands that are relevant
+  to the active major mode.
+- ~amx-show-unbound-commands~ shows frequently used commands that have
+  no keybindings.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package amx
+    :straight t
+    ;; :after (ivy counsel)
+    :config
+    (amx-mode t))   ; it auto-detects ivy-mode
+#+END_SRC
 * Local variables
 # Local Variables:
 # eval: (org-content 3)
