@@ -2009,16 +2009,6 @@ itself.
 #+end_src
 
 ** Buffer/window management
-*** popper
-#+begin_src emacs-lisp
-  (evil-define-key 'normal 'global
-    (kbd "C-p") nil ;; unbind C-p first
-    (kbd "C-p p") 'popper-toggle-latest
-    (kbd "C-p c") 'popper-cycle
-    (kbd "C-p t") 'popper-toggle-type
-    )
-#+end_src
-
 ** File management
 *** Rename file in buffer
 The =rename-file= function does a file job renaming a file but it
@@ -2773,6 +2763,17 @@ Some tips:
     :config
     (amx-mode t))   ; it auto-detects ivy-mode
 #+END_SRC
+
+** popper
+#+begin_src emacs-lisp
+  (evil-define-key 'normal 'global
+    (kbd "C-p") nil ;; unbind C-p first
+    (kbd "C-p p") 'popper-toggle-latest
+    (kbd "C-p c") 'popper-cycle
+    (kbd "C-p t") 'popper-toggle-type
+    )
+#+end_src
+
 * Local variables
 # Local Variables:
 # eval: (org-content 3)
