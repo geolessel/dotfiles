@@ -1771,8 +1771,23 @@ philosophy of reusing as much as built-in Emacs as possible.
         ("s-<backspace>" . vertico-directory-delete-entry)))
 #+end_src
 
+*** Use the orderless completion style
+This package allows for really complex sorting. According to the docs,
+it "divides the pattern into space-separated components, and matches
+candidates that match all of the components in any order. Each
+component can match in any one of several ways: literally, as a
+regexp, as an initialism, in the flex style, or as multiple word
+prefixes. By default, regexp and literal matches are enabled."
 
+- [[https://github.com/oantolin/orderless][Github]]
 
+#+begin_src emacs-lisp
+(use-package orderless
+  :straight t
+  :custom
+  (completion-styles '(orderless))
+  (completion-category-defaults nil))
+#+end_src
 
 
 
