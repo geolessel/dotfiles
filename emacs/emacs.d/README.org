@@ -356,6 +356,13 @@ auto-revert to the current state of the file.
 (setq global-auto-revert-mode t)
 #+end_src
 
+Also make sure to refresh non-file buffers (like =dired=) when the
+filesystem changes.
+
+#+begin_src emacs-lisp
+(setq global-auto-revert-non-file-buffers t)
+#+end_src
+
 ** Enable recursive minibuffers
 I'm not entirely sure what this allows TBH, but it is suggested by
 vertico's readme.
