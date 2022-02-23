@@ -1434,6 +1434,7 @@ The documentation for this one (with examples) is in the source code.
   :straight t
   :config
   (setq evil-undo-system 'undo-tree)
+  (add-hook 'evil-local-mode-hook 'turn-on-undo-tree-mode)
   (global-undo-tree-mode))          ; use it everwhere!
 #+END_SRC
 
