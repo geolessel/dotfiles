@@ -1528,7 +1528,8 @@ since it is enabled for Ruby buffers by default.
   :straight t
   :config
   (setq-default flycheck-highlighting-mode 'lines)
-  (global-flycheck-mode)
+  (setq flycheck-global-modes '(not emacs-lisp-mode))
+  (add-hook 'after-init-hook #'global-flycheck-mode)
   (add-hook 'flycheck-mode-hook #'geo/use-eslint-from-node-modules)
   (add-hook 'ruby-mode-hook
     (lambda ()
@@ -2846,7 +2847,6 @@ Some tips:
 # End:
 
 * TODO
-** Turn off flycheck for emacs lisp (or little editor buffer thing)
 ** wrangle temp files
 ** turn off listing killed buffers in the switch buffer list
 ** minor mode / package for testing
