@@ -1274,16 +1274,6 @@ which represent numeric arguments to send to interactive functions.
     (projectile-mode +1))
 #+END_SRC
 
-**** Extra goodies from =counsel-projectile=
-
-[[https://github.com/ericdanan/counsel-projectile][Github]]
-
-#+begin_src emacs-lisp
-  (use-package counsel-projectile
-    :straight t
-    )
-#+end_src
-
 *** Group buffers by project
 
 Sometimes it's helpful to see the buffers open grouped by project.
@@ -1706,23 +1696,19 @@ provides much more contextual information.
 - [[https://github.com/Wilfred/helpful][Github]]
 
 #+BEGIN_SRC emacs-lisp
-  (use-package helpful
-    :straight t
-    :bind (
-      ; rebind help keys to use helpful
-      ("C-h f" . helpful-callable)
-      ("C-h v" . helpful-variable)
-      ("C-h k" . helpful-key)
-      ; lookup the current symbol at point
-      ("C-c C-d" . helpful-at-point)
-      ; look up functions (expluding macros)
-      ("C-h F" . helpful-function)
-      ; look up commands
-      ("C-h C" . helpful-command))
-    :config
-    ; use helpful with ivy
-    (setq counsel-describe-function-function #'helpful-callable)
-    (setq counsel-describe-variable-function #'helpful-variable))
+(use-package helpful
+  :straight t
+  :bind (
+    ; rebind help keys to use helpful
+    ("C-h f" . helpful-callable)
+    ("C-h v" . helpful-variable)
+    ("C-h k" . helpful-key)
+    ; lookup the current symbol at point
+    ("C-c C-d" . helpful-at-point)
+    ; look up functions (expluding macros)
+    ("C-h F" . helpful-function)
+    ; look up commands
+    ("C-h C" . helpful-command)))
 #+END_SRC
 
 ** Searching
@@ -1828,9 +1814,32 @@ documentation, bound keyboard shortcuts, etc.
   (:map minibuffer-local-map ("M-A" . marginalia-cycle)))
 #+end_src
 
+*** consult for extra commands and actions
+- [[https://github.com/minad/consult][Github]]
 
+#+begin_src emacs-lisp
+(use-package consult
+  ;; Enable automatic preview at point in the *Completions* buffer. This is
+  ;; relevant when you use the default completion UI. You may want to also
+  ;; enable `consult-preview-at-point-mode` in Embark Collect buffers.
+  :hook (completion-list-mode . consult-preview-at-point)
 
+  ;; always executed
+  :init
+  (setq register-preview-delay 0.5
+        register-preview-function #'consult-register-format)
+  ;; This adds thin lines, sorting and hides the mode line of the window.
+  (advice-add #'register-preview :override #'consult-register-window)
+  ;; Optionally replace `completing-read-multiple' with an enhanced version.
+  (advice-add #'completing-read-multiple :override #'consult-completing-read-multiple)
+  ;; Use Consult to select xref locations with preview
+  (setq xref-show-xrefs-function #'consult-xref
+        xref-show-definitions-function #'consult-xref)
+
+  ; after lazy loading the package
   :config
+  (setq consult-narrow-key "<"))
+#+end_src
 
 *** Use hydra for extra context/help
 
@@ -2056,42 +2065,41 @@ To combat this, this function:
 #+end_src
 
 ** Editing tasks
-*** Search with =counsel-ag=
-
-Since ~/~ is search in =evil-mode=, I like binding ~C-/~ to search the
-entire project. To help seed the search, use ~C-?~ on a word to open
-counsel with that word pre-filled.
-
-I have to wrap =counsel-ag= with a ~let~ in order to restrict
-which completion modes are available to ag. I want to either be
-specific (~literal~) or be able to input a regex (~regexp~).
-
-I'd also like to seed =counsel-ag= with the word underneath the
-cursor. I can do that by getting the word with ~thing-at-point~.
-
-#+begin_src emacs-lisp
-  (defun geo/counsel-ag (&optional seed-word)
-      (interactive)
-      (let ((prescient-filter-method '(literal regexp)))
-      (counsel-ag seed-word)))
-
-  (defun geo/counsel-ag-thing-at-point ()
-      (interactive)
-      (let ((seed-word (thing-at-point 'word t)))
-      (geo/counsel-ag seed-word)))
-
-  (define-key evil-normal-state-map (kbd "C-/") 'geo/counsel-ag)
-  (define-key evil-normal-state-map (kbd "C-?") 'geo/counsel-ag-thing-at-point)
-#+end_src
-
-*** Search the buffer with =swiper=
+*** Search the buffer with =consult=
 
 vim's keybindings are for ~/~ to search the buffer. I do like that
 keybinding, but I would like upgrade the search function to use
-=swiper=.
+=consult=.
 
 #+begin_src emacs-lisp
-  (define-key evil-normal-state-map (kbd "/") 'swiper)
+(define-key evil-normal-state-map (kbd "/") 'consult-line)
+#+end_src
+
+*** Search with =consult-ripgrep=
+
+Since ~/~ is search in =evil-mode=, I like binding ~C-/~ to search the
+entire project. To help seed the search, use ~C-?~ on a word to open
+=consult-ripgrep= with that word pre-filled.
+
+I'd also like to seed =consult-ripgrep= with the word underneath the
+cursor. I can do that by getting the word with ~thing-at-point~.
+
+#+begin_src emacs-lisp
+(defun geo/consult-ripgrep (&optional seed-word)
+    (interactive)
+    (let* ((project-root-dir (cdr (project-current)))
+           (seed-dir (read-string "Search in directory: "
+                                  (or project-root-dir
+                                      (file-name-directory (f-this-file))))))
+      (consult-ripgrep seed-dir seed-word)))
+
+(defun geo/consult-ripgrep-thing-at-point ()
+    (interactive)
+    (let ((seed-word (thing-at-point 'word t)))
+    (geo/consult-ripgrep seed-word)))
+
+(define-key evil-normal-state-map (kbd "C-/") 'geo/consult-ripgrep)
+(define-key evil-normal-state-map (kbd "C-?") 'geo/consult-ripgrep-thing-at-point)
 #+end_src
 
 *** Open up this config file for editing
@@ -2149,7 +2157,7 @@ _a_propos        _c_ommand
 _d_ocumentation  _l_ibrary
 _v_ariable       _u_ser-option
 _i_nfo       valu_e_"
-    ("a" counsel-apropos)
+    ("a" consult-apropos)
     ("d" apropos-documentation)
     ("v" apropos-variable)
     ("i" info-apropos)
@@ -2170,7 +2178,7 @@ _i_nfo       valu_e_"
       ("n" persp-next "Next")
       ("p" persp-prev "Prev"))
      "Buffers"
-     (("b b" persp-counsel-switch-buffer "Switch to buffer in current perspective")
+     (("b b" persp-switch-buffer "Switch to buffer in current perspective")
       ("b a" persp-add-buffer "Add buffer to current perspective")
       ("b k" persp-remove-buffer "Remove buffer from current perspective")
       ("b s" persp-set-buffer "Move buffer to current perspective"))
@@ -2180,18 +2188,45 @@ _i_nfo       valu_e_"
      ))
 #+end_src
 
+*** Registers/Marks
+#+begin_src emacs-lisp
+(pretty-hydra-define geo/hydra-registers-menu (:exit t :quit-key "q")
+  ("Registers"
+   (("r" consult-register "Select from list")
+    ("s" consult-register-store "Store"))
+   "Marks"
+   (("m" consult-mark "Jump to local mark")
+    ("M" consult-global-mark "Jump to global mark"))))
+#+end_src
+
+*** Searching
+#+begin_src emacs-lisp
+(pretty-hydra-define geo/hydra-search-menu (:exit t :quit-key "q")
+  ("Local"
+   (("l" consult-line "Show matching lines")
+    ("L" consult-line-multi "Show matching lines across buffers")
+    ("f" consult-focus-lines "Hide lines not matching")
+    ("m" consult-multi-occur "Search/Select multiple lines")
+    ("i" consult-imenu "imenu"))
+   "External"
+    (("g" consult-grep "Grep")
+     ("r" consult-ripgrep "Ripgrep")
+     ("G" consult-git-grep "git Grep")
+     ("F" consult-find "Find file"))))
+#+end_src
+
 *** Buffers/Files
 #+begin_src emacs-lisp
 (pretty-hydra-define geo/hydra-buffer-menu (:exit t :quit-key "q")
   ("Buffers"
-    (("b" persp-counsel-switch-buffer "Switch (within workspace)")
-     ("B" persp-switch-to-buffer "Switch (globally)")
+    (("b" consult-buffer "Switch (globally)")
+     ("B" consult-buffer-other-window "Switch (other window)")
      ("n" evil-buffer-new "New")
      ("R" rename-buffer "Rename buffer")
      ("k" kill-this-buffer "Kill this buffer")
      ("K" geo/kill-other-buffers "Kill all other buffers"))
    "Files"
-     (("r" geo/rename-file-and-visit "Rename this file"))
+     (("f r" geo/rename-file-and-visit "Rename this file"))
    "Views/Modes"
      (("i" persp-ibuffer "ibuffer (within workspace)")
       ("I" ibuffer "ibuffer (globally)"))))
@@ -2270,28 +2305,26 @@ all? Now I don't have to!
   (pretty-hydra-define geo/hydra-projectile (:exit t :quit-key "q")
     (
       "Files"
-      (("f" counsel-projectile-find-file "Find file")
+      (("f" projectile-find-file "Find file")
        (">" projectile-toggle-between-implementation-and-test
          "Go to test/impl")
        ("d" projectile-display-buffer "Display buffer")
-       ("D" counsel-projectile-dired "dired"))
+       ("D" projectile-dired "dired"))
 
       "Searching"
       (("/" projectile-ag "ag")
-       ("?" counsel-projectile-ag "ag (with counsel)")
        ("g" projectile-grep "grep")
        ("r" projectile-ripgrep "ripgrep"))
 
       "Management"
-      (("p" counsel-projectile-switch-project "Switch project")
+      (("p" projectile-switch-project "Switch project")
        ("i" projectile-ibuffer "ibuffer")
-       ("b" counsel-projectile-switch-to-buffer "Switch to buffer")
+       ("b" consult-project-buffer "Switch to buffer")
        ("t" projectile-test-project "Test project"))
 
       "Commands"
       (("v" projectile-run-vterm "vterm")
-       ("c" projectile-run-command-in-root "Run command in root"))
-  ))
+       ("c" projectile-run-command-in-root "Run command in root"))))
 #+end_src
 
 *** Dired
@@ -2379,6 +2412,8 @@ forget what to call or what keys to press. This helps immensely.
     ("Working"
      (("w" geo/hydra-workspace-menu/body "Workspaces")
       ("b" geo/hydra-buffer-menu/body "Buffers")
+      ("r" geo/hydra-registers-menu/body "Registers/Marks")
+      ("s" geo/hydra-search-menu/body "Search")
       ("p" geo/hydra-projectile/body "Projectile")
       ("g" magit-status "Magit")
       ("G" geo/hydra-github-menu/body "Github"))
@@ -2785,6 +2820,16 @@ Some tips:
     (kbd "C-p p") 'popper-toggle-latest
     (kbd "C-p c") 'popper-cycle
     (kbd "C-p t") 'popper-toggle-type
+    )
+#+end_src
+
+** Extra goodies from =counsel-projectile=
+
+[[https://github.com/ericdanan/counsel-projectile][Github]]
+
+#+begin_src emacs-lisp
+  (use-package counsel-projectile
+    :straight t
     )
 #+end_src
 
