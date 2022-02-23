@@ -1609,11 +1609,18 @@ Some nice ui-related things including:
 
 =company-mode= provides auto complete functions.
 
+[[https://github.com/company-mode/company-mode][Github]]
+
 #+begin_src emacs-lisp
-  (use-package company
-    :straight t
-    :init
-    (add-hook 'after-init-hook 'global-company-mode))
+(use-package company
+  :straight t
+  :init
+  (add-hook 'after-init-hook 'global-company-mode)
+  :config
+  (setq company-minimum-prefix-length 1
+        company-idle-delay (lambda ()
+                             (if (company-in-string-or-comment) nil 0.3))
+        company-tooltip-align-annotations t))
 #+end_src
 
 =company-box= makes the autocomplete dropdown much nicer.
