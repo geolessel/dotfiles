@@ -371,6 +371,13 @@ vertico's readme.
 (setq enable-recursive-minibuffers t)
 #+end_src
 
+** Don't ever use dialog boxes
+Always put prompts in the echo area.
+
+#+begin_src emacs-lisp
+(setq use-dialog-box nil)
+#+end_src
+
 * UI
 ** Themes
 Doom emacs has some great themes. Let's use them!
