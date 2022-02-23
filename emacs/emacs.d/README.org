@@ -525,7 +525,7 @@ Light
 When you have the best font, use the best font.
 
 #+BEGIN_SRC emacs-lisp
-  (set-frame-font "PragmataPro Liga-14" nil t)
+(set-frame-font "PragmataPro Liga-16" nil t)
 #+END_SRC
 
 GNU Emacs doesn't have great support for ligatures, but I defintely
