@@ -2086,6 +2086,11 @@ itself.
 #+end_src
 
 ** Buffer/window management
+*** Delete other windows
+#+begin_src emacs-lisp
+(define-key evil-normal-state-map (kbd "s-q") #'delete-other-windows)
+#+end_src>
+
 ** File management
 *** Rename file in buffer
 The =rename-file= function does a file job renaming a file but it
@@ -2201,6 +2206,11 @@ The executable needs to be installed in the project's node_modules."
 (defun geo/eslint-fix--enable-hook () (add-hook 'after-save-hook #'geo/eslint-fix))
 ;; (add-hook 'typescript-mode-hook geo/eslint-fix--enable-hook)
 #+end_src
+*** Rebind Command-v to yank globally
+#+begin_src emacs-lisp
+(bind-key "M-v" #'yank 'global-map)
+#+end_src
+
 ** Hydra menus
 *** Apropros
 
