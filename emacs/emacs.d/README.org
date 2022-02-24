@@ -1760,7 +1760,12 @@ philosophy of reusing as much as built-in Emacs as possible.
    vertico-scroll-margin 2
    vertico-count 10
    vertico-resize nil))
+#+end_src
 
+Also use =vertico-directory= but modify it so that option-backspace
+deletes the current directory or file from the path.
+
+#+begin_src emacs-lisp
 ;; taken from https://github.com/minad/vertico/wiki#additions-for-moving-up-and-down-directories-in-find-file
 (defun vertico-directory-delete-entry ()
   "Delete directory or entire entry before point."
@@ -1872,6 +1877,46 @@ nice docstrings.
  (use-package pretty-hydra
    :straight t
    )
+#+end_src
+
+*** Take actions via embark
+
+[[https://github.com/oantolin/embark][GitHub]]
+
+#+begin_src emacs-lisp
+(use-package embark
+  :straight t
+  :ensure t
+  :init
+  ;; replace the key help with a completing-read interface
+  ;; which-key-C-h-dispatch
+  (setq prefix-help-command #'embark-prefix-help-command)
+
+  :config
+  (define-key evil-normal-state-map (kbd "C-.") #'embark-act)
+  (define-key minibuffer-local-map (kbd "C-.") #'embark-act)
+  (define-key evil-normal-state-map (kbd "C-;") #'embark-dwim)
+  (define-key evil-normal-state-map (kbd "C-h B") #'embark-bindings)
+  ;; Hide the mode line of the Embark live/completions buffers
+  (add-to-list 'display-buffer-alist
+               '("\\`\\*Embark Collection \\(Live\\|Completions\\)\\*"
+                 nil
+                 (window-parameters (mode-line-format . none)))))
+#+end_src
+
+The quick start guide in the README suggests that ~consult~ users will
+also want the ~embark-consult~ package.
+
+#+begin_src emacs-lisp
+(use-package embark-consult
+  :straight t
+  :ensure t
+  :after (embark consult)
+  :demand t
+  ;; if you want to have consult previews as you move around an
+  ;; auto-updating embark collect buffer
+  :hook
+  (embark-collect-mode . consult-preview-at-point-mode))
 #+end_src
 
 ** Better terminal emulation
