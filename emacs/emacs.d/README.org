@@ -2124,14 +2124,18 @@ To combat this, this function:
 #+end_src
 
 ** Editing tasks
-*** Search the buffer with =consult=
-
+*** Search the buffer
 vim's keybindings are for ~/~ to search the buffer. I do like that
-keybinding, but I would like upgrade the search function to use
-=consult=.
+keybinding but I would like to upgrade the evil-search function to get a
+nice prompt.
 
 #+begin_src emacs-lisp
-(define-key evil-normal-state-map (kbd "/") 'consult-line)
+(defun geo/search-with-prompt ()
+  (interactive)
+  (let ((search-string (read-regexp "Search regex: ")))
+    (evil-search search-string t t)))
+
+(define-key evil-normal-state-map (kbd "/") #'geo/search-with-prompt)
 #+end_src
 
 *** Search with =consult-ripgrep=
