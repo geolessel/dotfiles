@@ -1260,38 +1260,6 @@ which represent numeric arguments to send to interactive functions.
     (winum-mode))
 #+end_src
 ** Projects
-*** Use *projectile* to manage projects.
-
-- [[https://projectile.mx/][Home page]]
-- [[https://docs.projectile.mx/projectile/index.html][Manual]]
-
-#+BEGIN_SRC emacs-lisp
-  (use-package projectile
-    :straight t
-    :bind-keymap
-    ("C-c p" . projectile-command-map)
-    :config
-    (projectile-mode +1))
-#+END_SRC
-
-*** Group buffers by project
-
-Sometimes it's helpful to see the buffers open grouped by project.
-We can use *ibuffer-projectile* to do that.
-
-- [[https://github.com/purcell/ibuffer-projectile][Github]]
-
-#+BEGIN_SRC emacs-lisp
-  (use-package ibuffer-projectile
-    :straight t
-    :config
-    (add-hook 'ibuffer-hook
-      (lambda ()
-        (ibuffer-projectile-set-filter-groups)
-        (unless (eq ibuffer-sorting-mode 'alphabetic)
-          (ibuffer-do-sort-by-alphabetic)))))
-#+END_SRC
-
 ** Commenting
 
 A Nerd Commenter emulation, help you comment code efficiently. For example,
@@ -1303,7 +1271,7 @@ Examples:
 
 The docs recommend calling ~evilnc-default-hotkeys~ on load to set up
 the keybindings. However, this sets ~C-c p~ which I prefer to save
-for =projectile=.
+for =project=.
 
 [[https://github.com/redguardtoo/evil-nerd-commenter][Github]]
 
@@ -2144,9 +2112,6 @@ Since ~/~ is search in =evil-mode=, I like binding ~C-/~ to search the
 entire project. To help seed the search, use ~C-?~ on a word to open
 =consult-ripgrep= with that word pre-filled.
 
-I'd also like to seed =consult-ripgrep= with the word underneath the
-cursor. I can do that by getting the word with ~thing-at-point~.
-
 #+begin_src emacs-lisp
 (defun geo/consult-ripgrep (&optional seed-word)
     (interactive)
@@ -2156,12 +2121,18 @@ cursor. I can do that by getting the word with ~thing-at-point~.
                                       (file-name-directory (f-this-file))))))
       (consult-ripgrep seed-dir seed-word)))
 
+(define-key evil-normal-state-map (kbd "C-/") 'geo/consult-ripgrep)
+#+end_src
+
+I'd also like to seed =consult-ripgrep= with the word underneath the
+cursor. I can do that by getting the word with ~thing-at-point~.
+
+#+begin_src emacs-lisp
 (defun geo/consult-ripgrep-thing-at-point ()
     (interactive)
     (let ((seed-word (thing-at-point 'word t)))
     (geo/consult-ripgrep seed-word)))
 
-(define-key evil-normal-state-map (kbd "C-/") 'geo/consult-ripgrep)
 (define-key evil-normal-state-map (kbd "C-?") 'geo/consult-ripgrep-thing-at-point)
 #+end_src
 
@@ -2364,35 +2335,30 @@ the ability to toggle them.
    ))
 #+end_src
 
-*** Projectile
-
-There's so much stuff in =projectile=. Who can keep track of it
-all? Now I don't have to!
+*** Projects
 
 #+begin_src emacs-lisp
-  (pretty-hydra-define geo/hydra-projectile (:exit t :quit-key "q")
-    (
-      "Files"
-      (("f" projectile-find-file "Find file")
-       (">" projectile-toggle-between-implementation-and-test
-         "Go to test/impl")
-       ("d" projectile-display-buffer "Display buffer")
-       ("D" projectile-dired "dired"))
+(pretty-hydra-define geo/hydra-projectile (:exit t :quit-key "q")
+  ("Files"
+    (("f" project-find-file "Find file")
+     ("d" project-display-buffer "Display buffer")
+     ("D" project-dired "dired"))
 
-      "Searching"
-      (("/" projectile-ag "ag")
-       ("g" projectile-grep "grep")
-       ("r" projectile-ripgrep "ripgrep"))
+    "Searching"
+    (("a" projectile-ag "ag")
+     ("g" projectile-grep "grep")
+     ("/" consult-ripgrep "ripgrep")
+     ("r" project-query-replace-regexp "Search and replace"))
 
-      "Management"
-      (("p" projectile-switch-project "Switch project")
-       ("i" projectile-ibuffer "ibuffer")
-       ("b" consult-project-buffer "Switch to buffer")
-       ("t" projectile-test-project "Test project"))
+    "Management"
+    (("p" project-switch-project "Switch project")
+     ("b" consult-project-buffer "Switch to buffer")
+     ("B" project-kill-buffers "Kill all project buffers"))
 
-      "Commands"
-      (("v" projectile-run-vterm "vterm")
-       ("c" projectile-run-command-in-root "Run command in root"))))
+    "Commands"
+    (("v" project-eshell "eshell")
+     ("c" project-shell-command "Run command in root")
+     ("C" project-async-shell-command "Run command in root async"))))
 #+end_src
 
 *** Dired
@@ -2900,6 +2866,39 @@ Some tips:
     :straight t
     )
 #+end_src
+
+** Use *projectile* to manage projects.
+
+- [[https://projectile.mx/][Home page]]
+- [[https://docs.projectile.mx/projectile/index.html][Manual]]
+
+#+BEGIN_SRC emacs-lisp
+  (use-package projectile
+    :straight t
+    :bind-keymap
+    ("C-c p" . projectile-command-map)
+    :config
+    (projectile-mode +1))
+#+END_SRC
+
+** Group buffers by project
+
+Sometimes it's helpful to see the buffers open grouped by project.
+We can use *ibuffer-projectile* to do that.
+
+- [[https://github.com/purcell/ibuffer-projectile][Github]]
+
+#+BEGIN_SRC emacs-lisp
+  (use-package ibuffer-projectile
+    :straight t
+    :config
+    (add-hook 'ibuffer-hook
+      (lambda ()
+        (ibuffer-projectile-set-filter-groups)
+        (unless (eq ibuffer-sorting-mode 'alphabetic)
+          (ibuffer-do-sort-by-alphabetic)))))
+#+END_SRC
+
 
 * Local variables
 # Local Variables:
