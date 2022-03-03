@@ -2219,37 +2219,47 @@ way to toggle it on and off. So here are a few helper functions to add
 the ability to toggle them.
 
 #+begin_src emacs-lisp
-  (defun geo/doom-modeline-toggle-word-count ()
-    "Toggle doom-modeline's word count indicator on and off"
-    (interactive)
-    (if doom-modeline-enable-word-count
-        (progn
-          (setq doom-modeline-enable-word-count nil)
-          (message "Word count turned off"))
+(defun geo/doom-modeline-toggle-word-count ()
+  "Toggle doom-modeline's word count indicator on and off"
+  (interactive)
+  (if doom-modeline-enable-word-count
       (progn
-        (setq doom-modeline-enable-word-count t)
-        (message "Word count turned on for modes %s" doom-modeline-continuous-word-count-modes))))
+        (setq doom-modeline-enable-word-count nil)
+        (message "Word count turned off"))
+    (progn
+      (setq doom-modeline-enable-word-count t)
+      (message "Word count turned on for modes %s" doom-modeline-continuous-word-count-modes))))
 
-  (defun geo/persp-mode-toggle-modestring ()
-    "Toggle the list of perspective names in the modeline (off/single/all)"
-    (interactive)
-    ;; it is off
-    (if (not persp-show-modestring)
-        ;; turn it on (short)
+(defun geo/doom-modeline-toggle-minor-modes ()
+  "Toggle the list of minor modes in doom-modeline"
+  (interactive)
+  (setq doom-modeline-minor-modes (not doom-modeline-minor-modes)))
+
+(defun geo/doom-modeline-toggle-encoding ()
+  "Toggle the display of buffer encoding in doom-modeline"
+  (interactive)
+  (setq doom-modeline-buffer-encoding (not doom-modeline-buffer-encoding)))
+
+(defun geo/persp-mode-toggle-modestring ()
+  "Toggle the list of perspective names in the modeline (off/single/all)"
+  (interactive)
+  ;; it is off
+  (if (not persp-show-modestring)
+      ;; turn it on (short)
+      (progn
+        (setq persp-modestring-short t)
+        (persp-turn-on-modestring)
+        (message "Perspective names turned on (short)"))
+    ;; it is on (short)
+    (if persp-modestring-short
         (progn
-          (setq persp-modestring-short t)
+          (setq persp-modestring-short nil)
           (persp-turn-on-modestring)
-          (message "Perspective names turned on (short)"))
-      ;; it is on (short)
-      (if persp-modestring-short
-          (progn
-            (setq persp-modestring-short nil)
-            (persp-turn-on-modestring)
-            (message "Perspective names turned on (long)"))
-        ;; it is on (long)
-        (progn
-          (persp-turn-off-modestring)
-          (message "Perspective names turned off")))))
+          (message "Perspective names turned on (long)"))
+      ;; it is on (long)
+      (progn
+        (persp-turn-off-modestring)
+        (message "Perspective names turned off")))))
 #+end_src
 
 #+begin_src emacs-lisp
@@ -2271,7 +2281,9 @@ the ability to toggle them.
    "Modeline"
    (("m c" column-number-mode "column number" :toggle t)
     ("m l" line-number-mode "line number" :toggle t)
+    ("m e" geo/doom-modeline-toggle-encoding "encoding" :toggle doom-modeline-buffer-encoding)
     ("m w" geo/doom-modeline-toggle-word-count "word count" :toggle doom-modeline-enable-word-count)
+    ("m m" geo/doom-modeline-toggle-minor-modes "minor modes" :toggle doom-modeline-minor-modes)
     ("m p" geo/persp-mode-toggle-modestring "perspective list" :toggle persp-show-modestring)
     ("m t" display-time-mode "display time" :toggle t))
    ))
@@ -2280,16 +2292,15 @@ the ability to toggle them.
 *** Projects
 
 #+begin_src emacs-lisp
-(pretty-hydra-define geo/hydra-projectile (:exit t :quit-key "q")
+(pretty-hydra-define geo/hydra-project (:exit t :quit-key "q")
   ("Files"
     (("f" project-find-file "Find file")
      ("d" project-display-buffer "Display buffer")
      ("D" project-dired "dired"))
 
     "Searching"
-    (("a" projectile-ag "ag")
-     ("g" projectile-grep "grep")
-     ("/" consult-ripgrep "ripgrep")
+    (("/" consult-ripgrep "ripgrep")
+     ("a" ag-project "ag")
      ("r" project-query-replace-regexp "Search and replace"))
 
     "Management"
@@ -2390,7 +2401,7 @@ forget what to call or what keys to press. This helps immensely.
       ("b" geo/hydra-buffer-menu/body "Buffers")
       ("r" geo/hydra-registers-menu/body "Registers/Marks")
       ("s" geo/hydra-search-menu/body "Search")
-      ("p" geo/hydra-projectile/body "Projectile")
+      ("p" geo/hydra-project/body "Projects")
       ("g" magit-status "Magit")
       ("G" geo/hydra-github-menu/body "Github"))
 
