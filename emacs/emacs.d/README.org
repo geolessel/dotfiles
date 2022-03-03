@@ -1762,7 +1762,12 @@ documentation, bound keyboard shortcuts, etc.
 
   ; after lazy loading the package
   :config
-  (setq consult-narrow-key "<"))
+  (setq consult-narrow-key "<")
+  ;; don't automatically show live previews for these; trigger with M-.
+  (consult-customize
+   consult-ripgrep consult-grep consult-git-grep
+   consult-bookmark consult-buffer consult-project-buffer
+   :preview-key (kbd "M-.")))
 #+end_src
 
 *** Use hydra for extra context/help
