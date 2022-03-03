@@ -712,27 +712,6 @@ Some alternatives I considered:
 I want more control over how and where new buffers are displayed in my
 frame.
 
-*** popper
-Defines specific buffers to consider popups. A popup can then be
-stashed away or converted into a more first-class buffer as needed.
-
-Keybindings are in the personal keybindings section.
-
-[[https://github.com/karthink/popper][Github]]
-
-#+begin_src emacs-lisp
-  (use-package popper
-    :straight t
-    :init
-    ;; define which buffers I want to consider pop-ups
-    (setq popper-reference-buffers
-          '("\\*Messages\\*"
-            "\\*rspec-compilation\\*"
-            "\\*Org-Babel error output\\*"
-            ))
-    :config
-    (popper-mode +1))
-#+end_src
 
 * Modes
 ** Evil
@@ -2826,6 +2805,28 @@ Some tips:
 #+END_SRC
 
 ** popper
+Defines specific buffers to consider popups. A popup can then be
+stashed away or converted into a more first-class buffer as needed.
+
+Keybindings are in the personal keybindings section.
+
+[[https://github.com/karthink/popper][Github]]
+
+#+begin_src emacs-lisp
+  (use-package popper
+    :straight t
+    :init
+    ;; define which buffers I want to consider pop-ups
+    (setq popper-reference-buffers
+          '("\\*Messages\\*"
+            "\\*rspec-compilation\\*"
+            "\\*Org-Babel error output\\*"
+            ))
+    :config
+    (popper-mode +1))
+#+end_src
+
+*** popper keybindings
 #+begin_src emacs-lisp
   (evil-define-key 'normal 'global
     (kbd "C-p") nil ;; unbind C-p first
