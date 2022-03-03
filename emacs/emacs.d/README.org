@@ -409,6 +409,9 @@ Other cool theme packages I've found.
   :straight t
   :init
   (modus-themes-load-themes))
+
+(use-package base16-theme
+  :ensure t)
 #+end_src
 
 Here is the theme to load for this session.
