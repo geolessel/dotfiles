@@ -561,32 +561,6 @@ this. According to the docs, "it is like an Emacs-wide version of
 Doom emacs also provides a pretty slick mode line. Let's use that, too.
 
 #+BEGIN_SRC emacs-lisp
-
-** Dashboard
-
-Doom emacs has a great startup dashboard. Let's use it!
-
-#+BEGIN_SRC emacs-lisp
-  (use-package dashboard
-    :straight t
-    :config
-    (dashboard-setup-startup-hook)
-    ; set the title
-    (setq dashboard-banner-logo-title "Greetings Geo. Shall we play a game?")
-    ; set the banner
-    (setq dashboard-startup-banner 'logo)
-    ; set the sections I'd like displayed and how many of each
-    (setq dashboard-items '((recents . 5) (projects . 5)))
-    ; center it all
-    (setq dashboard-center-content t)
-    ; don't show shortcut keys
-    (setq dashboard-show-shortcuts nil)
-    ; use nice icons for the files
-    (setq dashboard-set-file-icons t)
-    ; use nice section icons
-    (setq dashboard-set-heading-icons t)
-    ; disable the snarky footer
-    (setq dashboard-set-footer nil))
 (use-package doom-modeline
   :straight t
   :hook
@@ -2903,6 +2877,32 @@ We can use *ibuffer-projectile* to do that.
           (ibuffer-do-sort-by-alphabetic)))))
 #+END_SRC
 
+** Dashboard
+
+Doom emacs has a great startup dashboard. Let's use it!
+
+#+BEGIN_SRC emacs-lisp :tangle no
+  (use-package dashboard
+    :straight t
+    :config
+    (dashboard-setup-startup-hook)
+    ; set the title
+    (setq dashboard-banner-logo-title "Greetings Geo. Shall we play a game?")
+    ; set the banner
+    (setq dashboard-startup-banner 'logo)
+    ; set the sections I'd like displayed and how many of each
+    (setq dashboard-items '((recents . 5) (projects . 5)))
+    ; center it all
+    (setq dashboard-center-content t)
+    ; don't show shortcut keys
+    (setq dashboard-show-shortcuts nil)
+    ; use nice icons for the files
+    (setq dashboard-set-file-icons t)
+    ; use nice section icons
+    (setq dashboard-set-heading-icons t)
+    ; disable the snarky footer
+    (setq dashboard-set-footer nil))
+#+END_SRC
 
 * Local variables
 # Local Variables:
