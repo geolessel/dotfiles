@@ -2385,7 +2385,7 @@ Some functions that make working with github a little easier.
 (pretty-hydra-define geo/hydra-github-menu (:quit-key "q")
   ("Github"
    (("o" geo/github-open-in-github "Open file on Github")
-    ("p" geo/github-open-pr-from-branch "Open PR from brach")
+    ("p" geo/github-open-pr-from-branch "Open PR from branch")
     )
    ))
 #+end_src
