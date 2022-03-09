@@ -2196,7 +2196,7 @@ _i_nfo       valu_e_"
     ("i" consult-imenu "imenu"))
    "External"
     (("g" consult-grep "Grep")
-     ("r" consult-ripgrep "Ripgrep")
+     ("r" geo/consult-ripgrep "Ripgrep")
      ("G" consult-git-grep "git Grep")
      ("F" consult-find "Find file"))))
 #+end_src
