@@ -714,51 +714,10 @@ frame.
 
 
 * Modes
-** Evil
-
-Make it like vim!
-
-#+BEGIN_SRC emacs-lisp
-  (use-package evil
-    :straight t
-    ; :after (evil-leader) ; must be after to get leader available in initial buffers
-    :init
-    (setq evil-want-integration t)
-    (setq evil-want-keybinding nil)
-    (setq evil-want-C-u-scroll t) ; use Ctrl-U to scroll up
-    :config
-    ; use evil-mode everywhere
-    (evil-mode 1)
-    ; use C-g to exit insert mode reinforcing Emacs-ism
-    (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state))
-#+END_SRC
-
-
-*** Extra keybindings
-A collection of Evil bindings for the parts of Emacs that Evil does not
-cover properly by default, such as help-mode, M-x calendar, Eshell and more.
-
-#+BEGIN_SRC emacs-lisp
-  (use-package evil-collection
-    :straight t
-    ; :after (evil evil-leader)
-    :init
-    (setq evil-want-keybinding nil)
-    :config
-    (evil-collection-init))
-#+END_SRC
-
-** YAML
-
-#+begin_src emacs-lisp
-  (use-package yaml-mode
-    :straight t
-    :config
-    (add-to-list 'auto-mode-alist '("\\.ya?ml$" . yaml-mode))
-    )
-#+end_src
-
 ** Org
+#+begin_src emacs-lisp
+(use-package org :straight t)
+#+end_src
 
 Some little things to make =org-mode= better.
 
@@ -915,6 +874,50 @@ org-capture-like editing function.
         (save-buffer)))))
 
 (add-hook 'window-state-change-hook #'geo/org-record-editing-of-file)
+#+end_src
+
+** Evil
+
+Make it like vim!
+
+#+BEGIN_SRC emacs-lisp
+  (use-package evil
+    :straight t
+    ; :after (evil-leader) ; must be after to get leader available in initial buffers
+    :init
+    (setq evil-want-integration t)
+    (setq evil-want-keybinding nil)
+    (setq evil-want-C-u-scroll t) ; use Ctrl-U to scroll up
+    :config
+    ; use evil-mode everywhere
+    (evil-mode 1)
+    ; use C-g to exit insert mode reinforcing Emacs-ism
+    (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state))
+#+END_SRC
+
+
+*** Extra keybindings
+A collection of Evil bindings for the parts of Emacs that Evil does not
+cover properly by default, such as help-mode, M-x calendar, Eshell and more.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package evil-collection
+    :straight t
+    ; :after (evil evil-leader)
+    :init
+    (setq evil-want-keybinding nil)
+    :config
+    (evil-collection-init))
+#+END_SRC
+
+** YAML
+
+#+begin_src emacs-lisp
+  (use-package yaml-mode
+    :straight t
+    :config
+    (add-to-list 'auto-mode-alist '("\\.ya?ml$" . yaml-mode))
+    )
 #+end_src
 
 ** Ruby
