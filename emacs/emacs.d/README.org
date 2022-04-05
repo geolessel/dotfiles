@@ -1048,9 +1048,15 @@ as the preferred checker even in typescript files.
 ** Elixir
 
 #+begin_src emacs-lisp
-  (use-package elixir-mode
-    :straight t
-    )
+(use-package elixir-mode
+  :straight t
+  :hook (elixir-mode . (lambda ()
+                         (add-hook
+                          'before-save-hook
+                          'elixir-format
+                          nil
+                          t)))
+  )
 #+end_src
 
 ** Docker
