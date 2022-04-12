@@ -1338,7 +1338,6 @@ Keys:
 #+end_src
 
 ** Undo
-
 Even I make mistakes. Emacs' built-in undo system is pretty powerful
 but a little hard to understand. There are other undo packages that
 dumb it down at the expense of functionality, but *undo-tree* tries
@@ -1352,7 +1351,9 @@ The documentation for this one (with examples) is in the source code.
 (use-package undo-tree
   :straight t
   :config
-  (setq evil-undo-system 'undo-tree)
+  (setq evil-undo-system 'undo-tree
+        undo-tree-history-directory-alist
+        `(("." . ,(file-name-concat user-emacs-directory "litter" "undo-tree"))))
   (add-hook 'evil-local-mode-hook 'turn-on-undo-tree-mode)
   (global-undo-tree-mode))          ; use it everwhere!
 #+END_SRC
