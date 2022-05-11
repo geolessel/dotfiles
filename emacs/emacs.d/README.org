@@ -1983,7 +1983,7 @@ on github."
   "Return the filename relative to the project root."
   (interactive "fFile: ")
   (let ((relative-filename
-         (file-relative-name filename (cdr (project-current)))))
+         (file-relative-name filename (caddr (project-current)))))
     (when (called-interactively-p 'interactive)
       (message relative-filename))
     relative-filename))
@@ -2004,7 +2004,7 @@ itself.
              (file-name-nondirectory
               (directory-file-name
                (file-name-directory
-                (cdr (project-current)))))))
+                (caddr (project-current)))))))
         (when (called-interactively-p 'interactive)
           (message dir))
         dir))))
@@ -2072,7 +2072,7 @@ entire project. To help seed the search, use ~C-?~ on a word to open
 #+begin_src emacs-lisp
 (defun geo/consult-ripgrep (&optional seed-word)
     (interactive)
-    (let* ((project-root-dir (cdr (project-current)))
+    (let* ((project-root-dir (caddr (project-current)))
            (seed-dir (read-string "Search in directory: "
                                   (or project-root-dir
                                       (file-name-directory (f-this-file))))))
@@ -2121,7 +2121,7 @@ The executable needs to be installed in the project's node_modules."
   (interactive)
   (let* ((filename (buffer-file-name))
          (buffer (get-buffer-create "*geo/eslint-fix*"))
-         (project-root-dir (cdr (project-current)))
+         (project-root-dir (caddr (project-current)))
          (executable (concat project-root-dir "node_modules/.bin/eslint")))
     (if (file-executable-p executable)
         (make-process
