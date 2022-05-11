@@ -712,12 +712,16 @@ Some alternatives I considered:
 I want more control over how and where new buffers are displayed in my
 frame.
 
-
 * Modes
 ** Org
-#+begin_src emacs-lisp
-(use-package org :straight t)
-#+end_src
+Because ~org-mode~ is built in to Emacs, we don't want to fetch,
+compile, and include a different version. The local version is
+fine. Without this configuration, org-mode gets really confused and
+starts throwing all sorts of errors.
+
+#+BEGIN_SRC emacs-lisp
+(use-package org :straight (:type built-in))
+#+END_SRC
 
 Some little things to make =org-mode= better.
 
@@ -737,6 +741,7 @@ I've also customized which characters the bullets are.
 #+begin_src emacs-lisp
 (use-package org-bullets
   :straight t
+  :after (org)
   :hook (org-mode . org-bullets-mode)
   :custom
   (org-bullets-bullet-list '("⦿" "○" "●" "○" "●" "○" "●")))
@@ -790,7 +795,7 @@ header variables/options you can provide in a request.
 | =:resolve=    | =--resolve=    | =:resolve example.com:80:127.0.0.1,example.com:443:127.0.0.1=                           |
 
 #+begin_src emacs-lisp
-(use-package ob-http :straight t)
+(use-package ob-http :straight t :after (org))
 #+end_src
 
 *** Enable babel modes for languages
@@ -806,7 +811,7 @@ header variables/options you can provide in a request.
 To get the async execution, add the ~:async~ keyword to a code block.
 
 #+begin_src emacs-lisp
-(use-package ob-async :straight t)
+(use-package ob-async :straight t :after (org))
 #+end_src
 
 *** Reduce indentation in source blocks to 0
