@@ -1991,6 +1991,31 @@ on github."
     (message "opened %s" github-url)))
 #+end_src
 
+**** Show the git log for the current file (and/or line)
+
+#+begin_src emacs-lisp
+(defun geo/git-log ()
+  "Show the git log for the current file (or lines within it).
+
+If line(s) are selected, the git log will be restricted to those lines.
+If line(s) are not selected, the log for the file itself will be shown.
+
+The log output will be shown in a temporary buffer."
+  (interactive)
+  (let* ((common-args "--max-count=1 --decorate=full --pretty=medium --patch")
+         (command-s (if (use-region-p)
+                        (format "log -L %s,%s:%s %s"
+                                (line-number-at-pos (region-beginning) t)
+                                (- (line-number-at-pos (region-end) t) 1)
+                                (buffer-file-name)
+                                common-args)
+                      (format "log %s -- %s" common-args (buffer-file-name))))
+         (buffer-name "*git log*")
+         (temp-buffer-setup-hook (lambda () (diff-mode))))
+    (with-output-to-temp-buffer buffer-name
+      (princ (format "# git %s\n\n" command-s))
+      (princ (geo/git-run-command command-s)))))
+#+end_src
 *** Project-related
 **** Get filename relative to the project root.
 
