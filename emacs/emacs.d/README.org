@@ -850,18 +850,29 @@ editing one file to another. In order to do this, I'm hooking into
 ~window-buffer-change-hook~ which then calls my function which calls my
 org-capture-like editing function.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (defun geo/org-record-editing-of-file ()
   "Clock in editing the current file."
   (interactive)
   (let ((filename (or (buffer-file-name) (buffer-name)))
-        (project (geo/project-name-from-directory-of-file)))
+        (project (geo/project-name-from-directory-of-file))
+        (debug-on-error t))
     ;; don't record visiting "*" buffers (e.g. *Messages*, *scratch*, etc)
     ;; as it gets too noisy (minibuffers seem to start with a space)
-    (when (and (not (string-prefix-p "*" filename))
+    (when (and filename
+               (not (string-prefix-p "*" filename))
                (not (string-prefix-p " *" filename)))
       (with-current-buffer
         (find-file-noselect (concat org-directory "/auto-time-tracker.org") t t nil)
+        ;; if this is the first time we've loaded up this file (or maybe haven't actually
+        ;; loaded it for real like with `find-file`), org-complex-heading-regexp-format
+        ;; hasn't yet been defined as it is a local variable. This ensures that if it
+        ;; isn't defined, we define it and other local things required but without
+        ;; having to completely load up org-mode.
+        (when (not org-complex-heading-regexp-format)
+          (message "org-complex-heading-regexp-format not set")
+          (org-set-regexps-and-options)
+          (message "org-complex-heading-regexp-format is now %s" org-complex-heading-regexp-format))
         (org-datetree-find-iso-week-create (calendar-current-date))
         (goto-char (point-at-eol))
         (org-narrow-to-subtree)
@@ -872,9 +883,13 @@ org-capture-like editing function.
           (insert filename)
           (when project (org-set-tags project)))
         ;; prevent stopping and starting the same file task
-        (when (not (equal org-clock-current-task filename))
+        (cond
+         ((and (boundp 'org-clock-current-task)
+               (not (equal org-clock-current-task filename)))
           (org-clock-out nil t)
           (org-clock-in))
+         ((not (boundp 'org-clock-current-task))
+          (org-clock-in)))
         (widen)
         (save-buffer)))))
 
