@@ -975,6 +975,17 @@ Some options that may be worth fiddling with in the future:
   (use-package rspec-mode
     :straight t)
 #+end_src
+*** stree mode
+Planning Center has a gem for auto-formatting and style called
+Edna. Edna, in turn, uses the Ruby ~syntax_tree~ gem which has an
+executable named ~stree~. I wrote a minor mode that utilizes the gem
+for auto-formatting Ruby files. It is in a local folder and I just
+need to require it here to make it available.
+
+#+begin_src emacs-lisp
+(require 'stree-mode)
+#+end_src
+
 ** JS
 
 The default for =js-mode= is to indent at 4 spaces. NOPE.
