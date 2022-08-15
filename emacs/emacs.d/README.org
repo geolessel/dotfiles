@@ -1130,7 +1130,6 @@ Other one: https://github.com/wendelscardua/ca65-mode
 (require 'ca65-mode)
 (add-to-list 'auto-mode-alist '("\\.asm?$" . ca65-mode))
 #+end_src
-
 * Editing
 
   Things that provide general, non-language specific editing functionality.
@@ -1412,7 +1411,7 @@ can utilize that server to make fixes in our javascript files.
 [[https://github.com/aaronjensen/eslintd-fix][Github]]
 
 #+begin_src emacs-lisp
-(defvar geo/eslint_d-exec-path "~/.config/yarn/global/node_modules/.bin")
+(defvar geo/eslint_d-exec-path "/usr/local/bin")
 
 (use-package eslintd-fix
   :straight t
@@ -1902,7 +1901,7 @@ The command should be the string to follow a normal 'git' command.
 For example, to run 'git branch --show-current', `command` would
 equal 'branch --show-current'."
   (interactive "sGit command: ")
-  (let ((git-result (geo/trim
+  (let ((git-result (string-chop-newline
                      (shell-command-to-string
                       (concat "git " command)))))
     (when (or (called-interactively-p 'interactive)
@@ -2514,6 +2513,8 @@ forget what to call or what keys to press. This helps immensely.
 
 - [[https://github.com/magnars/multiple-cursors.el][multiple-cursors]] - edit similar text with multiple cursors
   simultaneously.
+
+- [[https://kristofferbalintona.me/posts/cape/]] - use cape instead of company?
 
 ** Org Mode
 
