@@ -9,3 +9,7 @@ zle -N fzf-history-search fzf-history-search
 
 # bindkey '^r' history-incremental-search-backward
 bindkey "^R" fzf-history-search
+
+# move forward and backward through history one entry at a time
+bindkey "^p" up-history
+bindkey "^n" down-history
