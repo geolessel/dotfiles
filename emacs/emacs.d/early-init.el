@@ -32,5 +32,6 @@
 ;; when gccemacs is installed.
 ;; (setq comp-deferred-compilation nil)
 
-; disable the default Emacs package manager
+;; disable the default Emacs package manager
+;; https://github.com/radian-software/straight.el#getting-started
 (setq package-enable-at-startup nil)
