@@ -1786,6 +1786,7 @@ documentation, bound keyboard shortcuts, etc.
   (consult-customize
    consult-ripgrep consult-grep consult-git-grep
    consult-bookmark consult-buffer consult-project-buffer
+   geo/consult-ripgrep geo/consult-ripgrep-thing-at-point
    :preview-key (kbd "M-.")))
 #+end_src
 
@@ -2113,7 +2114,6 @@ entire project. To help seed the search, use ~C-?~ on a word to open
   (consult-ripgrep dirname seed-word))
 
 (define-key evil-normal-state-map (kbd "C-/") 'geo/consult-ripgrep)
-(consult-customize geo/consult-ripgrep :preview-key (kbd "M-."))
 #+end_src
 
 I'd also like to seed =consult-ripgrep= with the word underneath the
@@ -2126,7 +2126,6 @@ cursor. I can do that by getting the word with ~thing-at-point~.
     (geo/consult-ripgrep seed-word)))
 
 (define-key evil-normal-state-map (kbd "C-?") 'geo/consult-ripgrep-thing-at-point)
-(consult-customize geo/consult-ripgrep-thing-at-point :preview-key (kbd "M-."))
 #+end_src
 
 *** Open up this config file for editing
