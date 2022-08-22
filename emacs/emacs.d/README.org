@@ -2104,13 +2104,13 @@ entire project. To help seed the search, use ~C-?~ on a word to open
 =consult-ripgrep= with that word pre-filled.
 
 #+begin_src emacs-lisp
-(defun geo/consult-ripgrep (&optional seed-word)
-    (interactive)
-    (let* ((project-root-dir (caddr (project-current)))
-           (seed-dir (read-string "Search in directory: "
-                                  (or project-root-dir
-                                      (file-name-directory (f-this-file))))))
-      (consult-ripgrep seed-dir seed-word)))
+(defun geo/consult-ripgrep (&optional seed-word dirname)
+  (interactive
+   (let* ((dir (read-directory-name "Search in directory: "
+                                    (or (project-root (project-current))
+                                        (file-name-directory (f-this-file))))))
+     (list "" dir)))
+  (consult-ripgrep dirname seed-word))
 
 (define-key evil-normal-state-map (kbd "C-/") 'geo/consult-ripgrep)
 #+end_src
