@@ -56,13 +56,6 @@ subprocesses.
     (load bootstrap-file nil 'nomessage))
 #+END_SRC
 
-** Set preferred package repos
-#+begin_src emacs-lisp
-(setq package-archives '(("melpa" . "https://melpa.org/packages/")
-                         ("melpa-stable" . "https://stable.melpa.org/packages/")
-                         ("org" . "https://orgmode.org/elpa/")
-                         ("elpa" . "https://elpa.gnu.org/packages/")))
-#+end_src
 ** =use-package=
 #+BEGIN_SRC emacs-lisp
   (straight-use-package 'use-package)
