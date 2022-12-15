@@ -1144,6 +1144,21 @@ Other one: https://github.com/wendelscardua/ca65-mode
 (require 'ca65-mode)
 (add-to-list 'auto-mode-alist '("\\.asm?$" . ca65-mode))
 #+end_src
+** Lisp
+While I'm not a daily lisp programmer (yet), I do occasionally jump
+into learning more about various flavours of lisp apart from elisp
+itself. These are some packages that help with those explorations.
+
+*** SLIME
+A Common Lisp dev environment build on top of Emacs.
+
+#+begin_src emacs-lisp
+(use-package slime
+  :straight t
+  :config
+  (setq inferior-lisp-program "sbcl"))
+#+end_src
+
 * Editing
 
   Things that provide general, non-language specific editing functionality.
@@ -2567,6 +2582,8 @@ forget what to call or what keys to press. This helps immensely.
   simultaneously.
 
 - [[https://kristofferbalintona.me/posts/cape/]] - use cape instead of company?
+
+- [[https://github.com/emacs-evil/evil-cleverparens][clever-perens]] - for editing lisp-like languages in evil mode?
 
 ** Org Mode
 
