@@ -1088,15 +1088,21 @@ as the preferred checker even in typescript files.
 ** Elixir
 
 #+begin_src emacs-lisp
+(defun geo/elixir-format-buffer ()
+  (interactive)
+  (lsp-format-buffer))
+#+end_src
+
+#+begin_src emacs-lisp
 (use-package elixir-mode
   :straight t
-  :hook (elixir-mode . (lambda ()
-                         (add-hook
-                          'before-save-hook
-                          'elixir-format
-                          nil
-                          t)))
-  )
+  :init
+  (add-to-list 'auto-mode-alist '("\\.heex\\'" . elixir-mode))
+  :hook (elixir-mode . (lambda () (add-hook
+                                   'before-save-hook
+                                   'geo/elixir-format-buffer
+                                   nil
+                                   t))))
 #+end_src
 
 ** Docker
@@ -1520,6 +1526,7 @@ messages inline with =flycheck-inline=.
   :init
   (setq lsp-keymap-prefix "C-c l")
   :hook (
+    (elixir-mode . lsp-deferred)
     (typescript-mode . lsp-deferred)
     (js-mode . lsp-deferred)
     (lsp-mode . lsp-enable-which-key-integration))
