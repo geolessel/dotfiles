@@ -720,6 +720,15 @@ Some alternatives I considered:
 I want more control over how and where new buffers are displayed in my
 frame.
 
+*** Make =switch-to-buffer= respect my positioning rules
+IOW, treat manual switching the same as programmatic switching. Manual
+switching is "exempt from any display action rules you create
+yourself." [[https://www.masteringemacs.org/article/demystifying-emacs-window-manager][source]]
+
+#+begin_src emacs-lisp
+(setq switch-to-buffer-obey-display-actions t)
+#+end_src
+
 * Modes
 ** Org
 Because ~org-mode~ is built in to Emacs, we don't want to fetch,
@@ -2087,6 +2096,59 @@ itself.
 #+begin_src emacs-lisp
 (define-key evil-normal-state-map (kbd "s-q") #'delete-other-windows)
 #+end_src>
+
+*** Split a full window horizontally
+I couldn't think of a great title for this function but essentially
+this will split the window horizontally creating the new window below
+/all other windows/. This comes in handy when, for instance, the
+window is already split vertically one or more times. With the normal
+split, it will split the currently-divided vertical section in
+horizontally.
+
+For example, if A, B, and C exist and =evil-window-split= (or
+=split-window=) is called within B, this is the result:
+
+#+BEGIN_EXAMPLE
+┌───────────╦═══════════╦───────────┐
+│           ║           ║           │
+│           ║     B     ║           │
+│           ║           ║           │
+│     A     ╠═══════════╣     C     │
+│           │           │           │
+│           │     D     │           │
+│           │           │           │
+│           │           │           │
+└───────────┴───────────┴───────────┘
+#+END_EXAMPLE
+
+If A, B, and C exist and =geo/window-split-full= is called within B,
+this is the result:
+
+#+BEGIN_EXAMPLE
+┌───────────╦═══════════╦───────────┐
+│           ║           ║           │
+│     A     ║     B     ║     C     │
+│           ║           ║           │
+├───────────╩═══════════╩───────────┤
+│                                   │
+│                 D                 │
+│                                   │
+│                                   │
+└───────────────────────────────────┘
+#+END_EXAMPLE
+
+#+begin_src emacs-lisp
+(defun geo/window-split-full ()
+  "Split the full window horizontally.
+
+Instead of splitting the current window horizontally like
+`split-window` would, this command splits the full parent window
+horizontally."
+  (interactive)
+  (split-window (window-parent (selected-window))))
+
+(define-key evil-normal-state-map (kbd "C-w S") #'geo/window-split-full)
+#+end_src
 
 ** File management
 *** Rename file in buffer
