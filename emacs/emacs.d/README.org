@@ -703,13 +703,17 @@ Some alternatives I considered:
   up on =persp-mode= this was initially my preference.
 
  #+begin_src emacs-lisp
-   (use-package perspective
-     :straight t
-     :config
-     (persp-mode)
-     ; sort perspectives by most recently accessed (others: 'name, 'created)
-     (setq persp-sort 'access)
-     )
+ (use-package perspective
+   :straight t
+   :config
+   ; sort perspectives by most recently accessed (others: 'name, 'created)
+   (setq persp-sort 'access)
+   :init
+   ; all my usage is via custom hydra calls, so I don't want a prefix key
+   ; (persp-mode-prefix-key (kbd "C-c M-p"))
+   ; *not* setting this causes warnings during startup
+   (setf persp-suppress-no-prefix-key-warning t)
+   (persp-mode))
  #+end_src
 
 ** Buffer/Popup Placement
