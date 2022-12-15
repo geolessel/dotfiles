@@ -211,6 +211,17 @@ If the matching paren isn't visible, highlight the entire expression.
   (setq show-paren-style "mixed")
 #+end_src
 
+** Show trailing white space
+It should be obvious when there is trailing white space, but only in
+modes in which I am programming or writing documentation or notes.
+
+#+begin_src emacs-lisp
+(let ((show-whitespace-in-modes '(prog-mode-hook
+                                  org-mode-hook
+                                  markdown-mode-hook)))
+  (dolist (mode-hook show-whitespace-in-modes)
+          (add-hook mode-hook (lambda () (setq show-trailing-whitespace t)))))
+#+end_src
 ** Set the default tab width
 
 #+BEGIN_SRC emacs-lisp
@@ -2310,6 +2321,17 @@ the ability to toggle them.
       (progn
         (persp-turn-off-modestring)
         (message "Perspective names turned off")))))
+
+(defun geo/toggle-show-trailing-whitespace ()
+  "Toggle showing trailing whitespace."
+  (interactive)
+  (if show-trailing-whitespace
+      (progn
+        (setq show-trailing-whitespace nil)
+        (message "Trailing whitespace hidden"))
+    (progn
+      (setq show-trailing-whitespace t)
+      (message "Trailing whitespace shown"))))
 #+end_src
 
 #+begin_src emacs-lisp
@@ -2324,7 +2346,8 @@ the ability to toggle them.
    ""
    (("d" diff-hl-mode "diff-hl" :toggle t)
     ("c" global-display-fill-column-indicator-mode "show fill column" :toggle t)
-    (")" geo/toggle-show-paren-style "show-paren style"))
+    (")" geo/toggle-show-paren-style "show-paren style")
+    ("t" geo/toggle-show-trailing-whitespace "trailing whitespace" :toggle t))
    "Editing"
    (("p" electric-pair-mode "electric-pair" :toggle t)
     ("f" auto-fill-mode "auto-fill"))
@@ -2335,8 +2358,7 @@ the ability to toggle them.
     ("m w" geo/doom-modeline-toggle-word-count "word count" :toggle doom-modeline-enable-word-count)
     ("m m" geo/doom-modeline-toggle-minor-modes "minor modes" :toggle doom-modeline-minor-modes)
     ("m p" geo/persp-mode-toggle-modestring "perspective list" :toggle persp-show-modestring)
-    ("m t" display-time-mode "display time" :toggle t))
-   ))
+    ("m t" display-time-mode "display time" :toggle t))))
 #+end_src
 
 *** Projects
@@ -2983,5 +3005,4 @@ The documentation for this one (with examples) is in the source code.
 ** wrangle temp files
 ** turn off listing killed buffers in the switch buffer list
 ** minor mode / package for testing
-
 ** toggle Top/Bot/30% where-are-you-in-this-file indicator on modeline
