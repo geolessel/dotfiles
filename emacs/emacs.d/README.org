@@ -419,9 +419,7 @@ Other cool theme packages I've found.
   :straight t)
 
 (use-package modus-themes
-  :straight t
-  :init
-  (modus-themes-load-themes))
+  :straight t)
 
 (use-package base16-theme
   :ensure t)
