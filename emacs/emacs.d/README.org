@@ -686,7 +686,6 @@ easier.
   :config
   (dimmer-configure-helm)
   (dimmer-configure-hydra)
-  (dimmer-configure-company-box)
   (dimmer-configure-magit)
   (dimmer-configure-which-key)
   (dimmer-mode))
@@ -1596,33 +1595,6 @@ Some nice ui-related things including:
 #+end_src
 #+end_src
 
-*** Company
-
-=company-mode= provides auto complete functions.
-
-[[https://github.com/company-mode/company-mode][Github]]
-
-#+begin_src emacs-lisp
-(use-package company
-  :straight t
-  :init
-  (add-hook 'after-init-hook 'global-company-mode)
-  :config
-  (setq company-minimum-prefix-length 1
-        company-idle-delay (lambda ()
-                             (if (company-in-string-or-comment) nil 0.3))
-        company-tooltip-align-annotations t))
-#+end_src
-
-=company-box= makes the autocomplete dropdown much nicer.
-
-#+begin_src emacs-lisp
-  (use-package company-box
-    :straight t
-    :after company
-    :hook (company-mode . company-box-mode))
-#+end_src
-
 *** Dash
 
 I use [[https://kapeli.com/dash][Dash]] for API documentation. This makes it so that I can get
@@ -1636,6 +1608,30 @@ documentation on the thing under my cursor.
   ("C-c D" . dash-at-point))
 #+end_src
 
+*** Auto completion
+After using =company= for a long time, I've decided to switch to
+=corfu= for many of the same reasons I switched to =vertico=: it uses
+more of Emacs' own functions and internals.
+
+- [[https://github.com/minad/corfu/wiki][corfu wiki]]
+
+#+begin_src emacs-lisp
+(use-package corfu
+  :straight (corfu :files (:defaults "extensions/*"))
+  :custom
+  (corfu-cycle t)                ;; Enable cycling for corfu-next/previous
+  ;; (corfu-auto t)                 ;; Enable auto completion
+  (corfu-separator ?\s)          ;; Orderless field separator
+  ;; (corfu-quit-at-boundary nil)   ;; Never quit at completion boundary
+  ;; (corfu-quit-no-match nil)      ;; Never quit, even if there is no match
+  ;; (corfu-preview-current nil)    ;; Disable current candidate preview
+  ;; (corfu-preselect-first nil)    ;; Disable candidate preselection
+  ;; (corfu-on-exact-match nil)     ;; Configure handling of exact matches
+  ;; (corfu-scroll-margin 5)        ;; Use scroll margin
+  :init
+  (corfu-popupinfo-mode)
+  (global-corfu-mode))
+#+end_src
 ** Code folding
 
 =evil-vimish-fold= provides vim-like code folding for a large
@@ -1788,8 +1784,16 @@ prefixes. By default, regexp and literal matches are enabled."
 (use-package orderless
   :straight t
   :custom
-  (completion-styles '(orderless))
-  (completion-category-defaults nil))
+  (completion-styles '(orderless partial-completion basic))
+  (completion-category-defaults nil)
+  ;; from the docs: the basic completion style needs to be tried first
+  ;; (not as a fallback) for TRAMP hostname completion to work. In
+  ;; order to achieve that, we add an entry for the file completion
+  ;; category in the completion-category-overrides variable. In
+  ;; addition, the partial-completion style allows you to use
+  ;; wildcards for file completion and partial paths, e.g., /u/s/l for
+  ;; /usr/share/local.
+  (completion-category-overrides '((file (styles basic partial-completion)))))
 #+end_src
 
 *** Persist history over Emacs restarts
@@ -3100,6 +3104,33 @@ The documentation for this one (with examples) is in the source code.
   (add-hook 'evil-local-mode-hook 'turn-on-undo-tree-mode)
   (global-undo-tree-mode))          ; use it everwhere!
 #+END_SRC
+** Company
+=company-mode= provides auto complete functions.
+
+[[https://github.com/company-mode/company-mode][Github]]
+
+#+begin_src emacs-lisp
+(use-package company
+  :straight t
+  :init
+  (add-hook 'after-init-hook 'global-company-mode)
+  :config
+  (setq company-minimum-prefix-length 1
+        company-idle-delay (lambda ()
+                             (if (company-in-string-or-comment) nil 0.3))
+        company-tooltip-align-annotations t))
+#+end_src
+
+=company-box= makes the autocomplete dropdown much nicer.
+
+#+begin_src emacs-lisp
+  (use-package company-box
+    :straight t
+    :after company
+    :hook (company-mode . company-box-mode))
+#+end_src
+
+
 * Local variables
 # Local Variables:
 # eval: (org-content 3)
