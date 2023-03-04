@@ -238,6 +238,15 @@ https://blog.sumtypeofway.com/posts/emacs-config.html.
 (setq-default indent-tabs-mode nil)
 #+END_SRC
 
+** Use tab for completion too
+By default, =TAB= only indents. But I'd also like it to trigger the
+autocompletion framework I current have loaded. I set that behaviour
+below.
+
+#+begin_src emacs-lisp
+(setq tab-always-indent 'complete)
+#+end_src
+
 ** Tell Emacs that a single space follows a period
 
 Emacs, by default, wants to ensure that a period that ends a sentence
