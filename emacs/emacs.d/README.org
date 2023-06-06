@@ -392,6 +392,14 @@ Always put prompts in the echo area.
 #+end_src
 
 * UI
+** Increase internal padding
+I want some breathing space between the text and the frame, so let's
+bump up that value a bit.
+
+#+begin_src emacs-lisp
+(setq default-frame-alist
+      '((internal-border-width . 15)))
+#+end_src
 ** Themes
 Doom emacs has some great themes. Let's use them!
 
@@ -2440,6 +2448,21 @@ the ability to toggle them.
       (message "Trailing whitespace shown"))))
 #+end_src
 
+Add the ability to change the internal frame padding. Usually I like a
+little bit of breathing room but sometimes that should be reduce to
+fit in more text.
+
+#+begin_src emacs-lisp
+(defun geo/set-internal-frame-padding (pixels)
+  "Set padding inside the frame in pixels."
+  (interactive
+   (let ((pixels (read-number
+                  "Pixels: "
+                  (frame-parameter nil 'internal-border-width))))
+     (list pixels)))
+  (set-frame-parameter nil 'internal-border-width pixels))
+#+end_src
+
 #+begin_src emacs-lisp
 (pretty-hydra-define geo/hydra-prefs-menu (:quit-key "q")
   ("Display"
@@ -2453,9 +2476,10 @@ the ability to toggle them.
    (("d" diff-hl-mode "diff-hl" :toggle t)
     ("c" global-display-fill-column-indicator-mode "show fill column" :toggle t)
     (")" geo/toggle-show-paren-style "show-paren style")
-    ("t" geo/toggle-show-trailing-whitespace "trailing whitespace" :toggle t))
+    ("t" geo/toggle-show-trailing-whitespace "trailing whitespace" :toggle t)
+    ("p" geo/set-internal-frame-padding "set internal padding"))
    "Editing"
-   (("p" electric-pair-mode "electric-pair" :toggle t)
+   (("e" electric-pair-mode "electric-pair" :toggle t)
     ("f" auto-fill-mode "auto-fill"))
    "Modeline"
    (("m c" column-number-mode "column number" :toggle t)
