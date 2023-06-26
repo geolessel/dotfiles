@@ -2535,6 +2535,25 @@ fit in more text.
   (set-frame-parameter nil 'internal-border-width pixels))
 #+end_src
 
+Speaking of text breathing room, sometimes having a bit of line
+spacing is handy. While the process for changing this is pretty
+simple, having a function in my hydra helps me remember that it can be
+done in the first place.
+
+#+begin_src emacs-lisp
+(defun geo/set-line-spacing (spacing)
+  "Set the line height globally and buffer-locally.
+
+If value is a floating point number, it specifies the spacing
+relative to the default frame line height. A value of 0 means
+add no extra space."
+  (interactive
+   (let ((spacing (read-number "Spacing: " line-spacing)))
+     (list spacing)))
+  (setq-local line-spacing spacing)
+  (setq-default line-spacing spacing))
+#+end_src
+
 #+begin_src emacs-lisp
 (pretty-hydra-define geo/hydra-prefs-menu (:quit-key "q")
   ("Display"
@@ -2549,7 +2568,8 @@ fit in more text.
     ("c" global-display-fill-column-indicator-mode "show fill column" :toggle t)
     (")" geo/toggle-show-paren-style "show-paren style")
     ("t" geo/toggle-show-trailing-whitespace "trailing whitespace" :toggle t)
-    ("p" geo/set-internal-frame-padding "set internal padding"))
+    ("p" geo/set-internal-frame-padding "set internal padding")
+    ("l" geo/set-line-spacing "set line spacing"))
    "Editing"
    (("e" electric-pair-mode "electric-pair" :toggle t)
     ("f" auto-fill-mode "auto-fill"))
