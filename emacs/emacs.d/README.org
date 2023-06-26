@@ -551,15 +551,88 @@ When you have the best font, use the best font.
 #+END_SRC
 
 GNU Emacs doesn't have great support for ligatures, but I defintely
-want them. Thankfully, I came across [[https://github.com/lumiknit/emacs-pragmatapro-ligatures][pragmatapro-lig]] specifically for
-enabling PragmataPro font ligatures, so let's use it.
+want them. I wrote a minor mode to support PragmataPro specifically
+(based off of code provided by the PragmataPro author himself at
+https://github.com/fabrizioschiavi/pragmatapro/tree/master/emacs_snippets.
 
 #+begin_src emacs-lisp
+(require 'pragmata-mode)
+(add-hook 'prog-mode-hook #'pragmata-mode)
+(add-hook 'text-mode-hook #'pragmata-mode)
+(add-hook 'conf-mode-hook #'pragmata-mode)
+#+end_src
+
+The author of PragmataPro maintains a script that helps set up
+ligatures: [[https://github.com/fabrizioschiavi/pragmatapro/blob/master/emacs_snippets/][https://github.com/fabrizioschiavi/pragmatapro/blob/master/emacs_snippets/]]
+
+#+begin_src emacs-lisp :tangle no
+(load (concat user-emacs-directory "packages/" "pragmatapro-prettify-symbols-v0.829.el"))
+(add-hook 'prog-mode-hook #'prettify-hook)
+(add-hook 'text-mode-hook #'prettify-hook)
+(add-hook 'conf-mode-hook #'prettify-hook)
+(global-prettify-symbols-mode t)
+#+end_src
+
+I came across [[https://github.com/lumiknit/emacs-pragmatapro-ligatures][pragmatapro-lig]] specifically for enabling PragmataPro
+font ligatures and I used to use it but it started throwing errors
+when formatting with lsp-mode. I'm disabling for now in favor of the
+above.
+
+#+begin_src emacs-lisp :tangle no
 (use-package pragmatapro-lig
   :straight '(pragmatapro-lig :type git :host github :repo "geolessel/emacs-pragmatapro-ligatures")
   :init
   (require 'pragmatapro-lig)
   (pragmatapro-lig-global-mode))
+#+end_src
+
+The ~pragmatapro-lig~ package has been giving me trouble lately and
+when it is not giving me trouble, tends to slow down text
+rendering. I'm attempting to use ~ligature~ instead (even though it
+requires a lot more config).
+
+#+begin_src emacs-lisp :tangle no
+(use-package ligature :tangle no
+  :straight t
+  :config
+  ;; 't to use these ligatures in every major mode
+  (ligature-set-ligatures 't '("!= !== !=< !≡ !≡≡ ≡/ ≡/≡
+                                #( #_ #? #_( #{ #> ## #[
+                                $> %= &% && &+ &- &/ &= &&&
+                                (| *> ++ +++ += +> ++=
+                                -- -< -<< -= -> ->> --- --> -+-
+                                -\/ -|> -<| ->- -<- -| -|| -|:
+                                - [v]  - [x]  - [-]
+                                .= /= /== /-\ /-: /->
+                                /=> /-< /=< /=: //=
+                                := :≡ :=> :-\    :=/
+                                :-/ :-| :=| :|- :|=
+                                <$> <* <*> <+> <- <<= <= <=>
+                                <> <|> <<- <| <=< <~ <~~ <<~
+                                <$ <+ <!> <@> <#> <%> <^> <&>
+                                <?> <.> </> <\> <\"> <:> <~> <**>
+                                <<^ <-> <!-- <-- <~< <==> <|-
+                                <<| <|| <-< <--> <== <<==
+                                <-\ <-/ <=\ <=/
+                                =<< == === ==> => =~ =>>
+                                =~= =>> =>= =<= =< ==< =<|
+                                =| =|| =|: =/ =/= =/<
+                                ≡≡ ≡≡≡ ≡:≡ >- >= >>- >>= >=>
+                                >>^ >>| >!= >-> >== >/= >-|
+                                >=| >-\ >=\ >-/ >=/ >λ=
+                                ?. [[ [| [BUG] [DEBUG] [ERR]
+                                [ERROR] [FAIL] [FATAL] [FIXME]
+                                [HACK] [INFO] [INFO ] [KO]
+                                [MARK] [NOTE] [OK] [PASS]
+                                [PASS ] [TODO] [TRACE] [VERBOSE]
+                                [WARN] [WARN ] [WARNING]
+                                ]] \= \== \/- \-/ \-: \->
+                                \=> \-< \=< \=:
+                                _|_ ^= ^<< ^>> ^^
+                                |) |= |>= |> |+| |-> |--> |=>
+                                |==> |>- |<< ||> |>> |- ||- ||=
+                                |-: |=: |-< |=< |--< |==< |]
+                                ~= ~> ~~> ~>>")))
 #+end_src
 
 By default Emacs scales fonts with =text-scale-increase= and
@@ -1600,7 +1673,6 @@ Some nice ui-related things including:
     (setq lsp-headerline-breadcrumb-enable nil)
     (setq lsp-modeline-code-actions-enable t)
     )
-#+end_src
 #+end_src
 
 *** Dash
