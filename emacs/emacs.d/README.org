@@ -415,6 +415,15 @@ I love the monokai theme and would like to use it. Bring it in.
   :straight t)
 #+end_src
 
+[[https://github.com/motform/stimmung-themes][stimmung-themes]] is a pretty minimal theme in regards to font
+colors. It uses background colors and bold/italics to do a lot of its
+communication.
+
+#+begin_src emacs-lisp
+(use-package stimmung-themes
+  :straight t)
+#+end_src
+
 Other cool theme packages I've found.
 
 #+begin_src emacs-lisp
@@ -429,8 +438,18 @@ Other cool theme packages I've found.
 (use-package modus-themes
   :straight t)
 
+;; There are tons of options to define for these.
+;; See https://protesilaos.com/emacs/ef-themes
+(use-package ef-themes
+  :config
+  (setq ef-themes-region '(intense))
+  :straight t)
+
 (use-package base16-theme
   :ensure t)
+
+(use-package humanoid-themes)
+
 #+end_src
 
 Here is the theme to load for this session.
