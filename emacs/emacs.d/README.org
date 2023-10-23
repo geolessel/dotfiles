@@ -1902,6 +1902,14 @@ Vertico will use the history to do initial sorting.
 (use-package savehist
   :straight t
   :init
+  (setq savehist-additional-variables
+        ;; By default, the built-in `savehist-mode' only keeps a
+        ;; record of minibuffer histories.  With the variable
+        ;; `savehist-additional-variables' we can make `savehist-mode'
+        ;; keep a record of any variable we want, so that it persists
+        ;; between Emacs sessions. Let's also store the `kill-ring'
+        ;; and the `register-alist'.
+        '(register-alist kill-ring))
   (savehist-mode t))
 #+end_src
 
