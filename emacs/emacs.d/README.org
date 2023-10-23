@@ -2603,6 +2603,21 @@ add no extra space."
   (setq-default line-spacing spacing))
 #+end_src
 
+Cycle through the available options for =show-paren-style=.
+
+#+begin_src emacs-lisp
+(defun geo/toggle-show-paren-style ()
+  "Cycle the value of show-paren-style."
+  (interactive)
+  (setq show-paren-style
+        (cond
+         ((eq show-paren-style 'parenthesis) 'expression)
+         ((eq show-paren-style 'expression) 'mixed)
+         ((eq show-paren-style 'mixed) 'parenthesis)
+         (t 'expression))) ; default
+  (message "show-paren-style set to %s" show-paren-style))
+#+end_src
+
 #+begin_src emacs-lisp
 (pretty-hydra-define geo/hydra-prefs-menu (:quit-key "q")
   ("Display"
