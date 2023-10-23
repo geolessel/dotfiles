@@ -2307,6 +2307,27 @@ To combat this, this function:
       (message "Renamed %s to %s" orig-name new-name)))
 #+end_src
 
+*** Save the bookmark file immediately
+This snippet is [[https://protesilaos.com/codelog/2023-06-28-emacs-mark-register-basics/][from Prot]].
+
+> I want Emacs to write the list of bookmarks to the `bookmark-file'
+> as soon as I set a new bookmark. The default behaviour of Emacs is
+> to write to the disk as a final step before closing Emacs.
+
+#+begin_src emacs-lisp
+(defun geo/bookmark-save-no-prompt (&rest _)
+  "Run `bookmark-save' without prompts.
+
+The intent of this function is to be added as an :after advice to
+`bookmark-set-internal'. This means that when
+`bookmark-set-internal' is called, this function is called right
+afterwards. We set this up because there is no hook after setting
+a bookmark and we want to automatically save bookmarks at that
+point."
+  (funcall 'bookmark-save))
+(advice-add 'bookmark-set-internal :after 'geo/bookmark-save-no-prompt)
+#+end_src
+
 ** Editing tasks
 *** Search the buffer
 vim's keybindings are for ~/~ to search the buffer. I do like that
