@@ -2605,7 +2605,7 @@ add no extra space."
 #+begin_src emacs-lisp
 (pretty-hydra-define geo/hydra-prefs-menu (:quit-key "q")
   ("Display"
-   (("n" linum-mode "line number" :toggle t)
+   (("n" display-line-numbers-mode "line number" :toggle t)
     ("w" whitespace-mode "whitespace" :toggle t)
     ("h" global-hl-line-mode "highlight line" :toggle t)
     ("H" highlight-indent-guides-mode "highlight indents" :toggle t)
