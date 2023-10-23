@@ -1656,6 +1656,7 @@ messages inline with =flycheck-inline=.
   (lsp-completion-provider :none) ;; we use Corfu
   :init
   (setq lsp-keymap-prefix "C-c l")
+  (add-to-list 'exec-path "~/.elixir-ls")
   (defun geo/lsp-mode-setup-completion ()
     (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
           '(orderless))) ;; configure orderless
