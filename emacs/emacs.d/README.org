@@ -2618,6 +2618,46 @@ Cycle through the available options for =show-paren-style=.
   (message "show-paren-style set to %s" show-paren-style))
 #+end_src
 
+When displaying the time in the mode line, cycle through displaying
+the time in local time and then in UTC time.
+
+#+begin_src emacs-lisp
+(defun geo/display-time-mode-display-utc ()
+  "Set display-time-mode on and in UTC."
+  (setq display-time-format (format-time-string "%H:%MZ" (current-time) t)
+        geo/display-time-mode-format 'utc)
+  (display-time-mode 1)
+  (message "Displaying UTC time"))
+
+(defun geo/display-time-mode-display-local ()
+  "Set display-time-mode on and in local time zone."
+  (setq display-time-format (format-time-string "%H:%M")
+        geo/display-time-mode-format 'local)
+  (display-time-mode 1)
+  (message "Displaying local time"))
+
+(defun geo/cycle-display-time-mode (&optional value)
+  "Cycle display-time-mode and whether to show time in UTC or local zone.
+
+VALUE can be one of -1, 'utc, or 'local. If -1, turn
+ display-time-mode off. Otherwise, turn the display on and set it
+ to the appropriate time zone."
+  (interactive)
+  (cond
+   ((or (eq value -1)
+        (and (not value) display-time-mode (eq geo/display-time-mode-format 'utc)))
+    (display-time-mode -1)
+    (message "Turning off time display"))
+   ((or (eq value 'local)
+        (and (not value) (not display-time-mode)))
+    (geo/display-time-mode-display-local))
+   ((or (eq value 'utc)
+        (and (not value) display-time-mode (eq geo/display-time-mode-format 'local)))
+    (geo/display-time-mode-display-utc))))
+
+(geo/cycle-display-display-time-mode -1)
+#+end_src
+
 #+begin_src emacs-lisp
 (pretty-hydra-define geo/hydra-prefs-menu (:quit-key "q")
   ("Display"
@@ -2644,7 +2684,7 @@ Cycle through the available options for =show-paren-style=.
     ("m w" geo/doom-modeline-toggle-word-count "word count" :toggle doom-modeline-enable-word-count)
     ("m m" geo/doom-modeline-toggle-minor-modes "minor modes" :toggle doom-modeline-minor-modes)
     ("m p" geo/persp-mode-toggle-modestring "perspective list" :toggle persp-show-modestring)
-    ("m t" display-time-mode "display time" :toggle t))))
+    ("m t" geo/cycle-display-time-mode "display time" :toggle display-time-mode))))
 #+end_src
 
 *** Projects
