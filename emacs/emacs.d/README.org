@@ -1019,6 +1019,13 @@ org-capture-like editing function.
 (add-hook 'window-state-change-hook #'geo/org-record-editing-of-file)
 #+end_src
 
+*** Increase imenu headline depth
+When using =imenu= (or more likely =consult-imenu=) to search org
+files, I'd like to search deeper.
+
+#+begin_src emacs-lisp
+(setq org-imenu-depth 4)
+#+end_src
 ** Evil
 
 Make it like vim!
