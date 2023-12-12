@@ -450,12 +450,14 @@ Other cool theme packages I've found.
 
 (use-package humanoid-themes)
 
+(use-package catppuccin-theme)
+
 #+end_src
 
 Here is the theme to load for this session.
 
 #+BEGIN_SRC emacs-lisp
-(load-theme 'doom-moonlight t) ; t treats it as safe
+(load-theme 'catppuccin-theme t) ; t treats it as safe
 #+END_SRC
 
 A good source of themes with previews is [[https://peach-melpa.org/][peach-melpa.org]].
@@ -538,6 +540,21 @@ The now-built-in modus themes have some intense customization options
       '((1 . (overline background variable-pitch 1.3))
         (2 . (rainbow overline 1.1))
         (t . (semibold))))
+#+end_src
+*** Custom Catppuccin theme switcher
+The ~catppuccin~ theme comes with 4 "flavors" but there is no easy way
+to switch between them. I want one! So I'll make one.
+
+#+begin_src emacs-lisp
+(defun geo/catppuccin-switch-theme ()
+  "Choose a catppuccin theme to load."
+  (interactive)
+  (let* ((options '(frappe latte macchiato mocha))
+         (prompt "Choose a theme: ")
+         (theme (completing-read prompt options)))
+    (setq catppuccin-flavor (make-symbol theme))
+    (catppuccin-reload)
+    (message "Catppuccin flavor now %s" theme)))
 #+end_src
 *** Some other favorites
 
