@@ -1,9 +1,9 @@
-;;; stree-mode.el --- Emacs minor mode for the syntax_tree Ruby gem
+;;; pragmata-mode.el --- Emacs minor mode for the syntax_tree Ruby gem
 
 ;;; Author: Geoffrey Lessel <code@geoffreylessel.com>
 ;;; Version: 1.0.0
 
-;;; Commentary:
+;;; Commentary: PragmataPro v 0.829
 
 
 ;; Copied from https://github.com/fabrizioschiavi/pragmatapro/tree/master/emacs_snippets
