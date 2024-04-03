@@ -22,7 +22,7 @@ setopt LIST_ROWS_FIRST        # completion list in rows, then cols
 ### Expansion and Globbing #############################################
 setopt EXTENDED_GLOB          # treat `#`, `~`, `^` as part of pattern
 setopt HIST_SUBST_PATTERN     # using `:s`/`:&` modifiers use pattern matching instead of string matching
-setopt WARN_CREATE_GLOBAL     # print a warning when a global param is created in a function
+# setopt WARN_CREATE_GLOBAL     # print a warning when a global param is created in a function
 
 
 ########################################################################
@@ -30,7 +30,8 @@ setopt WARN_CREATE_GLOBAL     # print a warning when a global param is created i
 setopt APPEND_HISTORY         # add to history instead of overwriting
 setopt SHARE_HISTORY          # import new commands and append to history
 setopt EXTENDED_HISTORY       # puts timestamps in the history
-setopt HIST_IGNORE_DUPS       # ignore dups of previous event
+setopt HIST_IGNORE_DUPS       # ignore dups of most recent command
+setopt HIST_IGNORE_ALL_DUPS   # ignore all dups
 setopt HIST_EXPIRE_DUPS_FIRST # removes dupes when history fills up
 setopt HIST_SAVE_NO_DUPS      # old dups are ignored when writing history file
 setopt HIST_FIND_NO_DUPS      # when searching history, don't display dups
