@@ -433,32 +433,34 @@ Other cool theme packages I've found.
   :config
   (setq tron-legacy-theme-vidid-cursor t))
 
-(use-package kaolin-themes
-  :straight t)
+  (use-package kaolin-themes
+    :straight t)
 
-(use-package modus-themes
-  :straight t)
+  (use-package modus-themes
+    :straight t)
 
-;; There are tons of options to define for these.
-;; See https://protesilaos.com/emacs/ef-themes
-(use-package ef-themes
-  :config
-  (setq ef-themes-region '(intense))
-  :straight t)
+  ;; There are tons of options to define for these.
+  ;; See https://protesilaos.com/emacs/ef-themes
+  (use-package ef-themes
+    :config
+    (setq ef-themes-region '(intense))
+    :straight t)
 
-(use-package base16-theme
-  :ensure t)
+  (use-package base16-theme
+    :ensure t)
 
-(use-package humanoid-themes)
+  (use-package humanoid-themes)
 
-(use-package catppuccin-theme)
+  (use-package catppuccin-theme
+    :ensure t
+    :straight t)
 
 #+end_src
 
 Here is the theme to load for this session.
 
 #+BEGIN_SRC emacs-lisp
-(load-theme 'catppuccin-theme t) ; t treats it as safe
+(load-theme 'catppuccin t) ; t treats it as safe
 #+END_SRC
 
 A good source of themes with previews is [[https://peach-melpa.org/][peach-melpa.org]].
@@ -1239,6 +1241,23 @@ as the preferred checker even in typescript files.
 #+end_src
 
 #+begin_src emacs-lisp
+(use-package heex-ts-mode
+  :straight t
+  :hook (heex-ts-mode . (lambda () (add-hook
+                                    'before-save-hook
+                                    'geo/elixir-format-buffer
+                                    nil
+                                    t))))
+(use-package elixir-ts-mode
+  :straight t
+  :hook (elixir-ts-mode . (lambda () (add-hook
+                                   'before-save-hook
+                                   'geo/elixir-format-buffer
+                                   nil
+                                   t))))
+#+end_src
+
+#+begin_src emacs-lisp :tangle no
 (use-package elixir-mode
   :straight t
   :init
@@ -1304,6 +1323,15 @@ A Common Lisp dev environment build on top of Emacs.
   (setq inferior-lisp-program "sbcl"))
 #+end_src
 
+** Ediff
+Change some of the defaults of the built-in ~ediff~ package.
+
+Most of this comes from [[https://www.youtube.com/watch?v=pSvsAutseO0][Prot's video on ediff]].
+
+#+begin_src emacs-lisp
+(setq ediff-split-window-function 'split-window-horizontally
+      ediff-window-setup-function 'ediff-setup-windows-plain)
+#+end_src
 * Editing
 
   Things that provide general, non-language specific editing functionality.
@@ -1592,6 +1620,8 @@ can utilize that server to make fixes in our javascript files.
   :config
   (add-hook 'js-mode-hook 'eslintd-fix-mode)
   (add-hook 'typescript-mode-hook 'eslintd-fix-mode)
+  (add-hook 'js-ts-mode-hook 'eslintd-fix-mode)
+  (add-hook 'typescript-ts-mode-hook 'eslintd-fix-mode)
   ; we need the location of eslint_d
   (add-to-list 'exec-path geo/eslint_d-exec-path))
 #+end_src
@@ -1599,7 +1629,7 @@ can utilize that server to make fixes in our javascript files.
 *** prettier
 
 I've had some issues with format-all-mode and have decided to go with
-tools specific to the language I'm writing. To that end, prettier will
+tools specific to the language I'm writing. To that end, [[https://github.com/jscheid/prettier.el][prettier]] will
 format js/ts code (and some others).
 
 #+begin_src emacs-lisp
@@ -1677,8 +1707,9 @@ messages inline with =flycheck-inline=.
 #+end_src
 
 ** Documentation and code completion
-
 *** lsp-mode
+lsp for language server protocol features
+
 #+begin_src emacs-lisp
 (use-package lsp-mode
   :straight t
@@ -1691,11 +1722,12 @@ messages inline with =flycheck-inline=.
     (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
           '(orderless))) ;; configure orderless
   :hook
-  ((elixir-mode . lsp-deferred)
+  (;(elixir-mode . lsp-deferred)
    (elixir-ts-mode . lsp)
    (heex-ts-mode . lsp)
-   (typescript-mode . lsp-deferred)
-   (js-mode . lsp-deferred)
+   (typescript-ts-mode . lsp-deferred)
+   (tsx-ts-mode . lsp-deferred)
+   (js-ts-mode . lsp-deferred)
    (lsp-mode . lsp-enable-which-key-integration)
    (lsp-completion-mode . geo/lsp-mode-setup-completion))
   :commands (lsp lsp-deferred))
@@ -1714,15 +1746,20 @@ Some nice ui-related things including:
 [[https://emacs-lsp.github.io/lsp-mode/tutorials/how-to-turn-off/][A good guide on which ui element is what]]
 
 #+begin_src emacs-lisp
-  (use-package lsp-ui
-    :straight t
-    :config
-    (setq lsp-ui-doc-enable nil)
-    (setq lsp-ui-sideline-show-hover nil)
-    (setq lsp-ui-sideline-show-code-actions nil)
-    (setq lsp-headerline-breadcrumb-enable nil)
-    (setq lsp-modeline-code-actions-enable t)
-    )
+(use-package lsp-ui
+  :straight t
+  :config
+  (define-key evil-normal-state-map (kbd "M-RET") 'lsp-ui-doc-glance)
+  (define-key evil-normal-state-map (kbd "C-M-<return>") 'lsp-ui-doc-toggle)
+  (setq lsp-ui-doc-enable nil
+        lsp-ui-sideline-enable t
+        lsp-ui-sideline-show-hover nil
+        lsp-ui-sideline-show-code-actions nil
+        lsp-ui-sideline-show-symbol nil
+        lsp-ui-sideline-show-diagnostics t
+        lsp-ui-doc-max-height 40
+        lsp-headerline-breadcrumb-enable nil
+        lsp-modeline-code-actions-enable t))
 #+end_src
 
 *** Dash
@@ -1793,6 +1830,81 @@ Quick usage tips:
     (global-evil-vimish-fold-mode))
 #+end_src
 
+** tree-sitter
+I compile my own Emacs with =--with-tree-sitter= which enables the new
+tree-sitter functionality built into Emacs 29. In order to use
+grammars, we need to do a couple of things:
+
+The [[https://www.masteringemacs.org/article/how-to-get-started-tree-sitter][Mastering Emacs tree-sitter]] article provided a lot of the how-to
+for getting this working.
+
+*** Specify where grammars are located
+
+#+begin_src emacs-lisp
+(setq treesit-language-source-alist
+      '(
+        ;; provided by the official tree-sitter github org
+        (bash "https://github.com/tree-sitter/tree-sitter-bash")
+        (c "https://github.com/tree-sitter/tree-sitter-c")
+        (css "https://github.com/tree-sitter/tree-sitter-css")
+        ; (elisp "https://github.com/tree-sitter/tree-sitter-elisp")
+        ; (erb "https://github.com/tree-sitter/tree-sitter-embedded-template")
+        (html "https://github.com/tree-sitter/tree-sitter-html")
+        (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+        (json "https://github.com/tree-sitter/tree-sitter-json")
+        (ruby "https://github.com/tree-sitter/tree-sitter-ruby")
+        (rust "https://github.com/tree-sitter/tree-sitter-rust")
+        (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+        (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+        ;; other community-provided grammars
+        (dockerfile "https://github.com/camdencheek/tree-sitter-dockerfile")
+        (elixir "https://github.com/elixir-lang/tree-sitter-elixir")
+        (erlang "https://github.com/WhatsApp/tree-sitter-erlang")
+        (gitignore "https://github.com/shunsambongi/tree-sitter-gitignore")
+        (heex "https://github.com/phoenixframework/tree-sitter-heex")
+        (make "https://github.com/alemuller/tree-sitter-make")
+        (markdown "https://github.com/ikatyang/tree-sitter-markdown")
+        (org "https://github.com/milisims/tree-sitter-org")
+        (racket "https://github.com/6cdh/tree-sitter-racket")
+        (yaml "https://github.com/ikatyang/tree-sitter-yaml")
+        (zig "https://github.com/maxxnino/tree-sitter-zig")))
+
+(defun geo/install-all-treesit-grammars ()
+  "Install all grammars defined in `treesit-language-source-alist'."
+  (interactive)
+  (mapc #'treesit-install-language-grammar (mapcar #'car treesit-language-source-alist)))
+#+end_src
+
+*** Map old modes to new tree-sitter powered modes
+
+Emacs will still default to the original non-tree-sitter
+modes. However, we can get Emacs 29+ to remap one major mode to
+another. We'll do this for each major mode we want to override with
+its tree-sitter version.
+
+#+begin_src emacs-lisp
+(setq major-mode-remap-alist
+      '((c-mode . c-ts-mode)
+        (css-mode . c-ts-mode)
+        (html-mode . html-ts-mode)
+        (javascript-mode . js-ts-mode)
+        (json-mode . json-ts-mode)
+        (ruby-mode . ruby-ts-mode)
+        (rust-mode . rust-ts-mode)
+        (tsx-mode . tsx-ts-mode)
+        (typescript-mode . typescript-ts-mode)
+        (dockerfile-mode . dockerfile-ts-mode)
+        (elixir-mode . elixir-ts-mode)
+        ;; erlang-mode not defined
+        ;; gitignore-mode not defined
+        ;; make-mode not defined
+        ;; (markdown-mode . markdown-ts-mode)
+        ;; (org-mode . org-ts-mode)
+        ;; racket-mode not defined
+        (yaml-mode . yaml-ts-mode)
+        ;; zig-mode not defined
+        ))
+#+end_src
 * General packages
 
 Things that I couldn't think of a better top-level heading for.
@@ -2544,6 +2656,8 @@ _i_nfo       valu_e_"
 way to toggle it on and off. So here are a few helper functions to add
 the ability to toggle them.
 
+**** Doom modeline
+***** Toggle word count
 #+begin_src emacs-lisp
 (defun geo/doom-modeline-toggle-word-count ()
   "Toggle doom-modeline's word count indicator on and off"
@@ -2555,17 +2669,26 @@ the ability to toggle them.
     (progn
       (setq doom-modeline-enable-word-count t)
       (message "Word count turned on for modes %s" doom-modeline-continuous-word-count-modes))))
+#+end_src
 
+***** Toggle minor mode list
+#+begin_src emacs-lisp
 (defun geo/doom-modeline-toggle-minor-modes ()
   "Toggle the list of minor modes in doom-modeline"
   (interactive)
   (setq doom-modeline-minor-modes (not doom-modeline-minor-modes)))
+#+end_src
 
+***** Toggle file encoding
+#+begin_src emacs-lisp
 (defun geo/doom-modeline-toggle-encoding ()
   "Toggle the display of buffer encoding in doom-modeline"
   (interactive)
   (setq doom-modeline-buffer-encoding (not doom-modeline-buffer-encoding)))
+#+end_src
 
+***** Toggle perspective names
+#+begin_src emacs-lisp
 (defun geo/persp-mode-toggle-modestring ()
   "Toggle the list of perspective names in the modeline (off/single/all)"
   (interactive)
@@ -2586,7 +2709,10 @@ the ability to toggle them.
       (progn
         (persp-turn-off-modestring)
         (message "Perspective names turned off")))))
+#+end_src
 
+***** Toggle showing trailing whitespace
+#+begin_src emacs-lisp
 (defun geo/toggle-show-trailing-whitespace ()
   "Toggle showing trailing whitespace."
   (interactive)
@@ -2599,40 +2725,7 @@ the ability to toggle them.
       (message "Trailing whitespace shown"))))
 #+end_src
 
-Add the ability to change the internal frame padding. Usually I like a
-little bit of breathing room but sometimes that should be reduce to
-fit in more text.
-
-#+begin_src emacs-lisp
-(defun geo/set-internal-frame-padding (pixels)
-  "Set padding inside the frame in pixels."
-  (interactive
-   (let ((pixels (read-number
-                  "Pixels: "
-                  (frame-parameter nil 'internal-border-width))))
-     (list pixels)))
-  (set-frame-parameter nil 'internal-border-width pixels))
-#+end_src
-
-Speaking of text breathing room, sometimes having a bit of line
-spacing is handy. While the process for changing this is pretty
-simple, having a function in my hydra helps me remember that it can be
-done in the first place.
-
-#+begin_src emacs-lisp
-(defun geo/set-line-spacing (spacing)
-  "Set the line height globally and buffer-locally.
-
-If value is a floating point number, it specifies the spacing
-relative to the default frame line height. A value of 0 means
-add no extra space."
-  (interactive
-   (let ((spacing (read-number "Spacing: " line-spacing)))
-     (list spacing)))
-  (setq-local line-spacing spacing)
-  (setq-default line-spacing spacing))
-#+end_src
-
+***** Show paren style
 Cycle through the available options for =show-paren-style=.
 
 #+begin_src emacs-lisp
@@ -2648,6 +2741,7 @@ Cycle through the available options for =show-paren-style=.
   (message "show-paren-style set to %s" show-paren-style))
 #+end_src
 
+***** Show current local or UTC time
 When displaying the time in the mode line, cycle through displaying
 the time in local time and then in UTC time.
 
@@ -2670,8 +2764,8 @@ the time in local time and then in UTC time.
   "Cycle display-time-mode and whether to show time in UTC or local zone.
 
 VALUE can be one of -1, 'utc, or 'local. If -1, turn
- display-time-mode off. Otherwise, turn the display on and set it
- to the appropriate time zone."
+display-time-mode off. Otherwise, turn the display on and set it
+to the appropriate time zone."
   (interactive)
   (cond
    ((or (eq value -1)
@@ -2685,9 +2779,46 @@ VALUE can be one of -1, 'utc, or 'local. If -1, turn
         (and (not value) display-time-mode (eq geo/display-time-mode-format 'local)))
     (geo/display-time-mode-display-utc))))
 
-(geo/cycle-display-display-time-mode -1)
+(geo/cycle-display-time-mode -1)
 #+end_src
 
+**** Internal frame padding
+Add the ability to change the internal frame padding. Usually I like a
+little bit of breathing room but sometimes that should be reduce to
+fit in more text.
+
+#+begin_src emacs-lisp
+(defun geo/set-internal-frame-padding (pixels)
+  "Set padding inside the frame in pixels."
+  (interactive
+   (let ((pixels (read-number
+                  "Pixels: "
+                  (frame-parameter nil 'internal-border-width))))
+     (list pixels)))
+  (set-frame-parameter nil 'internal-border-width pixels))
+#+end_src
+
+**** Line spacing
+Speaking of text breathing room, sometimes having a bit of line
+spacing is handy. While the process for changing this is pretty
+simple, having a function in my hydra helps me remember that it can be
+done in the first place.
+
+#+begin_src emacs-lisp
+(defun geo/set-line-spacing (spacing)
+  "Set the line height globally and buffer-locally.
+
+If value is a floating point number, it specifies the spacing
+relative to the default frame line height. A value of 0 means
+add no extra space."
+  (interactive
+   (let ((spacing (read-number "Spacing: " line-spacing)))
+     (list spacing)))
+  (setq-local line-spacing spacing)
+  (setq-default line-spacing spacing))
+#+end_src
+
+**** The hydra menu
 #+begin_src emacs-lisp
 (pretty-hydra-define geo/hydra-prefs-menu (:quit-key "q")
   ("Display"
