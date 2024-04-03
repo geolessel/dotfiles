@@ -884,7 +884,7 @@ I've also customized which characters the bullets are.
 
 [[https://github.com/sabof/org-bullets][Github]]
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package org-bullets
   :straight t
   :after (org)
