@@ -1365,9 +1365,10 @@ When in a programming mode, don't treat the underscore character (~_~)
 as a word boundary.
 
 #+begin_src emacs-lisp
-  (add-hook 'prog-mode-hook
-            (lambda ()
-              (modify-syntax-entry ?_ "w")))
+(add-hook 'prog-mode-hook
+          (lambda ()
+            (modify-syntax-entry ?_ "w")))
+(add-hook 'html-mode-hook (lambda () (modify-syntax-entry ?_ "w")))
 #+end_src
 ** Moving and navigating inside a buffer
 *** evil-easymotion
@@ -1773,19 +1774,28 @@ Some nice ui-related things including:
 #+begin_src emacs-lisp
 (use-package lsp-ui
   :straight t
+  :bind
+  (("C-s-<return>" . lsp-ui-doc-focus-frame))
   :config
+  (add-hook 'lsp-ui-doc-frame-hook 'evil-normal-state)
   (define-key evil-normal-state-map (kbd "M-RET") 'lsp-ui-doc-glance)
-  (define-key evil-normal-state-map (kbd "C-M-<return>") 'lsp-ui-doc-toggle)
+  (define-key evil-normal-state-map (kbd "C-M-<return>")
+              #'(lambda ()
+                  (interactive)
+                  (lsp-ui-doc-toggle)
+                  (message "C-s-<return> to focus in documentation")))
   (setq lsp-ui-doc-enable nil
         lsp-ui-sideline-enable t
         lsp-ui-sideline-show-hover nil
         lsp-ui-sideline-show-code-actions nil
         lsp-ui-sideline-show-symbol nil
         lsp-ui-sideline-show-diagnostics t
-        lsp-ui-doc-max-height 40
+        lsp-ui-doc-max-height 80
+        lsp-ui-peek-show-directory nil
         lsp-headerline-breadcrumb-enable nil
         lsp-modeline-code-actions-enable t))
 #+end_src
+
 
 *** Dash
 
@@ -2901,6 +2911,36 @@ add no extra space."
      ("C" project-async-shell-command "Run command in root async"))))
 #+end_src
 
+*** LSP
+
+- https://emacs-lsp.github.io/lsp-ui/
+- https://emacs-lsp.github.io/lsp-mode/page/main-features/
+
+#+begin_src emacs-lisp
+(defun geo/toggle-lsp-variable (variable)
+  "Toggle a VARIABLE related to LSP UI Sideline"
+  (interactive)
+  (set variable (not (symbol-value variable)))
+  (message "%S is now %s" variable (symbol-value variable)))
+
+(pretty-hydra-define geo/hydra-lsp (:exit t :quit-key "q")
+  ("Sideline"
+   (("s d" (lambda () (interactive) (geo/toggle-lsp-variable 'lsp-ui-sideline-show-diagnostics)) "Show diagnostics in sideline")
+    ("s h" (lambda () (interactive) (geo/toggle-lsp-variable 'lsp-ui-sideline-show-hover)) "Show hover in sideline")
+    ("s a" (lambda () (interactive) (geo/toggle-lsp-variable 'lsp-ui-sideline-show-code-actions)) "Show actions in sideline"))
+   "Peek"
+   (("p d" lsp-ui-peek-find-definitions "Find definitions")
+    ("p r" lsp-ui-peek-find-references "Find references")
+    ("p /" (lambda () (interactive) (geo/toggle-lsp-variable 'lsp-ui-peek-show-directory)) "Show the directory"))
+   "Doc"
+   (("d e" (lambda () (interactive) (geo/toggle-lsp-variable 'lsp-ui-doc-enable)) "Enable/disable")
+    ("d c" (lambda () (interactive) (geo/toggle-lsp-variable 'lsp-ui-doc-show-with-cursor)) "Show docs with cursor")
+    ("d m" (lambda () (interactive) (geo/toggle-lsp-variable 'lsp-ui-doc-show-with-mouse)) "Show docs with mouse"))
+   "imenu"
+   (("i s" lsp-ui-imenu "Show imenu"))
+))
+#+end_src
+
 *** Dired
 
 Taken from the [[https://github.com/abo-abo/hydra/wiki/Dired][hydra wiki]]. Activate it with =.= in a =dired= mode.
@@ -2993,7 +3033,8 @@ forget what to call or what keys to press. This helps immensely.
       ("G" geo/hydra-github-menu/body "Github"))
 
      "Getting Help"
-     (("a" geo/hydra-apropos-menu/body "Apropos"))
+     (("a" geo/hydra-apropos-menu/body "Apropos")
+      ("l" geo/hydra-lsp/body "LSP"))
 
      "Customizing"
      (("," geo/hydra-prefs-menu/body "Preferences")
