@@ -1961,6 +1961,13 @@ its tree-sitter version.
         ;; zig-mode not defined
         ))
 #+end_src
+** LLM / ChatGPT integration
+Integrate with OpenAI ChatGPT. My own creation. Well, technically, I used ChatGPT to bootstrap it and add features.
+
+#+begin_src emacs-lisp
+(load "geo-chatgpt")
+#+end_src
+
 * General packages
 
 Things that I couldn't think of a better top-level heading for.
