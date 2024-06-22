@@ -1356,6 +1356,23 @@ copy of clang.format.el from https://github.com/llvm-mirror/clang/blob/master/to
             (add-hook 'before-save-hook 'geo/format-c-code-buffer nil t)))
 
 #+end_src
+
+** Markdown
+#+begin_src emacs-lisp
+(use-package markdown-ts-mode
+  :mode ("\\.md\\'" . markdown-ts-mode)
+  :defer 't
+  :config
+  (add-to-list 'treesit-language-source-alist
+               '(markdown "https://github.com/tree-sitter-grammars/tree-sitter-markdown"
+                          "split_parser"
+                          "tree-sitter-markdown/src"))
+  (add-to-list 'treesit-language-source-alist
+               '(markdown-inline "https://github.com/tree-sitter-grammars/tree-sitter-markdown"
+                                 "split_parser"
+                                 "tree-sitter-markdown-inline/src")))
+#+end_src
+
 * Editing
 
   Things that provide general, non-language specific editing functionality.
@@ -1899,7 +1916,8 @@ for getting this working.
         (gitignore "https://github.com/shunsambongi/tree-sitter-gitignore")
         (heex "https://github.com/phoenixframework/tree-sitter-heex")
         (make "https://github.com/alemuller/tree-sitter-make")
-        (markdown "https://github.com/ikatyang/tree-sitter-markdown")
+        ;; (markdown "https://github.com/ikatyang/tree-sitter-markdown")
+        (markdown "https://github.com/tree-sitter-grammars/tree-sitter-markdown")
         (org "https://github.com/milisims/tree-sitter-org")
         (racket "https://github.com/6cdh/tree-sitter-racket")
         (yaml "https://github.com/ikatyang/tree-sitter-yaml")
@@ -1936,7 +1954,7 @@ its tree-sitter version.
         ;; erlang-mode not defined
         ;; gitignore-mode not defined
         ;; make-mode not defined
-        ;; (markdown-mode . markdown-ts-mode)
+        (markdown-mode . markdown-ts-mode)
         ;; (org-mode . org-ts-mode)
         ;; racket-mode not defined
         (yaml-mode . yaml-ts-mode)
