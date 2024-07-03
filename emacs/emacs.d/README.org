@@ -3037,6 +3037,16 @@ Some functions that make working with github a little easier.
    ))
 #+end_src
 
+*** ChatGPT / LLMs
+They may take my job someday but for now they work for me.
+
+#+begin_src emacs-lisp
+(pretty-hydra-define geo/hydra-llm-menu (:quit-key "q")
+  ("Chat/LLMs"
+   (("c" geo/chatgpt-chat-with-code "Chat about a file or region")
+    ("C" geo/chatgpt-get-input "Start a chat with ChatGPT"))))
+#+end_src
+
 *** Main
 
 My main hydra menu that provides help and direction. Sometimes I
@@ -3056,6 +3066,10 @@ forget what to call or what keys to press. This helps immensely.
       ("p" geo/hydra-project/body "Projects")
       ("g" magit-status "Magit")
       ("G" geo/hydra-github-menu/body "Github"))
+
+     "AI"
+     (("c" geo/chatgpt-get-input "Ask ChatGPT anything")
+      ("C" geo/chatgpt-chat-with-code "Ask ChatGPT about code"))
 
      "Getting Help"
      (("a" geo/hydra-apropos-menu/body "Apropos")
