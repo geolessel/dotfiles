@@ -1,0 +1,12 @@
+# key: doc
+# name: doxygen doc
+# --
+/**
+ * @brief ${1:A brief desciption}
+ *
+ * ${2:A longer description}
+ *
+ * @param ${3:a The first parameter}
+ *
+ * @return ${4:A description of the return}
+ */

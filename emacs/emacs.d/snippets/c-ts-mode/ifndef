@@ -1,0 +1,9 @@
+# key: header
+# name: ifndef
+# --
+#ifndef __${1:header_name}_H_
+#define __$1_H_
+
+$0
+
+#endif // __$1_H_
