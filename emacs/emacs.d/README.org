@@ -2645,6 +2645,54 @@ The executable needs to be installed in the project's node_modules."
 (bind-key "M-v" #'yank 'global-map)
 #+end_src
 
+** Running `mix sobelow`
+#+begin_src emacs-lisp
+(defun geo/mix-sobelow ()
+  "Run `mix sobelow` in the project root and display the output in a buffer."
+  (interactive)
+  (let* ((default-directory (locate-dominating-file (project-root (project-current)) "mix.exs"))
+         (buffer (get-buffer-create "*sobelow*"))
+         (command "mix sobelow"))
+    (with-current-buffer buffer
+      (erase-buffer)
+      (insert (format "Running `%s` in %s\n\n" command default-directory))
+      (let ((exit-code (call-process-shell-command command nil buffer t)))
+        (if (eq exit-code 0)
+            (progn
+              (ansi-color-apply-on-region (point-min) (point-max)) ;; strip ansi colors
+              (geo/sobelow--prepend-file-paths)
+              (compilation-mode) ;; make the filepaths linkable
+              (goto-char (point-min)))
+          (message "Error running `mix sobelow`: exit code %d" exit-code))))
+    (display-buffer buffer)))
+
+(defun geo/sobelow--prepend-file-paths ()
+  "Prepend umbrella app file paths in sobelow's output for current buffer."
+  (let ((current-prefix ""))
+    (goto-char (point-min))  ;; Go to the beginning of the buffer
+    (while (not (eobp))  ;; Loop until the end of buffer
+      (let ((line (thing-at-point 'line t)))
+        (cond
+         ;; Check for ==> VARIABLE
+         ((string-match "^==> \\(.*\\)$" line)
+          (setq current-prefix (concat "apps/" (match-string 1 line) "/")))
+         ;; Check for File: PATH
+         ((string-match "^File: \\(.*\\)$" line)
+          (let ((original-path (match-string 1 line)))
+            (delete-region (line-beginning-position) (line-end-position)) ;; Delete the old line
+            (insert (concat "File: " current-prefix original-path))))) ;; Insert new line with prepended path
+        (forward-line 1)))))  ;; Move to the next line
+
+;; Match sobelow output and make the filenames and lines links to the exact spot
+;;
+;; sobelow output:
+;;
+;; File: apps/...
+;; Line: 83
+(add-to-list 'compilation-error-regexp-alist 'elixir-sobelow)
+(add-to-list 'compilation-error-regexp-alist-alist
+             '(elixir-sobelow "^File: \\([^:]+\\)\nLine: \\([0-9]+\\)$" 1 2))
+#+end_src
 ** Hydra menus
 *** Apropros
 
