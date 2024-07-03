@@ -1864,10 +1864,15 @@ more of Emacs' own functions and internals.
   (corfu-popupinfo-mode)
   (global-corfu-mode))
 #+end_src
+
 ** Code folding
 
-=evil-vimish-fold= provides vim-like code folding for a large
-variety of code types.
+#+begin_src emacs-lisp
+(use-package treesit-fold
+  :straight (treesit-fold :type git :host github :repo "emacs-tree-sitter/treesit-fold")
+  :config
+  (define-key evil-normal-state-map (kbd "C-f") #'treesit-fold-toggle))
+#+end_src
 
 Quick usage tips:
 
@@ -1878,22 +1883,6 @@ Quick usage tips:
 - ~zc~ close
 - ~zj~ navigate down a fold
 - ~zk~ navigate up a fold
-
-[[https://github.com/alexmurray/evil-vimish-fold][Github]]
-
-#+begin_src emacs-lisp :tangle no
-  (use-package vimish-fold
-    :straight t
-    :after evil)
-
-  (use-package evil-vimish-fold
-    :straight t
-    :after vimish-fold
-    :init
-    (setq evil-vimish-fold-target-modes '(prog-mode conf-mode text-mode))
-    :config
-    (global-evil-vimish-fold-mode))
-#+end_src
 
 ** tree-sitter
 I compile my own Emacs with =--with-tree-sitter= which enables the new
