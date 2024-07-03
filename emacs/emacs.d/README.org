@@ -1051,6 +1051,14 @@ files, I'd like to search deeper.
 #+begin_src emacs-lisp
 (setq org-imenu-depth 4)
 #+end_src
+*** Try to fix heading folding
+This was suggested on Reddit. It's driving me crazy. I'll try
+anything. https://www.reddit.com/r/emacs/comments/1ds3aoy/anyone_else_occasionally_experience_being_unable/
+
+#+begin_src emacs-lisp
+(setq org-fold-core-style 'overlays)
+(setq org-element-use-cache nil)
+#+end_src
 ** Evil
 
 Make it like vim!
