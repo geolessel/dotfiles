@@ -1,6 +1,14 @@
 #+AUTHOR: Geoffrey Lessel
 #+TITLE: Geo's emacs config
 
+* Working in macOS
+
+To get crisper font rendering in macOS, run this in the command line:
+
+#+begin_src shell :tangle no
+defaults write org.gnu.Emacs AppleFontSmoothing -int 0
+#+end_src
+
 * Startup
 
 Things that need to happen right away.
