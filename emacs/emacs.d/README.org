@@ -1358,7 +1358,10 @@ copy of clang.format.el from https://github.com/llvm-mirror/clang/blob/master/to
 #+end_src
 
 ** Markdown
-#+begin_src emacs-lisp
+*** Treesitter markdown-ts-mode
+Use markdown-ts-mode. Currently disabled.
+
+#+begin_src emacs-lisp :tangle no
 (use-package markdown-ts-mode
   :mode ("\\.md\\'" . markdown-ts-mode)
   :defer 't
@@ -1371,6 +1374,16 @@ copy of clang.format.el from https://github.com/llvm-mirror/clang/blob/master/to
                '(markdown-inline "https://github.com/tree-sitter-grammars/tree-sitter-markdown"
                                  "split_parser"
                                  "tree-sitter-markdown-inline/src")))
+#+end_src
+
+*** Use native syntax coloring for code blocks
+
+The code blocks must be specified but if they are, this will make it
+so that they are colored or highlighted as if the block was itself
+rendered in the major mode of the code in the code block.
+
+#+begin_src emacs-lisp
+(setq markdown-fontify-code-blocks-natively t)
 #+end_src
 
 * Editing
@@ -1916,8 +1929,8 @@ for getting this working.
         (gitignore "https://github.com/shunsambongi/tree-sitter-gitignore")
         (heex "https://github.com/phoenixframework/tree-sitter-heex")
         (make "https://github.com/alemuller/tree-sitter-make")
-        ;; (markdown "https://github.com/ikatyang/tree-sitter-markdown")
-        (markdown "https://github.com/tree-sitter-grammars/tree-sitter-markdown")
+        (markdown "https://github.com/ikatyang/tree-sitter-markdown")
+        ;; (markdown "https://github.com/tree-sitter-grammars/tree-sitter-markdown")
         (org "https://github.com/milisims/tree-sitter-org")
         (racket "https://github.com/6cdh/tree-sitter-racket")
         (yaml "https://github.com/ikatyang/tree-sitter-yaml")
@@ -1954,7 +1967,7 @@ its tree-sitter version.
         ;; erlang-mode not defined
         ;; gitignore-mode not defined
         ;; make-mode not defined
-        (markdown-mode . markdown-ts-mode)
+        ;; (markdown-mode . markdown-ts-mode)
         ;; (org-mode . org-ts-mode)
         ;; racket-mode not defined
         (yaml-mode . yaml-ts-mode)
