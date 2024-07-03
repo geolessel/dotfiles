@@ -1705,9 +1705,7 @@ format js/ts code (and some others).
 
 #+begin_src emacs-lisp
 (use-package prettier
-  :straight t
-  :config
-  (add-hook 'after-init-hook #'global-prettier-mode))
+  :straight t)
 #+end_src
 
 ** Syntax checking
