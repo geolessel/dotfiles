@@ -441,34 +441,42 @@ Other cool theme packages I've found.
   :config
   (setq tron-legacy-theme-vidid-cursor t))
 
-  (use-package kaolin-themes
-    :straight t)
+(use-package kaolin-themes
+  :straight t)
 
-  (use-package modus-themes
-    :straight t)
+(use-package modus-themes
+  :straight t)
 
-  ;; There are tons of options to define for these.
-  ;; See https://protesilaos.com/emacs/ef-themes
-  (use-package ef-themes
-    :config
-    (setq ef-themes-region '(intense))
-    :straight t)
+;; There are tons of options to define for these.
+;; See https://protesilaos.com/emacs/ef-themes
+(use-package ef-themes
+  :config
+  (setq ef-themes-region '(intense))
+  :straight t)
 
-  (use-package base16-theme
-    :ensure t)
+(use-package base16-theme
+  :ensure t)
 
-  (use-package humanoid-themes)
+(use-package humanoid-themes)
 
-  (use-package catppuccin-theme
-    :ensure t
-    :straight t)
+(use-package catppuccin-theme
+  :ensure t
+  :straight t)
 
+(use-package lambda-themes
+  :straight (:type git :host github :repo "lambda-emacs/lambda-themes")
+  :custom
+  (lambda-themes-set-italic-comments t)
+  (lambda-themes-set-italic-keywords nil)
+  (lambda-themes-set-variable-pitch nil))
 #+end_src
 
 Here is the theme to load for this session.
 
 #+BEGIN_SRC emacs-lisp
-(load-theme 'catppuccin t) ; t treats it as safe
+;; (load-theme 'catppuccin t) ; t treats it as safe
+;; (catppuccin-load-flavor 'macchiato)
+(load-theme 'lambda-light t)
 #+END_SRC
 
 A good source of themes with previews is [[https://peach-melpa.org/][peach-melpa.org]].
@@ -1791,7 +1799,8 @@ lsp for language server protocol features
     (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
           '(orderless))) ;; configure orderless
   :hook
-  (;(elixir-mode . lsp-deferred)
+  (
+   ; (elixir-mode . lsp-deferred)
    (elixir-ts-mode . lsp)
    (heex-ts-mode . lsp)
    (typescript-ts-mode . lsp-deferred)
@@ -3101,16 +3110,6 @@ Some functions that make working with github a little easier.
    ))
 #+end_src
 
-*** ChatGPT / LLMs
-They may take my job someday but for now they work for me.
-
-#+begin_src emacs-lisp
-(pretty-hydra-define geo/hydra-llm-menu (:quit-key "q")
-  ("Chat/LLMs"
-   (("c" geo/chatgpt-chat-with-code "Chat about a file or region")
-    ("C" geo/chatgpt-get-input "Start a chat with ChatGPT"))))
-#+end_src
-
 *** Main
 
 My main hydra menu that provides help and direction. Sometimes I
@@ -3132,8 +3131,8 @@ forget what to call or what keys to press. This helps immensely.
       ("G" geo/hydra-github-menu/body "Github"))
 
      "AI"
-     (("c" geo/chatgpt-get-input "Ask ChatGPT anything")
-      ("C" geo/chatgpt-chat-with-code "Ask ChatGPT about code"))
+     (("C" geo/chatgpt-chat-with-code "Ask ChatGPT about code")
+      ("c" geo/chatgpt-get-input "Ask ChatGPT anything"))
 
      "Getting Help"
      (("a" geo/hydra-apropos-menu/body "Apropos")
