@@ -237,6 +237,11 @@ If DEBUG-P is non-nil, debugging information will be printed."
       (make-directory directory t))
     (write-region (point-min) (point-max) filename)
     (find-file-other-window filename)
+    ;; Encode the buffer to utf-8
+    (set-buffer-file-coding-system 'utf-8)
+    ;; Move to the response heading
+    (goto-line 1)
+    (re-search-forward "^# Response" nil t)
     (message "Chat saved to %s" filename)))
 
 (transient-define-prefix geo/chatgpt-menu ()
