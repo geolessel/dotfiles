@@ -26,11 +26,33 @@
   :type 'string
   :group 'geo-ai-chat)
 
+(defcustom geo-ai-chat-system-prompts
+  '(("Elixir Developer" . "You are an experienced senior developer. Your knowledge is particularly good for the Elixir language, the Phoenix framework (including LiveView) and all the available Hex packages. When you are asked for help, you provide deep idiomatic answers. Assume the user is also an experienced developer and use advanced terms and concepts in your responses. Always include a concise response along with code blocks unless asked explicitly to only include code in your response.")
+    ("Emacs Developer" . "You are an experienced senior developer. Your knowledge is particularly deep for the Emacs Lisp language, the Emacs program, and various other lisps. When you are asked for help, you provide deep idiomatic responses. Assume the user is also and experienced Emacs user and use advanced terms and concepts in your responses.")
+    ("Code Review" . "Please review the following code: ")
+    ("Explain Concept" . "Can you explain the concept of: "))
+  "List of preset prompts for AI chat."
+  :type '(alist :key-type string :value-type string)
+  :group 'geo-ai-chat)
+
+(defcustom geo-ai-chat-current-system-prompt "Elixir Developer"
+  "The system prompt that should be used for current prompts."
+  :type 'string
+  :group 'geo-ai-chat)
+
 (defun geo/chatgpt-get-input ()
   "Prompt the user for input for the OpenAI assistant."
   (interactive)
   (let ((input (read-string "LLM prompt: ")))
     (geo/chatgpt--send-request input)))
+
+(defun geo/chatgpt-choose-system-prompt ()
+  (interactive)
+  (let* ((choices (mapcar 'car geo-ai-chat-system-prompts))
+         (choice (completing-read "Choose a system prompt: " choices nil t))
+         (system-prompt (cdr (assoc choice geo-ai-chat-system-prompts))))
+    (message "System prompt set to: %s" choice)
+    (setq geo-ai-chat-current-system-prompt choice)))
 
 (defun geo/chatgpt-chat-with-code ()
   "Prompt the user for input, then send the input and either the selected region or the entire buffer's contents to OpenAI's API."
@@ -117,7 +139,8 @@
 
 (defun geo/chatgpt--prepare-request-data (prompt)
   "Prepare the request data for the configured AI provider."
-  (let ((provider geo-ai-chat-provider))
+  (let ((provider geo-ai-chat-provider)
+        (system-prompt (cdr (assoc geo-ai-chat-current-system-prompt geo-ai-chat-system-prompts))))
     (json-encode
      (cond
       ((eq provider 'openai)
@@ -131,10 +154,11 @@
                        (content . ,prompt))])))
       ((eq provider 'anthropic)
        `((model . ,geo-ai-chat-anthropic-model)
+         (system . ,system-prompt)
          (messages . [((role . user)
                        (content . ,prompt))])
          (max_tokens . 3000)))
-      (t (error "Unsupported provider: %s" provider))))))
+      (t (error "Unsupported provider preparing request data: %s" provider))))))
 
 (defun geo/chatgpt--callback (status &optional debug-p)
   "Handle the OpenAI API response, including debugging steps.
