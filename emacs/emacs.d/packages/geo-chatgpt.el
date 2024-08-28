@@ -21,6 +21,11 @@
   :type 'string
   :group 'geo-ai-chat)
 
+(defcustom geo-ai-chat-buffer-name "*LLM Chat*"
+  "The buffer to build prompts and responses in."
+  :type 'string
+  :group 'geo-ai-chat)
+
 (defun geo/chatgpt-get-input ()
   "Prompt the user for input for the OpenAI assistant."
   (interactive)
@@ -30,7 +35,7 @@
 (defun geo/chatgpt-chat-with-code ()
   "Prompt the user for input, then send the input and either the selected region or the entire buffer's contents to OpenAI's API."
   (interactive)
-  (let ((input (read-string "Ask OpenAI (with buffer/region): "))
+  (let ((input (read-string "LLM prompt (with buffer/region): "))
         (content (if (use-region-p)
                      (buffer-substring-no-properties (region-beginning) (region-end))
                    (buffer-substring-no-properties (point-min) (point-max)))))
@@ -38,7 +43,7 @@
 
 (defun geo/chatgpt--create-input-buffer (input)
   "Create a new buffer for the user's input."
-  (with-current-buffer (get-buffer-create "*OpenAI Chat*")
+  (with-current-buffer (get-buffer-create geo-ai-chat-buffer-name)
     (erase-buffer)
     (insert "# Prompt\n\n" input "\n\n")))
 
@@ -65,7 +70,7 @@
 
 (defun geo/chatgpt--append-to-buffer (text)
   "Append TEXT to the existing buffer and save it."
-  (with-current-buffer (get-buffer-create "*OpenAI Chat*")
+  (with-current-buffer (get-buffer-create geo-ai-chat-buffer-name)
     (goto-char (point-max))
     (insert "\n# Response\n\n" (or text "No valid response received.") "\n")
     (geo/chatgpt--save-chat-to-file)))
@@ -140,21 +145,20 @@ If DEBUG-P is non-nil, debugging information will be printed."
   (search-forward "\n\n")       ;; Move past the HTTP headers
   (let ((response (buffer-substring-no-properties (point) (point-max))))
     (when debug-p
-      (with-output-to-temp-buffer "*Raw OpenAI Response*"
+      (with-output-to-temp-buffer "*Raw LLM Response*"
         (princ response)))    ;; Print raw response for debugging
     (condition-case err
         (let* ((json-response (json-read-from-string response))
                (parsed-response (geo/chatgpt--parse-response json-response)))
-          (message "Parsed: %s" parsed-response)
           (geo/chatgpt--append-response-to-buffer parsed-response))
       (json-readtable-error
        (message "Failed to parse the response as JSON: %s" (error-message-string err))
-       (with-output-to-temp-buffer "*OpenAI Response*"
+       (with-output-to-temp-buffer "*LLM Response*"
          (princ "Failed to parse the response as JSON.\n")
          (princ response)))
       (error
        (message "An unexpected error occurred: %s" (error-message-string err))
-       (with-output-to-temp-buffer "*OpenAI Response*"
+       (with-output-to-temp-buffer "*LLM Response*"
          (princ "An unexpected error occurred.\n")
          (princ response))))))
 
