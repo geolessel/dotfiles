@@ -1,10 +1,30 @@
 (require 'url)
 (require 'json)
 
+(defgroup geo-ai-chat nil
+  "Customization group for AI chat functionality."
+  :group 'applications)
+
+(defcustom geo-ai-chat-provider 'anthropic
+  "The AI provider to use for chat functionality."
+  :type '(choice (const :tag "OpenAI" openai)
+                 (const :tag "Anthropic" anthropic))
+  :group 'geo-ai-chat)
+
+(defcustom geo-ai-chat-openai-model "gpt-4"
+  "The OpenAI model to use for chat."
+  :type 'string
+  :group 'geo-ai-chat)
+
+(defcustom geo-ai-chat-anthropic-model "claude-3-5-sonnet-20240620"
+  "The Anthropic model to use for chat."
+  :type 'string
+  :group 'geo-ai-chat)
+
 (defun geo/chatgpt-get-input ()
   "Prompt the user for input for the OpenAI assistant."
   (interactive)
-  (let ((input (read-string "Ask OpenAI: ")))
+  (let ((input (read-string "LLM prompt: ")))
     (geo/chatgpt--send-request input)))
 
 (defun geo/chatgpt-chat-with-code ()
@@ -14,7 +34,7 @@
         (content (if (use-region-p)
                      (buffer-substring-no-properties (region-beginning) (region-end))
                    (buffer-substring-no-properties (point-min) (point-max)))))
-    (geo/chatgpt--send-request (concat input "\n\n==============================\nCODE:\n" content "==============================\n\n"))))
+    (geo/chatgpt--send-request (concat input "\n\n==============================\nCODE:\n" content "\n==============================\n\n"))))
 
 (defun geo/chatgpt--create-input-buffer (input)
   "Create a new buffer for the user's input."
@@ -23,10 +43,25 @@
     (insert "# Prompt\n\n" input "\n\n")))
 
 (defun geo/chatgpt--parse-response (response)
-  "Parse the OpenAI response and return the message content."
-  (let* ((choices (alist-get 'choices response))
-         (message-content (and choices (alist-get 'content (alist-get 'message (elt choices 0))))))
-    message-content))
+  "Parse the AI provider's response and return the message content."
+  (message "Response: %s" response)
+  (message "geo-ai-chat-provider: %s" geo-ai-chat-provider)
+  (cond ((eq geo-ai-chat-provider 'openai)
+         (message "provider: openai")
+         (let* ((choices (alist-get 'choices response))
+                (message-content (and choices (alist-get 'content (alist-get 'message (elt choices 0))))))
+           message-content))
+        ((eq geo-ai-chat-provider 'anthropic)
+         (message "provider: anthropic")
+         (let* ((content (alist-get 'content response))
+                (_ (message "content: %s" content))
+                (first-message (aref content 0))
+                (_ (message "first-message: %s" first-message))
+                (text (alist-get 'text first-message))
+                (_ (message "text: %s" text)))
+           ;; (message "Content: %s || first-message: %s || text: %s" content first-message text)
+           text))
+        (t (error "Unknown provider when processing response: %s" geo-ai-chat-provider))))
 
 (defun geo/chatgpt--append-to-buffer (text)
   "Append TEXT to the existing buffer and save it."
@@ -37,43 +72,64 @@
 
 (defun geo/chatgpt--append-response-to-buffer (response)
   "Append the OpenAI response to the existing buffer and save it."
-  (let* ((message-content (geo/chatgpt--parse-response response)))
-    (geo/chatgpt--append-to-buffer message-content)))
+  (geo/chatgpt--append-to-buffer response))
+
+(defun geo/chatgpt--prepare-headers ()
+  (let ((api-key (geo/chatgpt--get-api-key)))
+    (cond ((eq geo-ai-chat-provider 'openai)
+           `(("Content-Type" . "application/json")
+             ("Authorization" . ,(concat "Bearer " api-key))))
+          ((eq geo-ai-chat-provider 'anthropic)
+           `(("Content-Type" . "application/json")
+             ("anthropic-version" . "2023-06-01")
+             ("x-api-key" . ,api-key)))
+          (t (error "Unknown provider while preparing headers")))))
 
 (defun geo/chatgpt--send-request (input)
-  "Send the user input to OpenAI's API and handle the response."
+  "Send the user input to the configured AI provider's API and handle the response."
   (geo/chatgpt--create-input-buffer input)
-  (let* ((api-key (string-trim (shell-command-to-string "echo $EMACS_OPENAI_API_KEY")))
-         (url-request-method "POST")
-         (url-request-extra-headers
-          `(("Content-Type" . "application/json")
-            ("Authorization" . ,(concat "Bearer " api-key))))
-         (url-request-data
-          (json-encode `(("model" . "gpt-4o")
-                         ("temperature" . 1)
-                         ("max_tokens" . 3000)
-                         ("top_p" . 1)
-                         ("frequency_penalty" . 0)
-                         ("presence_penalty" . 0)
-                         ("messages" . [((role . "system")
-                                         (content .
-                                                  [((type . "text")
-                                                    (text . "You are a helpful senior software developer. You have many, many
-years of experience writing software for many different kinds of
-environments. Despite your experience, you are still up to date
-on the latest language idioms, security considerations,
-architecture, and language features.\n\nWhen you are presented
-with a question about specific code, give a helpful response in
-easy to understand language. When asked for more details, go deep
-into the topic.\n\nWhen presented with software architecture
-questions, respond without code examples unless code is
-specifically asked for. Limit your responses to the programming
-language the user is using."))]))
-                                        ((role . "user")
-                                         (content . [((type . "text")
-                                                      (text . ,input))]))]))))
-         (url "https://api.openai.com/v1/chat/completions"))
+  (let* ((url-request-method "POST")
+         (headers (geo/chatgpt--prepare-headers))
+         (url-request-extra-headers (geo/chatgpt--prepare-headers))
+         (url-request-data (geo/chatgpt--prepare-request-data input))
+         (url (geo/chatgpt--get-api-url)))
     (url-retrieve url 'geo/chatgpt--callback)))
+
+(defun geo/chatgpt--get-api-key ()
+  "Get the API key for the configured AI provider."
+  (let ((provider geo-ai-chat-provider))
+    (cond ((eq provider 'openai)
+           (string-trim (shell-command-to-string "echo $EMACS_OPENAI_API_KEY")))
+          ((eq provider 'anthropic)
+           (string-trim (shell-command-to-string "echo $EMACS_ANTHROPIC_API_KEY")))
+          (t (error "Unknown provider while getting api key")))))
+
+(defun geo/chatgpt--get-api-url ()
+  "Get the API URL for the configured AI provider."
+  (if (eq geo-ai-chat-provider 'openai)
+      "https://api.openai.com/v1/chat/completions"
+    "https://api.anthropic.com/v1/messages"))
+
+(defun geo/chatgpt--prepare-request-data (prompt)
+  "Prepare the request data for the configured AI provider."
+  (let ((provider geo-ai-chat-provider))
+    (json-encode
+     (cond
+      ((eq provider 'openai)
+       `((model . ,geo-ai-chat-openai-model)
+         (temperature . 1)
+         (max_tokens . 3000)
+         (top_p . 1)
+         (frequency_penalty . 0)
+         (presence_penalty . 0)
+         (messages . [((role . user)
+                       (content . ,prompt))])))
+      ((eq provider 'anthropic)
+       `((model . ,geo-ai-chat-anthropic-model)
+         (messages . [((role . user)
+                       (content . ,prompt))])
+         (max_tokens . 3000)))
+      (t (error "Unsupported provider: %s" provider))))))
 
 (defun geo/chatgpt--callback (status &optional debug-p)
   "Handle the OpenAI API response, including debugging steps.
@@ -84,12 +140,13 @@ If DEBUG-P is non-nil, debugging information will be printed."
   (search-forward "\n\n")       ;; Move past the HTTP headers
   (let ((response (buffer-substring-no-properties (point) (point-max))))
     (when debug-p
-        (with-output-to-temp-buffer "*Raw OpenAI Response*"
-          (princ response)))    ;; Print raw response for debugging
-
+      (with-output-to-temp-buffer "*Raw OpenAI Response*"
+        (princ response)))    ;; Print raw response for debugging
     (condition-case err
-        (let ((json-response (json-read-from-string response)))
-          (geo/chatgpt--append-response-to-buffer json-response))
+        (let* ((json-response (json-read-from-string response))
+               (parsed-response (geo/chatgpt--parse-response json-response)))
+          (message "Parsed: %s" parsed-response)
+          (geo/chatgpt--append-response-to-buffer parsed-response))
       (json-readtable-error
        (message "Failed to parse the response as JSON: %s" (error-message-string err))
        (with-output-to-temp-buffer "*OpenAI Response*"
