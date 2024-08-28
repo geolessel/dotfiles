@@ -1,5 +1,6 @@
 (require 'url)
 (require 'json)
+(require 'transient)
 
 (defgroup geo-ai-chat nil
   "Customization group for AI chat functionality."
@@ -46,13 +47,13 @@
   (let ((input (read-string "LLM prompt: ")))
     (geo/chatgpt--send-request input)))
 
-(defun geo/chatgpt-choose-system-prompt ()
-  (interactive)
-  (let* ((choices (mapcar 'car geo-ai-chat-system-prompts))
-         (choice (completing-read "Choose a system prompt: " choices nil t))
-         (system-prompt (cdr (assoc choice geo-ai-chat-system-prompts))))
-    (message "System prompt set to: %s" choice)
-    (setq geo-ai-chat-current-system-prompt choice)))
+(defun geo/chatgpt-get-system-prompt-choices ()
+  "Get the list of system prompt choices."
+  (mapcar 'car geo-ai-chat-system-prompts))
+
+(defun geo/chatgpt-set-system-prompt (prompt)
+  "Set the system prompt for the chat."
+  (setq geo-ai-chat-current-system-prompt prompt))
 
 (defun geo/chatgpt-chat-with-code ()
   "Prompt the user for input, then send the input and either the selected region or the entire buffer's contents to OpenAI's API."
@@ -196,3 +197,29 @@ If DEBUG-P is non-nil, debugging information will be printed."
     (write-region (point-min) (point-max) filename)
     (find-file-other-window filename)
     (message "Chat saved to %s" filename)))
+
+(transient-define-prefix geo/chatgpt-menu ()
+  "Transient menu for LLM interactions."
+  [["Actions\n"
+    ("c" "Chat with code (region or buffer)" geo/chatgpt-chat-with-code-transient)
+    ("i" "Chat with input" geo/chatgpt-get-input)]
+   ["Setup\n"
+    (geo/chatgpt--infix-role)]])
+  ;; ["Options"
+  ;;  ("-s" "System prompt" geo/chatgpt-set-system-prompt
+  ;;   :choices geo/chatgpt-get-system-prompt-choices
+  ;;   :init-value (lambda (obj) (oset obj value geo-ai-chat-current-system-prompt)))
+  ;;  ("-m" "Model" geo/chatgpt-set-model
+  ;;   :choices ("gpt-4" "gpt-3.5-turbo" "claude-3-5-sonnet-20240620"))
+  ;;  ("-t" "Temperature" geo/chatgpt-set-temperature
+  ;;   :choices ("0.0" "0.5" "1.0" "1.5" "2.0"))])
+
+(transient-define-infix geo/chatgpt--infix-role ()
+  "System role message"
+  :class 'transient-lisp-variable
+  :description "System role"
+  :prompt "Role: "
+  :variable 'geo-ai-chat-current-system-prompt
+  :key "r"
+  :reader (lambda (prompt &rest _)
+            (completing-read "System role: " (mapcar 'car geo-ai-chat-system-prompts))))
