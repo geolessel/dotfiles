@@ -41,6 +41,47 @@
   :type 'string
   :group 'geo-ai-chat)
 
+(defcustom geo-ai-chat-context-files nil
+  "List of files to include as context for AI chat."
+  :type '(repeat string)
+  :group 'geo-ai-chat)
+
+(defun geo/chatgpt-add-context-file ()
+  "Add a file to the context files list."
+  (interactive)
+  (let ((file (read-file-name "Add context file: ")))
+    (add-to-list 'geo-ai-chat-context-files file)
+    (message "Added %s to context files" file)))
+
+(defun geo/chatgpt-remove-context-file ()
+  "Remove a file from the context files list."
+  (interactive)
+  (let ((file (completing-read "Remove context file: " geo-ai-chat-context-files)))
+    (setq geo-ai-chat-context-files (delete file geo-ai-chat-context-files))
+    (message "Removed %s from context files" file)))
+
+(defun geo/chatgpt-clear-context-files ()
+  "Clear all context files."
+  (interactive)
+  (setq geo-ai-chat-context-files nil)
+  (message "Cleared all context files"))
+
+(defun geo/chatgpt-chat-with-context ()
+  "Prompt the user for input, then send the input and the contents of context files to the AI API."
+  (interactive)
+  (let* ((input (read-string "LLM prompt (with context files): "))
+         (context (mapconcat (lambda (file)
+                               (format "-----\nFile: %s\n\n%s\n\n"
+                                       file
+                                       (with-temp-buffer
+                                         (insert-file-contents file)
+                                         (buffer-string))))
+                             geo-ai-chat-context-files
+                             "\n"))
+         (encoded-input (encode-coding-string input 'utf-8))
+         (encoded-context (encode-coding-string context 'utf-8)))
+    (geo/chatgpt--send-request (concat encoded-input "\n\n==============================\nCONTEXT:\n" encoded-context "END CONTEXT\n==============================\n\n"))))
+
 (defun geo/chatgpt-get-input ()
   "Prompt the user for input for the OpenAI assistant."
   (interactive)
@@ -200,25 +241,18 @@ If DEBUG-P is non-nil, debugging information will be printed."
 
 (transient-define-prefix geo/chatgpt-menu ()
   "Transient menu for LLM interactions."
-  [["Actions\n"
-    ("c" "Chat with code (region or buffer)" geo/chatgpt-chat-with-code-transient)
-    ("i" "Chat with input" geo/chatgpt-get-input)]
-   ["Setup\n"
-    (geo/chatgpt--infix-role)]])
-  ;; ["Options"
-  ;;  ("-s" "System prompt" geo/chatgpt-set-system-prompt
-  ;;   :choices geo/chatgpt-get-system-prompt-choices
-  ;;   :init-value (lambda (obj) (oset obj value geo-ai-chat-current-system-prompt)))
-  ;;  ("-m" "Model" geo/chatgpt-set-model
-  ;;   :choices ("gpt-4" "gpt-3.5-turbo" "claude-3-5-sonnet-20240620"))
-  ;;  ("-t" "Temperature" geo/chatgpt-set-temperature
-  ;;   :choices ("0.0" "0.5" "1.0" "1.5" "2.0"))])
+  [["Actions"
+    ("c" "Chat with current (region or buffer)" geo/chatgpt-chat-with-code-transient)
+    ("i" "Chat with input" geo/chatgpt-get-input)
+    ("x" "Chat with context files" geo/chatgpt-chat-with-context)]
+   ["Setup"
+    (geo/chatgpt--infix-role)
+    (geo/chatgpt--suffix-context-files)]])
 
 (transient-define-infix geo/chatgpt--infix-role ()
   "System role message"
   :class 'transient-lisp-variable
   :description "System role"
-  :prompt "Role: "
   :variable 'geo-ai-chat-current-system-prompt
   :key "r"
   :reader (lambda (prompt &rest _)
@@ -228,3 +262,40 @@ If DEBUG-P is non-nil, debugging information will be printed."
                      ,(lambda (choice)
                         (concat " - " (cdr (assoc choice choices)))))))
               (completing-read "System role: " (mapcar 'car geo-ai-chat-system-prompts)))))
+
+(transient-define-suffix geo/chatgpt--suffix-context-files ()
+  :class 'transient-lisp-variable
+  :variable 'geo-ai-chat-context-files
+  :key "f"
+  :description (lambda () (format "Context files (%s selected)" (length geo-ai-chat-context-files)))
+  :transient t
+  (interactive)
+  (call-interactively #'geo/chatgpt-manage-context-files)
+  (transient-setup))
+
+(defun geo/chatgpt-manage-context-files ()
+  "Add, remove, or clear context files"
+  (interactive)
+  (let ((action nil))
+    (while (not (eq action ?q))
+      (setq action (read-char-choice "a)dd, r)emove, c)lear, or q)uit: "
+                                  '(?a ?r ?c ?q)))
+    (pcase action
+      (?a (call-interactively #'geo/chatgpt-add-context-file))
+      (?r (call-interactively #'geo/chatgpt-remove-context-file))
+      (?c (call-interactively #'geo/chatgpt-clear-context-files))))))
+
+(transient-define-infix geo/chatgpt--infix-context-files ()
+  "Manage context files"
+  :class 'transient-lisp-variable
+  :variable 'geo-ai-chat-context-files
+  :key "f"
+  :description "Context files"
+  :reader (lambda (_prompt _initial-input _history)
+            (let ((action (read-char-choice "a)dd, r)emove, c)lear, or q)uit: "
+                                            '(?a ?r ?c ?q))))
+              (cond
+               ((eq action ?a) (call-interactively #'geo/chatgpt-add-context-file))
+               ((eq action ?r) (call-interactively #'geo/chatgpt-remove-context-file))
+               ((eq action ?c) (call-interactively #'geo/chatgpt-clear-context-files)))
+              (format "%d file(s)" (length geo-ai-chat-context-files)))))
