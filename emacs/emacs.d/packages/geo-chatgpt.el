@@ -222,4 +222,9 @@ If DEBUG-P is non-nil, debugging information will be printed."
   :variable 'geo-ai-chat-current-system-prompt
   :key "r"
   :reader (lambda (prompt &rest _)
-            (completing-read "System role: " (mapcar 'car geo-ai-chat-system-prompts))))
+            (let ((choices geo-ai-chat-system-prompts)
+                  (completion-extra-properties
+                   `(:annotation-function
+                     ,(lambda (choice)
+                        (concat " - " (cdr (assoc choice choices)))))))
+              (completing-read "System role: " (mapcar 'car geo-ai-chat-system-prompts)))))
