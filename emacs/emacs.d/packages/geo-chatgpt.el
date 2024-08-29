@@ -41,7 +41,8 @@ Set to `nil' to disable autosaving."
 (defcustom elelem-available-models
   '((openai . gpt-4o)
     (openai . gpt-4o-mini)
-    (anthropic . claude-3-5-sonnet-20240620))
+    (anthropic . claude-3-5-sonnet-20240620)
+    (anthropic . claude-3-haiku-20240307))
   "The available providers and models for interactions."
   :type '(alist :key-type symbol :key-type symbol)
   :group 'elelem)
@@ -126,6 +127,7 @@ Set to `nil' to disable autosaving."
       (display-buffer buffer))
     (let ((window (get-buffer-window buffer)))
       (with-selected-window window
+        (set-buffer-file-coding-system 'utf-8)
         (re-search-forward "^# Response" nil t)
         ;; make the response display at the top of the window
         (recenter 0)))))
@@ -136,12 +138,13 @@ Set to `nil' to disable autosaving."
     (pcase provider
       ('openai
        (let* ((choices (alist-get 'choices response))
-              (message-content (and choices (alist-get 'content (alist-get 'message (elt choices 0))))))
-         message-content))
+              (first-choice (aref choices 0))
+              (delta (alist-get 'delta first-choice))
+              (content (alist-get 'content delta)))
+         content))
       ('anthropic
-       (let* ((content (alist-get 'content response))
-              (first-message (aref content 0))
-              (text (alist-get 'text first-message)))
+       (let* ((delta (alist-get 'delta response))
+              (text (alist-get 'text delta)))
          text))
       (_ (error "Unknown provider when processing response from provider: %s" provider)))))
 
@@ -188,6 +191,7 @@ Set to `nil' to disable autosaving."
                         (content . ,prompt))])))
        ('anthropic
         `((model . ,(symbol-name model))
+          (stream . t)
           (system . ,system-prompt)
           (messages . [((role . user)
                         (content . ,prompt))])
@@ -238,8 +242,7 @@ If DEBUG-P is non-nil, debugging information will be printed."
             (unless (string= json-data "[DONE]")
               (condition-case err
                   (let* ((json-response (json-read-from-string json-data))
-                         (parsed-response (elelem--parse-response json-response))
-                         (content (alist-get 'content (alist-get 'delta (aref (alist-get 'choices json-response) 0)))))
+                         (content (elelem--parse-response json-response)))
                     (when content (elelem--append-response-to-buffer content)))
                 (json-readtable-error (message "Failed to parse the response as JSON: %s" (error-message-string err)))
                 (error (message "An unexpected error occurred while processing chunk: %s" (error-message-string err)))))))
