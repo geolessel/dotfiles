@@ -47,7 +47,7 @@ Set to `nil' to disable autosaving."
   :type '(alist :key-type symbol :key-type symbol)
   :group 'elelem)
 
-(defcustom elelem-current-provider-and-model '(anthropic . claude-3-5-sonnect-20240620)
+(defcustom elelem-current-provider-and-model '(anthropic . claude-3-5-sonnet-20240620)
   "The current provider and model for interactions."
   :type '(alist :key-type symbol :key-type symbol)
   :group 'elelem)
@@ -122,6 +122,7 @@ Set to `nil' to disable autosaving."
     (with-current-buffer buffer
       (set-buffer-file-coding-system 'utf-8)
       (markdown-mode)
+      (visual-line-mode 1)
       (erase-buffer)
       (insert "# Prompt\n\n" input "\n\n# Response" (format " (%s %s)" (car elelem-current-provider-and-model) (cdr elelem-current-provider-and-model)) "\n\n")
       (display-buffer buffer))
@@ -130,7 +131,7 @@ Set to `nil' to disable autosaving."
         (set-buffer-file-coding-system 'utf-8)
         (re-search-forward "^# Response" nil t)
         ;; make the response display at the top of the window
-        (recenter 0)))))
+        (recenter 1)))))
 
 (defun elelem--parse-response (response)
   "Parse the AI provider's response and return the message content."
@@ -188,13 +189,13 @@ Set to `nil' to disable autosaving."
           (frequency_penalty . 0)
           (presence_penalty . 0)
           (messages . [((role . user)
-                        (content . ,prompt))])))
+                        (content . ,(encode-coding-string prompt 'utf-8)))])))
        ('anthropic
         `((model . ,(symbol-name model))
           (stream . t)
           (system . ,system-prompt)
           (messages . [((role . user)
-                        (content . ,prompt))])
+                        (content . ,(encode-coding-string prompt 'utf-8)))])
           (max_tokens . 3000)))
        (_ (error "Unsupported provider preparing request data: %s" provider))))))
 
