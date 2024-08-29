@@ -13,7 +13,7 @@
 
 (defcustom elelem-system-prompts
   '(("Elixir Developer" . "You are an experienced senior developer. Your knowledge is particularly good for the Elixir language, the Phoenix framework (including LiveView) and all the available Hex packages. When you are asked for help, you provide deep idiomatic answers. Assume the user is also an experienced developer and use advanced terms and concepts in your responses. Always include a concise response along with code blocks unless asked explicitly to only include code in your response.")
-    ("Emacs Developer" . "You are an experienced senior developer. Your knowledge is particularly deep for the Emacs Lisp language, the Emacs program, and various other lisps. When you are asked for help, you provide deep idiomatic responses. Assume the user is also and experienced Emacs user and use advanced terms and concepts in your responses.")
+    ("Emacs Developer" . "You are an experienced senior software developer. Your knowledge is particularly deep for the Emacs Lisp language, the Emacs program, and various other lisps. When you are asked for help, you provide deep idiomatic responses directly related to Emacs, Emacs Lisp, and other lisps. If required, use your knowledge of other programming languages as well. Assume the user is also and experienced Emacs user and use advanced terms and concepts in your responses.")
     ("Code Review" . "Please review the following code: ")
     ("Explain Concept" . "Can you explain the concept of: "))
   "List of preset prompts for AI chat."
@@ -76,7 +76,8 @@ Set to `nil' to disable autosaving."
 (defun elelem-chat-with-context ()
   "Prompt the user for input, then send the input and the contents of context files to the AI API."
   (interactive)
-  (let* ((input (read-string "LLM prompt (with context files): "))
+  (let* ((model (cdr elelem-current-provider-and-model))
+         (input (read-string (format "%s prompt (with context files): " model)))
          (context (mapconcat (lambda (file)
                                (format "-----\nFile: %s\n\n%s\n\n"
                                        file
@@ -92,7 +93,8 @@ Set to `nil' to disable autosaving."
 (defun elelem-get-input ()
   "Prompt the user for input for the OpenAI assistant."
   (interactive)
-  (let ((input (read-string "LLM prompt: ")))
+  (let* ((model (cdr elelem-current-provider-and-model))
+         (input (read-string (format "%s prompt: " model))))
     (elelem--send-request input)))
 
 (defun elelem-get-system-prompt-choices ()
@@ -106,17 +108,27 @@ Set to `nil' to disable autosaving."
 (defun elelem-chat-with-code ()
   "Prompt the user for input, then send the input and either the selected region or the entire buffer's contents to OpenAI's API."
   (interactive)
-  (let ((input (read-string "LLM prompt (with buffer/region): "))
-        (content (if (use-region-p)
-                     (buffer-substring-no-properties (region-beginning) (region-end))
-                   (buffer-substring-no-properties (point-min) (point-max)))))
+  (let* ((model (cdr elelem-current-provider-and-model))
+         (input (read-string (format "%s prompt (with buffer/region): " model)))
+         (content (if (use-region-p)
+                      (buffer-substring-no-properties (region-beginning) (region-end))
+                    (buffer-substring-no-properties (point-min) (point-max)))))
     (elelem--send-request (concat input "\n\n==============================\nCODE:\n" content "\n==============================\n\n"))))
 
 (defun elelem--create-input-buffer (input)
   "Create a new buffer for the user's input."
-  (with-current-buffer (get-buffer-create elelem-buffer-name)
-    (erase-buffer)
-    (insert "# Prompt\n\n" input "\n\n")))
+  (let ((buffer (get-buffer-create elelem-buffer-name)))
+    (with-current-buffer buffer
+      (set-buffer-file-coding-system 'utf-8)
+      (markdown-mode)
+      (erase-buffer)
+      (insert "# Prompt\n\n" input "\n\n# Response" (format " (%s %s)" (car elelem-current-provider-and-model) (cdr elelem-current-provider-and-model)) "\n\n")
+      (display-buffer buffer))
+    (let ((window (get-buffer-window buffer)))
+      (with-selected-window window
+        (re-search-forward "^# Response" nil t)
+        ;; make the response display at the top of the window
+        (recenter 0)))))
 
 (defun elelem--parse-response (response)
   "Parse the AI provider's response and return the message content."
@@ -134,13 +146,11 @@ Set to `nil' to disable autosaving."
       (_ (error "Unknown provider when processing response from provider: %s" provider)))))
 
 (defun elelem--append-to-buffer (text)
-  "Append TEXT to the existing buffer and save it."
-  (with-current-buffer (get-buffer-create elelem-buffer-name)
+  "Append TEXT to the existing buffer."
+  (with-current-buffer (get-buffer elelem-buffer-name)
     (goto-char (point-max))
-    (insert "\n# Response\n\n" (or text "No valid response received.") "\n")
-    (if elelem-autosave-chats-dir
-        (elelem--save-chat-to-file)
-      (display-buffer (current-buffer)))))
+    (insert (or text "No valid response received.\n"))
+    (redisplay)))
 
 (defun elelem--append-response-to-buffer (response)
   "Append the OpenAI response to the existing buffer and save it."
@@ -168,6 +178,7 @@ Set to `nil' to disable autosaving."
      (pcase provider
        ('openai
         `((model . ,(symbol-name model))
+          (stream . t)
           (temperature . 1)
           (max_tokens . 3000)
           (top_p . 1)
@@ -214,26 +225,26 @@ Set to `nil' to disable autosaving."
 
 STATUS is the status of the network process.
 If DEBUG-P is non-nil, debugging information will be printed."
-  (goto-char (point-min))       ;; Move to the start of the buffer
-  (search-forward "\n\n")       ;; Move past the HTTP headers
-  (let ((response (buffer-substring-no-properties (point) (point-max))))
-    (when debug-p
-      (with-output-to-temp-buffer "*raw elelem response*"
-        (princ response)))    ;; Print raw response for debugging
-    (condition-case err
-        (let* ((json-response (json-read-from-string response))
-               (parsed-response (elelem--parse-response json-response)))
-          (elelem--append-response-to-buffer parsed-response))
-      (json-readtable-error
-       (message "Failed to parse the response as JSON: %s" (error-message-string err))
-       (with-output-to-temp-buffer "*elelem Response*"
-         (princ "Failed to parse the response as JSON.\n")
-         (princ response)))
-      (error
-       (message "An unexpected error occurred: %s" (error-message-string err))
-       (with-output-to-temp-buffer "*elelem response*"
-         (princ "An unexpected error occurred.\n")
-         (princ response))))))
+  (goto-char (point-min))       ; Move to the start of the buffer
+  (search-forward "\n\n")       ; Move past the HTTP headers
+  (let ((inhibit-read-only t)   ; Allow modifications to the buffer
+        (json-object-type 'alist)
+        (json-array-type 'vector)
+        (json-key-type 'symbol))
+    (while (not (eobp))
+      (let ((line (buffer-substring-no-properties (point) (line-end-position))))
+        (when (string-prefix-p "data: " line)
+          (let ((json-data (substring line 6)))
+            (unless (string= json-data "[DONE]")
+              (condition-case err
+                  (let* ((json-response (json-read-from-string json-data))
+                         (parsed-response (elelem--parse-response json-response))
+                         (content (alist-get 'content (alist-get 'delta (aref (alist-get 'choices json-response) 0)))))
+                    (when content (elelem--append-response-to-buffer content)))
+                (json-readtable-error (message "Failed to parse the response as JSON: %s" (error-message-string err)))
+                (error (message "An unexpected error occurred while processing chunk: %s" (error-message-string err)))))))
+        (forward-line 1)))
+    (elelem--save-chat-to-file)))
 
 (defun elelem--save-chat-to-file ()
   "Save the chat buffer to a file in the `elelem-autosave-chats-dir' directory."
@@ -243,13 +254,11 @@ If DEBUG-P is non-nil, debugging information will be printed."
            (filename (expand-file-name (concat timestamp ".md") directory)))
       (unless (file-exists-p directory)
         (make-directory directory t))
-      (write-region (point-min) (point-max) filename)
-      (find-file-other-window filename)
-      ;; Encode the buffer to utf-8
-      (set-buffer-file-coding-system 'utf-8)
-      ;; Move to the response heading
-      (goto-line 1)
-      (re-search-forward "^# Response" nil t)
+      (with-current-buffer (get-buffer elelem-buffer-name)
+        ;; Encode the buffer to utf-8
+        (set-buffer-file-coding-system 'utf-8)
+        ;; write contents of buffer to filename; don't append; visit
+        (write-region (point-min) (point-max) filename nil t))
       (message "Chat saved to %s" filename))))
 
 (defun elelem-manage-context-files ()
