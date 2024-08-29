@@ -6,22 +6,6 @@
   "Customization group for AI chat functionality."
   :group 'applications)
 
-(defcustom elelem-provider 'anthropic
-  "The AI provider to use for chat functionality."
-  :type '(choice (const :tag "OpenAI" openai)
-                 (const :tag "Anthropic" anthropic))
-  :group 'elelem)
-
-(defcustom elelem-openai-model "gpt-4"
-  "The OpenAI model to use for chat."
-  :type 'string
-  :group 'elelem)
-
-(defcustom elelem-anthropic-model "claude-3-5-sonnet-20240620"
-  "The Anthropic model to use for chat."
-  :type 'string
-  :group 'elelem)
-
 (defcustom elelem-buffer-name "*elelem chat*"
   "The buffer to build prompts and responses in."
   :type 'string
@@ -54,25 +38,40 @@ Set to `nil' to disable autosaving."
                  (string :tag "Autosave directory"))
   :group 'elelem)
 
+(defcustom elelem-available-models
+  '((openai . gpt-4o)
+    (openai . gpt-4o-mini)
+    (anthropic . claude-3-5-sonnet-20240620))
+  "The available providers and models for interactions."
+  :type '(alist :key-type symbol :key-type symbol)
+  :group 'elelem)
+
+(defcustom elelem-current-provider-and-model '(anthropic . claude-3-5-sonnect-20240620)
+  "The current provider and model for interactions."
+  :type '(alist :key-type symbol :key-type symbol)
+  :group 'elelem)
+
+;;; FUNCTIONS
+
 (defun elelem-add-context-file ()
   "Add a file to the context files list."
   (interactive)
   (let ((file (read-file-name "Add context file: ")))
     (add-to-list 'elelem-context-files file)
-    (message "Added %s to context files" file)))
+    (message "Added %s to elelem context files" file)))
 
 (defun elelem-remove-context-file ()
   "Remove a file from the context files list."
   (interactive)
   (let ((file (completing-read "Remove context file: " elelem-context-files)))
     (setq elelem-context-files (delete file elelem-context-files))
-    (message "Removed %s from context files" file)))
+    (message "Removed %s from elelem context files" file)))
 
 (defun elelem-clear-context-files ()
   "Clear all context files."
   (interactive)
   (setq elelem-context-files nil)
-  (message "Cleared all context files"))
+  (message "Cleared all elelem context files"))
 
 (defun elelem-chat-with-context ()
   "Prompt the user for input, then send the input and the contents of context files to the AI API."
@@ -121,16 +120,18 @@ Set to `nil' to disable autosaving."
 
 (defun elelem--parse-response (response)
   "Parse the AI provider's response and return the message content."
-  (cond ((eq elelem-provider 'openai)
-         (let* ((choices (alist-get 'choices response))
-                (message-content (and choices (alist-get 'content (alist-get 'message (elt choices 0))))))
-           message-content))
-        ((eq elelem-provider 'anthropic)
-         (let* ((content (alist-get 'content response))
-                (first-message (aref content 0))
-                (text (alist-get 'text first-message)))
-           text))
-        (t (error "Unknown provider when processing response: %s" elelem-provider))))
+  (let ((provider (car elelem-current-provider-and-model)))
+    (pcase provider
+      ('openai
+       (let* ((choices (alist-get 'choices response))
+              (message-content (and choices (alist-get 'content (alist-get 'message (elt choices 0))))))
+         message-content))
+      ('anthropic
+       (let* ((content (alist-get 'content response))
+              (first-message (aref content 0))
+              (text (alist-get 'text first-message)))
+         text))
+      (_ (error "Unknown provider when processing response from provider: %s" provider)))))
 
 (defun elelem--append-to-buffer (text)
   "Append TEXT to the existing buffer and save it."
@@ -146,15 +147,41 @@ Set to `nil' to disable autosaving."
   (elelem--append-to-buffer response))
 
 (defun elelem--prepare-headers ()
-  (let ((api-key (elelem--get-api-key)))
-    (cond ((eq elelem-provider 'openai)
-           `(("Content-Type" . "application/json")
-             ("Authorization" . ,(concat "Bearer " api-key))))
-          ((eq elelem-provider 'anthropic)
-           `(("Content-Type" . "application/json")
-             ("anthropic-version" . "2023-06-01")
-             ("x-api-key" . ,api-key)))
-          (t (error "Unknown provider while preparing headers")))))
+  (let ((api-key (elelem--get-api-key))
+        (provider (car elelem-current-provider-and-model)))
+    (pcase provider
+      ('openai
+       `(("Content-Type" . "application/json")
+         ("Authorization" . ,(concat "Bearer " api-key))))
+      ('anthropic
+       `(("Content-Type" . "application/json")
+         ("anthropic-version" . "2023-06-01")
+         ("x-api-key" . ,api-key)))
+      (_ (error "Unknown provider while preparing headers for provider: %s" provider)))))
+
+(defun elelem--prepare-request-data (prompt)
+  "Prepare the request data for the configured AI provider."
+  (let ((provider (car elelem-current-provider-and-model))
+        (model (cdr elelem-current-provider-and-model))
+        (system-prompt (cdr (assoc elelem-current-system-prompt elelem-system-prompts))))
+    (json-encode
+     (pcase provider
+       ('openai
+        `((model . ,(symbol-name model))
+          (temperature . 1)
+          (max_tokens . 3000)
+          (top_p . 1)
+          (frequency_penalty . 0)
+          (presence_penalty . 0)
+          (messages . [((role . user)
+                        (content . ,prompt))])))
+       ('anthropic
+        `((model . ,(symbol-name model))
+          (system . ,system-prompt)
+          (messages . [((role . user)
+                        (content . ,prompt))])
+          (max_tokens . 3000)))
+       (_ (error "Unsupported provider preparing request data: %s" provider))))))
 
 (defun elelem--send-request (input)
   "Send the user input to the configured AI provider's API and handle the response."
@@ -168,41 +195,19 @@ Set to `nil' to disable autosaving."
 
 (defun elelem--get-api-key ()
   "Get the API key for the configured AI provider."
-  (let ((provider elelem-provider))
-    (cond ((eq provider 'openai)
-           (string-trim (shell-command-to-string "echo $EMACS_OPENAI_API_KEY")))
-          ((eq provider 'anthropic)
-           (string-trim (shell-command-to-string "echo $EMACS_ANTHROPIC_API_KEY")))
-          (t (error "Unknown provider while getting api key")))))
+  (let ((provider (car elelem-current-provider-and-model)))
+    (pcase provider
+      ('openai (string-trim (shell-command-to-string "echo $EMACS_OPENAI_API_KEY")))
+      ('anthropic (string-trim (shell-command-to-string "echo $EMACS_ANTHROPIC_API_KEY")))
+      (_ (error "Unknown provider while getting api key: %s" provider)))))
 
 (defun elelem--get-api-url ()
   "Get the API URL for the configured AI provider."
-  (if (eq elelem-provider 'openai)
-      "https://api.openai.com/v1/chat/completions"
-    "https://api.anthropic.com/v1/messages"))
-
-(defun elelem--prepare-request-data (prompt)
-  "Prepare the request data for the configured AI provider."
-  (let ((provider elelem-provider)
-        (system-prompt (cdr (assoc elelem-current-system-prompt elelem-system-prompts))))
-    (json-encode
-     (cond
-      ((eq provider 'openai)
-       `((model . ,elelem-openai-model)
-         (temperature . 1)
-         (max_tokens . 3000)
-         (top_p . 1)
-         (frequency_penalty . 0)
-         (presence_penalty . 0)
-         (messages . [((role . user)
-                       (content . ,prompt))])))
-      ((eq provider 'anthropic)
-       `((model . ,elelem-anthropic-model)
-         (system . ,system-prompt)
-         (messages . [((role . user)
-                       (content . ,prompt))])
-         (max_tokens . 3000)))
-      (t (error "Unsupported provider preparing request data: %s" provider))))))
+  (let ((provider (car elelem-current-provider-and-model)))
+    (pcase provider
+      ('openai "https://api.openai.com/v1/chat/completions")
+      ('anthropic "https://api.anthropic.com/v1/messages")
+      (_ (error "Unknown provider while getting API URL: %s provider")))))
 
 (defun elelem--callback (status &optional debug-p)
   "Handle the OpenAI API response, including debugging steps.
@@ -268,6 +273,7 @@ If DEBUG-P is non-nil, debugging information will be printed."
     ("x" "Chat with context files" elelem-chat-with-context)
     ("i" "Chat with input" elelem-get-input)]
    ["Setup"
+    (elelem--infix-provider-and-model)
     (elelem--infix-role)
     (elelem--infix-context-files)]])
 
@@ -295,3 +301,15 @@ If DEBUG-P is non-nil, debugging information will be printed."
   (call-interactively #'elelem-manage-context-files)
   (transient-setup))
 
+(transient-define-infix elelem--infix-provider-and-model ()
+  "Select provider and model"
+  :class 'transient-lisp-variable
+  :variable 'elelem-current-provider-and-model
+  :key "m"
+  :reader (lambda (&rest _)
+            (let* ((choices (mapcar (lambda (pair)
+                                      (cons (format "%s %s" (car pair) (cdr pair)) pair))
+                                    elelem-available-models))
+                   (selection (completing-read "Provider and model: "
+                                               (mapcar #'car choices) nil t)))
+              (cdr (assoc selection choices)))))
