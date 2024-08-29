@@ -22,7 +22,7 @@
   :type 'string
   :group 'elelem)
 
-(defcustom elelem-buffer-name "*LLM Chat*"
+(defcustom elelem-buffer-name "*elelem chat*"
   "The buffer to build prompts and responses in."
   :type 'string
   :group 'elelem)
@@ -44,6 +44,14 @@
 (defcustom elelem-context-files nil
   "List of files to include as context for AI chat."
   :type '(repeat string)
+  :group 'elelem)
+
+(defcustom elelem-autosave-chats-dir "~/emacs.d/elelem-chats"
+  "Which directory to autosave a response from a provider.
+
+Set to `nil' to disable autosaving."
+  :type '(choice (const :tag "Don't autosave" nil)
+                 (string :tag "Autosave directory"))
   :group 'elelem)
 
 (defun elelem-add-context-file ()
@@ -120,7 +128,7 @@
         ((eq elelem-provider 'anthropic)
          (let* ((content (alist-get 'content response))
                 (first-message (aref content 0))
-                (text (alist-get 'text first-message))
+                (text (alist-get 'text first-message)))
            text))
         (t (error "Unknown provider when processing response: %s" elelem-provider))))
 
@@ -129,7 +137,9 @@
   (with-current-buffer (get-buffer-create elelem-buffer-name)
     (goto-char (point-max))
     (insert "\n# Response\n\n" (or text "No valid response received.") "\n")
-    (elelem--save-chat-to-file)))
+    (if elelem-autosave-chats-dir
+        (elelem--save-chat-to-file)
+      (display-buffer (current-buffer)))))
 
 (defun elelem--append-response-to-buffer (response)
   "Append the OpenAI response to the existing buffer and save it."
@@ -203,7 +213,7 @@ If DEBUG-P is non-nil, debugging information will be printed."
   (search-forward "\n\n")       ;; Move past the HTTP headers
   (let ((response (buffer-substring-no-properties (point) (point-max))))
     (when debug-p
-      (with-output-to-temp-buffer "*Raw LLM Response*"
+      (with-output-to-temp-buffer "*raw elelem response*"
         (princ response)))    ;; Print raw response for debugging
     (condition-case err
         (let* ((json-response (json-read-from-string response))
@@ -211,30 +221,31 @@ If DEBUG-P is non-nil, debugging information will be printed."
           (elelem--append-response-to-buffer parsed-response))
       (json-readtable-error
        (message "Failed to parse the response as JSON: %s" (error-message-string err))
-       (with-output-to-temp-buffer "*LLM Response*"
+       (with-output-to-temp-buffer "*elelem Response*"
          (princ "Failed to parse the response as JSON.\n")
          (princ response)))
       (error
        (message "An unexpected error occurred: %s" (error-message-string err))
-       (with-output-to-temp-buffer "*LLM Response*"
+       (with-output-to-temp-buffer "*elelem response*"
          (princ "An unexpected error occurred.\n")
          (princ response))))))
 
 (defun elelem--save-chat-to-file ()
-  "Save the chat buffer to a file in the chatgpt-chats subdirectory."
-  (let* ((directory (expand-file-name "chatgpt" user-emacs-directory))
-         (timestamp (format-time-string "%Y%m%d_%H%M%S"))
-         (filename (expand-file-name (concat timestamp ".md") directory)))
-    (unless (file-exists-p directory)
-      (make-directory directory t))
-    (write-region (point-min) (point-max) filename)
-    (find-file-other-window filename)
-    ;; Encode the buffer to utf-8
-    (set-buffer-file-coding-system 'utf-8)
-    ;; Move to the response heading
-    (goto-line 1)
-    (re-search-forward "^# Response" nil t)
-    (message "Chat saved to %s" filename)))
+  "Save the chat buffer to a file in the `elelem-autosave-chats-dir' directory."
+  (when elelem-autosave-chats-dir
+    (let* ((directory (expand-file-name elelem-autosave-chats-dir))
+           (timestamp (format-time-string "%Y%m%d_%H%M%S"))
+           (filename (expand-file-name (concat timestamp ".md") directory)))
+      (unless (file-exists-p directory)
+        (make-directory directory t))
+      (write-region (point-min) (point-max) filename)
+      (find-file-other-window filename)
+      ;; Encode the buffer to utf-8
+      (set-buffer-file-coding-system 'utf-8)
+      ;; Move to the response heading
+      (goto-line 1)
+      (re-search-forward "^# Response" nil t)
+      (message "Chat saved to %s" filename))))
 
 (defun elelem-manage-context-files ()
   "Add, remove, or clear context files"
@@ -253,9 +264,9 @@ If DEBUG-P is non-nil, debugging information will be printed."
 (transient-define-prefix elelem-menu ()
   "Transient menu for LLM interactions."
   [["Actions"
-    ("c" "Chat with current (region or buffer)" elelem-chat-with-code-transient)
-    ("i" "Chat with input" elelem-get-input)
-    ("x" "Chat with context files" elelem-chat-with-context)]
+    ("c" "Chat with current (region or buffer)" elelem-chat-with-code)
+    ("x" "Chat with context files" elelem-chat-with-context)
+    ("i" "Chat with input" elelem-get-input)]
    ["Setup"
     (elelem--infix-role)
     (elelem--infix-context-files)]])
