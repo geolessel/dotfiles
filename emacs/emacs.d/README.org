@@ -1671,15 +1671,19 @@ The documentation for this one (with examples) is in the source code.
 
 - [[https://www.dr-qubit.org/undo-tree.html][Homepage]]
 
+Update: while I rolled with ~undo-tree~ for a while, I never really
+used its more advanced features. Furthermore, I think it was never
+quite set up correctly. I'm going to use ~undo-fu~ for a while which
+relies more on the built-in undo functionality, just making it simpler
+and act more like I'd expect.
+
 #+BEGIN_SRC emacs-lisp
-(use-package undo-tree
+(use-package undo-fu
   :config
-  (setq evil-undo-system 'undo-tree
-        undo-tree-history-directory-alist
-        `(("." . ,(file-name-concat user-emacs-directory "litter" "undo-tree")))
-        undo-tree-visualizer-diff t)
-  (add-hook 'evil-local-mode-hook 'turn-on-undo-tree-mode)
-  (global-undo-tree-mode))          ; use it everwhere!
+  (setq evil-undo-system 'undo-fu)
+
+  ;; Make redo use Control+r
+  (define-key evil-normal-state-map (kbd "C-r") 'undo-fu-only-redo))
 #+END_SRC
 
 ** Snippets
