@@ -498,9 +498,7 @@ Other cool theme packages I've found.
 
 (use-package humanoid-themes)
 
-(use-package catppuccin-theme
-  :init
-  (load-theme 'catppuccin t))
+(use-package catppuccin-theme)
 
 (use-package lambda-themes
   :ensure (:host github :repo "lambda-emacs/lambda-themes")
@@ -508,14 +506,17 @@ Other cool theme packages I've found.
   (lambda-themes-set-italic-comments t)
   (lambda-themes-set-italic-keywords nil)
   (lambda-themes-set-variable-pitch nil))
+
+;; Recommendation from Jesse Anderson
+; (use-package flatui-theme)
 #+end_src
 
 Here is the theme to load for this session.
 
 #+BEGIN_SRC emacs-lisp
-;; (load-theme 'catppuccin t) ; t treats it as safe
-;; (catppuccin-load-flavor 'macchiato)
-(load-theme 'lambda-light t)
+(load-theme 'catppuccin t) ; t treats it as safe
+(catppuccin-load-flavor 'frappe)
+;; (load-theme 'flatui t)
 #+END_SRC
 
 A good source of themes with previews is [[https://peach-melpa.org/][peach-melpa.org]].
@@ -678,11 +679,11 @@ when formatting with lsp-mode. I'm disabling for now in favor of the
 above.
 
 #+begin_src emacs-lisp :tangle no
-(use-package pragmatapro-lig
-  :straight '(pragmatapro-lig :type git :host github :repo "geolessel/emacs-pragmatapro-ligatures")
-  :init
-  (require 'pragmatapro-lig)
-  (pragmatapro-lig-global-mode))
+;; (use-package pragmatapro-lig
+;;   :straight '(pragmatapro-lig :type git :host github :repo "geolessel/emacs-pragmatapro-ligatures")
+;;   :init
+;;   (require 'pragmatapro-lig)
+;;   (pragmatapro-lig-global-mode))
 #+end_src
 
 The ~pragmatapro-lig~ package has been giving me trouble lately and
@@ -1352,7 +1353,7 @@ good enough exercise that I'll continue using my own for now.
 
 Other one: https://github.com/wendelscardua/ca65-mode
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (require 'ca65-mode)
 (add-to-list 'auto-mode-alist '("\\.asm?$" . ca65-mode))
 #+end_src
@@ -1671,10 +1672,25 @@ Keys:
 #+end_src
 
 ** Undo
-Even I make mistakes. With recent updates and the built-in ~undo-redo~
-package, I've decided to move away from ~undo-tree~. I had some issues
-with that package that I couldn't ever figure out and the reality is
-that I rarely use the extra features that ~undo-tree~ provides.
+Emacs' built-in undo system is pretty powerful but a little hard to
+understand. There are other undo packages that dumb it down at the
+expense of functionality, but *undo-tree* tries to make that power
+come easier, especially with tree visualization.
+
+The documentation for this one (with examples) is in the source code.
+
+- [[https://www.dr-qubit.org/undo-tree.html][Homepage]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package undo-tree
+  :config
+  (setq evil-undo-system 'undo-tree
+        undo-tree-history-directory-alist
+        `(("." . ,(file-name-concat user-emacs-directory "litter" "undo-tree")))
+        undo-tree-visualizer-diff t)
+  (add-hook 'evil-local-mode-hook 'turn-on-undo-tree-mode)
+  (global-undo-tree-mode))          ; use it everwhere!
+#+END_SRC
 
 ** Snippets
 
@@ -1842,7 +1858,7 @@ more of Emacs' own functions and internals.
 
 #+begin_src emacs-lisp
 (use-package corfu
-  :straight (corfu :files (:defaults "extensions/*"))
+  ;; :straight (corfu :files (:defaults "extensions/*"))
   :custom
   (corfu-cycle t)                ;; Enable cycling for corfu-next/previous
   ;; (corfu-auto t)                 ;; Enable auto completion
@@ -1861,9 +1877,10 @@ more of Emacs' own functions and internals.
 ** Code folding
 
 #+begin_src emacs-lisp
-(use-package treesit-fold
-  :config
-  (define-key evil-normal-state-map (kbd "C-f") #'treesit-fold-toggle))
+;; (use-package treesit-fold
+;;   :straight (treesit-fold :type git :host github :repo "emacs-tree-sitter/treesit-fold")
+;;   :config
+;;   (define-key evil-normal-state-map (kbd "C-f") #'treesit-fold-toggle))
 #+end_src
 
 Quick usage tips:
@@ -1956,10 +1973,21 @@ its tree-sitter version.
         ))
 #+end_src
 ** LLM / ChatGPT integration
+*** Homegrown
 Integrate with OpenAI ChatGPT. My own creation. Well, technically, I used ChatGPT to bootstrap it and add features.
 
 #+begin_src emacs-lisp
 (load "geo-chatgpt")
+#+end_src
+
+*** GPTel
+When I previously checked this package out before I started writing
+my own, it didn't quite fit my use cases. It has been updated many
+times since then and I think I can use it regularly now. Plus, I don't
+have to maintain it!
+
+#+begin_src emacs-lisp
+(use-package gptel)
 #+end_src
 
 * General packages
@@ -2650,9 +2678,9 @@ The executable needs to be installed in the project's node_modules."
 ;;
 ;; File: apps/...
 ;; Line: 83
-(add-to-list 'compilation-error-regexp-alist 'elixir-sobelow)
-(add-to-list 'compilation-error-regexp-alist-alist
-             '(elixir-sobelow "^File: \\([^:]+\\)\nLine: \\([0-9]+\\)$" 1 2))
+;; (add-to-list 'compilation-error-regexp-alist 'elixir-sobelow)
+;; (add-to-list 'compilation-error-regexp-alist-alist
+;;              '(elixir-sobelow "^File: \\([^:]+\\)\nLine: \\([0-9]+\\)$" 1 2))
 #+end_src
 ** Hydra menus
 *** Apropros
@@ -3560,27 +3588,6 @@ Doom emacs has a great startup dashboard. Let's use it!
     (setq dashboard-set-footer nil))
 #+END_SRC
 
-** Undo
-Emacs' built-in undo system is pretty powerful
-but a little hard to understand. There are other undo packages that
-dumb it down at the expense of functionality, but *undo-tree* tries
-to make that power come easier, especially with tree visualization.
-
-The documentation for this one (with examples) is in the source code.
-
-- [[https://www.dr-qubit.org/undo-tree.html][Homepage]]
-
-#+BEGIN_SRC emacs-lisp
-(use-package undo-tree
-  :straight t
-  :config
-  (setq evil-undo-system 'undo-tree
-        undo-tree-history-directory-alist
-        `(("." . ,(file-name-concat user-emacs-directory "litter" "undo-tree")))
-        undo-tree-visualizer-diff t)
-  (add-hook 'evil-local-mode-hook 'turn-on-undo-tree-mode)
-  (global-undo-tree-mode))          ; use it everwhere!
-#+END_SRC
 ** Company
 =company-mode= provides auto complete functions.
 
