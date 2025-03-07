@@ -29,8 +29,8 @@ zsh_add_completion_file "nvm" "https://raw.githubusercontent.com/zsh-users/zsh-c
 zsh_add_completion_file "bundle" "https://raw.githubusercontent.com/zsh-users/zsh-completions/master/src/_bundle"
 
 export HISTFILE=$HOME/.zhistory
-export HISTSIZE=1000
-export SAVEHIST=1000
+export HISTSIZE=10000
+export SAVEHIST=10000
 export PAGER='less'
 export LC_ALL='en_US.UTF-8'
 export LANG='en_US.UTF-8'
