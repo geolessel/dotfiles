@@ -41,13 +41,15 @@ Set to `nil' to disable autosaving."
 (defcustom elelem-available-models
   '((openai . gpt-4o)
     (openai . gpt-4o-mini)
+    (anthropic . claude-3-5-sonnet-20241022)
     (anthropic . claude-3-5-sonnet-20240620)
+    (anthropic . claude-3-opus-20240229)
     (anthropic . claude-3-haiku-20240307))
   "The available providers and models for interactions."
   :type '(alist :key-type symbol :key-type symbol)
   :group 'elelem)
 
-(defcustom elelem-current-provider-and-model '(anthropic . claude-3-5-sonnet-20240620)
+(defcustom elelem-current-provider-and-model '(anthropic . claude-3-5-sonnet-20241022)
   "The current provider and model for interactions."
   :type '(alist :key-type symbol :key-type symbol)
   :group 'elelem)
@@ -326,3 +328,5 @@ If DEBUG-P is non-nil, debugging information will be printed."
                    (selection (completing-read "Provider and model: "
                                                (mapcar #'car choices) nil t)))
               (cdr (assoc selection choices)))))
+
+(global-set-key (kbd "C-c a") 'elelem-menu)
