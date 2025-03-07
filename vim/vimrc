@@ -3,6 +3,9 @@
 set nocompatible                  " Must come first because it changes other options.
 filetype off
 
+" Use C-p to open up the fzf as a file finder
+nnoremap <silent> <c-p> :exe "r!fzf"<cr>
+
 " requires a previously-run `git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim`
 " set rtp+=~/.vim/bundle/Vundle.vim
 " call vundle#begin()
