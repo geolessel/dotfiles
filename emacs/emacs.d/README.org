@@ -46,7 +46,7 @@ subprocesses.
 #+end_src
 
 ** Bootstrap =straight= package manager
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
   (defvar bootstrap-version)
   (setq straight-repository-branch "develop")
   (let
@@ -65,10 +65,51 @@ subprocesses.
     (load bootstrap-file nil 'nomessage))
 #+END_SRC
 
+** Use =elpaca= package manager
+
+#+begin_src emacs-lisp
+(defvar elpaca-installer-version 0.8)
+(defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
+(defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
+(defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
+(defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
+                              :ref nil :depth 1
+                              :files (:defaults "elpaca-test.el" (:exclude "extensions"))
+                              :build (:not elpaca--activate-package)))
+(let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
+       (build (expand-file-name "elpaca/" elpaca-builds-directory))
+       (order (cdr elpaca-order))
+       (default-directory repo))
+  (add-to-list 'load-path (if (file-exists-p build) build repo))
+  (unless (file-exists-p repo)
+    (make-directory repo t)
+    (when (< emacs-major-version 28) (require 'subr-x))
+    (condition-case-unless-debug err
+        (if-let* ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
+                  ((zerop (apply #'call-process `("git" nil ,buffer t "clone"
+                                                  ,@(when-let* ((depth (plist-get order :depth)))
+                                                      (list (format "--depth=%d" depth) "--no-single-branch"))
+                                                  ,(plist-get order :repo) ,repo))))
+                  ((zerop (call-process "git" nil buffer t "checkout"
+                                        (or (plist-get order :ref) "--"))))
+                  (emacs (concat invocation-directory invocation-name))
+                  ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
+                                        "--eval" "(byte-recompile-directory \".\" 0 'force)")))
+                  ((require 'elpaca))
+                  ((elpaca-generate-autoloads "elpaca" repo)))
+            (progn (message "%s" (buffer-string)) (kill-buffer buffer))
+          (error "%s" (with-current-buffer buffer (buffer-string))))
+      ((error) (warn "%s" err) (delete-directory repo 'recursive))))
+  (unless (require 'elpaca-autoloads nil t)
+    (require 'elpaca)
+    (elpaca-generate-autoloads "elpaca" repo)
+    (load "./elpaca-autoloads")))
+(add-hook 'after-init-hook #'elpaca-process-queues)
+(elpaca `(,@elpaca-order))
+#+end_src
+
 ** =use-package=
-#+BEGIN_SRC emacs-lisp
-  (straight-use-package 'use-package)
-#+END_SRC
+use-package is now built in to Emacs. Don't install other versions.
 
 *** Syntax example
 #+BEGIN_SRC emacs-lisp :tangle no
@@ -81,15 +122,20 @@ subprocesses.
   )
 #+END_SRC
 
+*** Use =elpaca= unless otherwise specified
+#+begin_src emacs-lisp
+(elpaca elpaca-use-package
+  ;; Enable use-package :ensure support for Elpaca.
+  (elpaca-use-package-mode))
+#+end_src
+
 *** Always install a package if it's not available
-#+BEGIN_SRC emacs-lisp :tangle no
-  (require 'use-package-ensure)
-  (setq use-package-always-ensure t)
+#+BEGIN_SRC emacs-lisp
+(require 'use-package-ensure)
+(setq use-package-always-ensure t)
 #+END_SRC
 
-*** Use =straight= unless otherwise specified
 #+begin_src emacs-lisp
-(setq straight-use-package-by-default t)
 #+end_src
 
 ** Make sure $PATH is correct
@@ -103,16 +149,11 @@ issue.
 
 #+begin_src emacs-lisp
   (use-package exec-path-from-shell
-    :straight t
     :custom
     ;; bring in env vars that rspec-mode needs to run tests correctly
     ;; in pco-box
     (exec-path-from-shell-variables
-     '("PATH"
-       "MANPATH"
-       "MYSQL_PORT_3306_TCP_ADDR"
-       "MYSQL_READER_PORT_3306_TCP_ADDR"
-       "MYSQL_READER_PORT_3306_TCP_PORT"))
+     '("PATH" "MANPATH"))
     :config
     (when (memq window-system '(mac ns x))
       (exec-path-from-shell-initialize)))
@@ -413,15 +454,13 @@ bump up that value a bit.
 Doom emacs has some great themes. Let's use them!
 
 #+BEGIN_SRC emacs-lisp
-(use-package doom-themes
-  :straight t)
+(use-package doom-themes)
 #+END_SRC
 
 I love the monokai theme and would like to use it. Bring it in.
 
 #+begin_src emacs-lisp
-(use-package monokai-theme
-  :straight t)
+(use-package monokai-theme)
 #+end_src
 
 [[https://github.com/motform/stimmung-themes][stimmung-themes]] is a pretty minimal theme in regards to font
@@ -429,42 +468,36 @@ colors. It uses background colors and bold/italics to do a lot of its
 communication.
 
 #+begin_src emacs-lisp
-(use-package stimmung-themes
-  :straight t)
+(use-package stimmung-themes)
 #+end_src
 
 Other cool theme packages I've found.
 
 #+begin_src emacs-lisp
 (use-package tron-legacy-theme
-  :straight t
   :config
   (setq tron-legacy-theme-vidid-cursor t))
 
-(use-package kaolin-themes
-  :straight t)
+(use-package kaolin-themes)
 
-(use-package modus-themes
-  :straight t)
+(use-package modus-themes)
 
 ;; There are tons of options to define for these.
 ;; See https://protesilaos.com/emacs/ef-themes
 (use-package ef-themes
   :config
-  (setq ef-themes-region '(intense))
-  :straight t)
+  (setq ef-themes-region '(intense)))
 
-(use-package base16-theme
-  :ensure t)
+(use-package base16-theme)
 
 (use-package humanoid-themes)
 
 (use-package catppuccin-theme
-  :ensure t
-  :straight t)
+  :init
+  (load-theme 'catppuccin t))
 
 (use-package lambda-themes
-  :straight (:type git :host github :repo "lambda-emacs/lambda-themes")
+  :ensure (:host github :repo "lambda-emacs/lambda-themes")
   :custom
   (lambda-themes-set-italic-comments t)
   (lambda-themes-set-italic-keywords nil)
@@ -653,7 +686,6 @@ requires a lot more config).
 
 #+begin_src emacs-lisp :tangle no
 (use-package ligature :tangle no
-  :straight t
   :config
   ;; 't to use these ligatures in every major mode
   (ligature-set-ligatures 't '("!= !== !=< !≡ !≡≡ ≡/ ≡/≡
@@ -704,8 +736,7 @@ this. According to the docs, "it is like an Emacs-wide version of
 [[https://github.com/purcell/default-text-scale][Github]]
 
 #+begin_src emacs-lisp
-  (use-package default-text-scale
-    :straight t)
+  (use-package default-text-scale)
 #+end_src
 
 ** Modeline
@@ -714,9 +745,8 @@ Doom emacs also provides a pretty slick mode line. Let's use that, too.
 
 #+BEGIN_SRC emacs-lisp
 (use-package doom-modeline
-  :straight t
-  :hook
-  (after-init . doom-modeline-mode)
+  :init
+  (doom-modeline-mode)
   :config
   ;; use unicode as a fallback (instead of ASCII) when not using icons
   (setq doom-modeline-unicode-fallback t)
@@ -753,7 +783,6 @@ Doom emacs also provides a pretty slick mode line. Let's use that, too.
 
 #+BEGIN_SRC emacs-lisp
   (use-package evil-goggles
-    :straight t
     :after (evil)
     :config
     (evil-goggles-mode)
@@ -783,7 +812,6 @@ Alternatives (taken from the =highlight-indent-guides= Github:
 
 #+begin_src emacs-lisp
   (use-package highlight-indent-guides
-    :straight t
     :init
     ;; I would much prefer to use 'character as the method, but
     ;; it appears it has some performance hits when doing so
@@ -794,7 +822,6 @@ Alternatives (taken from the =highlight-indent-guides= Github:
 
 #+begin_src emacs-lisp
   (use-package rainbow-delimiters
-    :straight t
     :config
     (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
     )
@@ -851,7 +878,6 @@ Some alternatives I considered:
 
  #+begin_src emacs-lisp
  (use-package perspective
-   :straight t
    :config
    ; sort perspectives by most recently accessed (others: 'name, 'created)
    (setq persp-sort 'access)
@@ -884,7 +910,7 @@ fine. Without this configuration, org-mode gets really confused and
 starts throwing all sorts of errors.
 
 #+BEGIN_SRC emacs-lisp
-(use-package org :straight (:type built-in))
+;; (use-package org)
 #+END_SRC
 
 Some little things to make =org-mode= better.
@@ -904,7 +930,6 @@ I've also customized which characters the bullets are.
 
 #+begin_src emacs-lisp :tangle no
 (use-package org-bullets
-  :straight t
   :after (org)
   :hook (org-mode . org-bullets-mode)
   :custom
@@ -958,8 +983,8 @@ header variables/options you can provide in a request.
 | =:curl=       | N/A            | =:curl --insecure --compressed= additional arguments for curl                           |
 | =:resolve=    | =--resolve=    | =:resolve example.com:80:127.0.0.1,example.com:443:127.0.0.1=                           |
 
-#+begin_src emacs-lisp
-(use-package ob-http :straight t :after (org))
+#+begin_src emacs-lisp :tangle no
+;; (use-package ob-http :after (org))
 #+end_src
 
 *** Enable babel modes for languages
@@ -967,7 +992,7 @@ header variables/options you can provide in a request.
 (org-babel-do-load-languages 'org-babel-load-languages
                              '((emacs-lisp . t)
                                (shell . t)
-                               (http . t)
+                               ;; (http . t)
                                (ruby . t)))
 #+end_src
 
@@ -975,7 +1000,7 @@ header variables/options you can provide in a request.
 To get the async execution, add the ~:async~ keyword to a code block.
 
 #+begin_src emacs-lisp
-(use-package ob-async :straight t :after (org))
+(use-package ob-async :after (org))
 #+end_src
 
 *** Reduce indentation in source blocks to 0
@@ -1073,7 +1098,7 @@ anything. https://www.reddit.com/r/emacs/comments/1ds3aoy/anyone_else_occasional
 
 #+begin_src emacs-lisp
 (setq org-fold-core-style 'overlays)
-(setq org-element-use-cache nil)
+(setq org-element-use-cache 0)
 #+end_src
 ** Evil
 
@@ -1081,17 +1106,17 @@ Make it like vim!
 
 #+BEGIN_SRC emacs-lisp
 (use-package evil
-  :straight t
-  ; :after (evil-leader) ; must be after to get leader available in initial buffers
+  :ensure t
+  ;; :wait t
+  ;; :after (evil-leader) ; must be after to get leader available in initial buffers
   :init
   (setq evil-want-integration t)
   (setq evil-want-keybinding nil)
   (setq evil-want-C-u-scroll t) ; use Ctrl-U to scroll up
-  (setq evil-undo-system 'undo-redo) ; use built-in undo/redo
   :config
-  ; use evil-mode everywhere
+  ;; use evil-mode everywhere
   (evil-mode 1)
-  ; use C-g to exit insert mode reinforcing Emacs-ism
+  ;; use C-g to exit insert mode reinforcing Emacs-ism
   (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state))
 #+END_SRC
 
@@ -1102,7 +1127,6 @@ cover properly by default, such as help-mode, M-x calendar, Eshell and more.
 
 #+BEGIN_SRC emacs-lisp
   (use-package evil-collection
-    :straight t
     ; :after (evil evil-leader)
     :init
     (setq evil-want-keybinding nil)
@@ -1114,7 +1138,6 @@ cover properly by default, such as help-mode, M-x calendar, Eshell and more.
 
 #+begin_src emacs-lisp
   (use-package yaml-mode
-    :straight t
     :config
     (add-to-list 'auto-mode-alist '("\\.ya?ml$" . yaml-mode))
     )
@@ -1151,8 +1174,7 @@ Some options that may be worth fiddling with in the future:
 [[https://github.com/pezra/rspec-mode][Github]]
 
 #+begin_src emacs-lisp
-  (use-package rspec-mode
-    :straight t)
+  (use-package rspec-mode)
 #+end_src
 *** stree mode
 Planning Center has a gem for auto-formatting and style called
@@ -1193,7 +1215,7 @@ Default keybindings:
 - ~C-c C-d~: Decrement the number at point
 
 #+begin_src emacs-lisp
-  (use-package json-mode :straight t)
+  (use-package json-mode)
 #+end_src
 
 ** RJSX
@@ -1214,7 +1236,6 @@ warnings and errors that are really annoying since we use
 
 #+begin_src emacs-lisp
 (use-package rjsx-mode
-  :straight t
   :config
   (with-eval-after-load 'rjsx-mode
     (define-key rjsx-mode-map "<" nil)
@@ -1229,7 +1250,6 @@ warnings and errors that are really annoying since we use
 
 #+begin_src emacs-lisp
 (use-package web-mode
-  :straight t
   :config
   (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
   (setq-default web-mode-code-indent-offset 2))
@@ -1252,11 +1272,10 @@ as the preferred checker even in typescript files.
 ** Slim
 
 #+begin_src emacs-lisp
-  (use-package slim-mode
-    :straight t)
+  (use-package slim-mode)
 #+end_src
 
-** Elixir
+* Elixir
 
 #+begin_src emacs-lisp
 (defun geo/elixir-format-buffer ()
@@ -1283,7 +1302,6 @@ as the preferred checker even in typescript files.
 
 #+begin_src emacs-lisp :tangle no
 (use-package elixir-mode
-  :straight t
   :init
   (add-to-list 'auto-mode-alist '("\\.heex\\'" . elixir-mode))
   :hook (elixir-mode . (lambda () (add-hook
@@ -1302,7 +1320,6 @@ To build the image from the buffer, use ~C-c C-b~.
 
 #+begin_src emacs-lisp
   (use-package dockerfile-mode
-    :straight t
     :config
     (add-to-list 'auto-mode-alist '("Dockerfile\\'" . dockerfile-mode)))
 #+end_src
@@ -1312,8 +1329,7 @@ To build the image from the buffer, use ~C-c C-b~.
 files.
 
 #+begin_src emacs-lisp
-  (use-package docker-compose-mode
-    :straight t)
+  (use-package docker-compose-mode)
 #+end_src
 
 ** Assembly
@@ -1342,7 +1358,6 @@ A Common Lisp dev environment build on top of Emacs.
 
 #+begin_src emacs-lisp
 (use-package slime
-  :straight t
   :config
   (setq inferior-lisp-program "sbcl"))
 #+end_src
@@ -1432,7 +1447,6 @@ target and wham! you have teleported there.
 
 #+BEGIN_SRC emacs-lisp
 (use-package evil-easymotion
-      :straight t
       :after (evil)
       :config
 (evilem-default-keybindings "M")
@@ -1448,7 +1462,6 @@ you type.
 
 #+BEGIN_SRC emacs-lisp
 (use-package evil-snipe
-      :straight t
       :after (evil)
       :config
   (evil-snipe-mode +1)
@@ -1470,7 +1483,6 @@ the containing function, etc., etc.
 
 #+begin_src emacs-lisp
 (use-package expand-region
-  :straight t
   :bind ("C-=" . er/expand-region))
 #+end_src
 
@@ -1505,7 +1517,6 @@ which represent numeric arguments to send to interactive functions.
 
 #+begin_src emacs-lisp
   (use-package winum
-    :straight t
     :init
     (setq winum-keymap
           (let ((map (make-sparse-keymap)))
@@ -1540,7 +1551,6 @@ for =project=.
 
 #+BEGIN_SRC emacs-lisp
   (use-package evil-nerd-commenter
-    :straight t
     :after evil
     :bind (
       ("C-c c ;" . evilnc-comment-or-uncomment-lines)
@@ -1557,7 +1567,6 @@ align with align.el's default rules for the active major mode.
 
 #+BEGIN_SRC emacs-lisp
   (use-package evil-lion
-    :straight t
     :bind
     (:map evil-normal-state-map
           ("g l " . evil-lion-left)
@@ -1587,7 +1596,6 @@ It's easiest to explain with examples.
 
 #+BEGIN_SRC emacs-lisp
   (use-package evil-surround
-    :straight t
     :after evil
     :config
     (global-evil-surround-mode 1))
@@ -1602,7 +1610,6 @@ It's easiest to explain with examples.
 
 #+BEGIN_SRC emacs-lisp
   (use-package magit
-    :straight t
     :bind (
       ("C-c g" . magit-status)))
 #+END_SRC
@@ -1616,7 +1623,6 @@ until a save has occurred.
 
 #+BEGIN_SRC emacs-lisp
   (use-package diff-hl
-    :straight t
     :config
     (global-diff-hl-mode))
 #+END_SRC
@@ -1641,7 +1647,6 @@ Keys:
 
 #+begin_src emacs-lisp
   (use-package git-timemachine
-    :straight t
     :config
     (with-eval-after-load 'git-timemachine
       (evil-make-overriding-map git-timemachine-mode-map 'normal)
@@ -1674,7 +1679,6 @@ Stuff I forget and need to be reminded of regularly:
 
 #+begin_src emacs-lisp
   (use-package yasnippet
-    :straight t
     :config
     (yas-global-mode 1)
     )
@@ -1695,7 +1699,6 @@ can utilize that server to make fixes in our javascript files.
 (defvar geo/eslint_d-exec-path "/usr/local/bin")
 
 (use-package eslintd-fix
-  :straight t
   :config
   (add-hook 'js-mode-hook 'eslintd-fix-mode)
   (add-hook 'typescript-mode-hook 'eslintd-fix-mode)
@@ -1712,8 +1715,7 @@ tools specific to the language I'm writing. To that end, [[https://github.com/js
 format js/ts code (and some others).
 
 #+begin_src emacs-lisp
-(use-package prettier
-  :straight t)
+(use-package prettier)
 #+end_src
 
 ** Syntax checking
@@ -1743,7 +1745,6 @@ since it is enabled for Ruby buffers by default.
 
 #+begin_src emacs-lisp
 (use-package flycheck
-  :straight t
   :config
   (setq-default flycheck-highlighting-mode 'lines)
   (setq flycheck-global-modes '(not emacs-lisp-mode))
@@ -1761,7 +1762,6 @@ it'll help if the whole status line was colored.
 
 #+begin_src emacs-lisp
   (use-package flycheck-color-mode-line
-    :straight t
     :after (flycheck)
     :config
     (eval-after-load "flycheck"
@@ -1776,7 +1776,6 @@ messages inline with =flycheck-inline=.
 
 #+begin_src emacs-lisp
   (use-package flycheck-inline
-    :straight t
     :after (flycheck)
     :config
     (with-eval-after-load 'flycheck
@@ -1826,7 +1825,6 @@ Some nice ui-related things including:
 
 #+begin_src emacs-lisp
 (use-package lsp-ui
-  :straight t
   :bind
   (("C-s-<return>" . lsp-ui-doc-focus-frame))
   :config
@@ -1857,7 +1855,6 @@ documentation on the thing under my cursor.
 
 #+begin_src emacs-lisp
 (use-package dash-at-point
-  :straight t
   :bind
   ("C-c d" . dash-at-point-with-docset)
   ("C-c D" . dash-at-point))
@@ -1892,7 +1889,6 @@ more of Emacs' own functions and internals.
 
 #+begin_src emacs-lisp
 (use-package treesit-fold
-  :straight (treesit-fold :type git :host github :repo "emacs-tree-sitter/treesit-fold")
   :config
   (define-key evil-normal-state-map (kbd "C-f") #'treesit-fold-toggle))
 #+end_src
@@ -2007,7 +2003,6 @@ Using *which-key*.
 
 #+BEGIN_SRC emacs-lisp
   (use-package which-key
-    :straight t
     :config
     (which-key-mode))
 #+END_SRC
@@ -2021,7 +2016,6 @@ provides much more contextual information.
 
 #+BEGIN_SRC emacs-lisp
 (use-package helpful
-  :straight t
   :bind (
     ; rebind help keys to use helpful
     ("C-h f" . helpful-callable)
@@ -2042,7 +2036,6 @@ Emacs.
 
 #+begin_src emacs-lisp
   (use-package ag
-    :straight t
     :config
     (setq ag-highlight-search t) ; highlight results
     )
@@ -2056,19 +2049,8 @@ philosophy of reusing as much as built-in Emacs as possible.
 #+begin_src emacs-lisp
 ;; we need to tell straight that these packages are bundled together
 ;; see https://github.com/raxod502/straight.el/issues/819
-(straight-use-package '(vertico
-  :files (:defaults "extensions/*")
-  :includes (vertico-buffer
-             vertico-directory
-             vertico-flat
-             vertico-indexed
-             vertico-mouse
-             vertico-quick
-             vertico-repeat
-             vertico-reverse)))
-
 (use-package vertico
-  :straight t
+  ;;:files (:defaults "extensions/*")
   :init
   (vertico-mode)
   (setq
@@ -2095,6 +2077,7 @@ deletes the current directory or file from the path.
 
 (use-package vertico-directory
   :after vertico
+  :ensure nil
   :bind
   (:map minibuffer-local-map
         ("s-<backspace>" . vertico-directory-delete-entry)))
@@ -2112,7 +2095,6 @@ prefixes. By default, regexp and literal matches are enabled."
 
 #+begin_src emacs-lisp
 (use-package orderless
-  :straight t
   :custom
   (completion-styles '(orderless partial-completion basic))
   (completion-category-defaults nil)
@@ -2130,18 +2112,15 @@ prefixes. By default, regexp and literal matches are enabled."
 Vertico will use the history to do initial sorting.
 
 #+begin_src emacs-lisp
-(use-package savehist
-  :straight t
-  :init
-  (setq savehist-additional-variables
-        ;; By default, the built-in `savehist-mode' only keeps a
-        ;; record of minibuffer histories.  With the variable
-        ;; `savehist-additional-variables' we can make `savehist-mode'
-        ;; keep a record of any variable we want, so that it persists
-        ;; between Emacs sessions. Let's also store the `kill-ring'
-        ;; and the `register-alist'.
-        '(register-alist kill-ring))
-  (savehist-mode t))
+(setq savehist-additional-variables
+      ;; By default, the built-in `savehist-mode' only keeps a
+      ;; record of minibuffer histories.  With the variable
+      ;; `savehist-additional-variables' we can make `savehist-mode'
+      ;; keep a record of any variable we want, so that it persists
+      ;; between Emacs sessions. Let's also store the `kill-ring'
+      ;; and the `register-alist'.
+      '(register-alist kill-ring))
+(savehist-mode t)
 #+end_src
 
 *** Use marginalia to provide more context/information
@@ -2152,7 +2131,6 @@ documentation, bound keyboard shortcuts, etc.
 
 #+begin_src emacs-lisp
 (use-package marginalia
-  :straight t
   :init
   (marginalia-mode)
   :bind
@@ -2199,9 +2177,7 @@ documentation, bound keyboard shortcuts, etc.
 - [[https://github.com/abo-abo/hydra][Github]]
 
 #+begin_src emacs-lisp
- (use-package hydra
-   :straight t
-   )
+ (use-package hydra)
 #+end_src
 
 *pretty-hydra* makes it easy to define pretty hydras! It takes
@@ -2211,9 +2187,7 @@ nice docstrings.
 - [[https://github.com/jerrypnz/major-mode-hydra.el#pretty-hydra][Github]]
 
 #+begin_src emacs-lisp
- (use-package pretty-hydra
-   :straight t
-   )
+ (use-package pretty-hydra)
 #+end_src
 
 *** Take actions via embark
@@ -2222,7 +2196,6 @@ nice docstrings.
 
 #+begin_src emacs-lisp
 (use-package embark
-  :straight t
   :ensure t
   :init
   ;; replace the key help with a completing-read interface
@@ -2246,7 +2219,6 @@ also want the ~embark-consult~ package.
 
 #+begin_src emacs-lisp
 (use-package embark-consult
-  :straight t
   :ensure t
   :after (embark consult)
   :demand t
@@ -2264,7 +2236,6 @@ I've heard that *vterm* is the bee's knees.
 
 #+begin_src emacs-lisp
   (use-package vterm
-    :straight t
     :init
     (setq vterm-always-compile-module t))
 #+end_src
@@ -2706,6 +2677,7 @@ The executable needs to be installed in the project's node_modules."
 *** Apropros
 
 #+begin_src emacs-lisp
+(with-eval-after-load 'hydra
   (defhydra geo/hydra-apropos-menu (:color blue :hint nil)
 "
 _a_propos        _c_ommand
@@ -2719,11 +2691,12 @@ _i_nfo       valu_e_"
     ("c" apropos-command)
     ("l" apropos-library)
     ("u" apropos-user-option)
-    ("e" apropos-value))
+    ("e" apropos-value)))
 #+end_src
 
 *** Workspaces
 #+begin_src emacs-lisp
+(with-eval-after-load 'pretty-hydra
   (pretty-hydra-define geo/hydra-workspace-menu (:exit t :quit-key "q")
     ("General"
      (("w" persp-switch "Switch/New")
@@ -2740,7 +2713,7 @@ _i_nfo       valu_e_"
      "State Mgmt"
      (("W" persp-state-save "Write to disk")
       ("l" persp-state-load "Load from disk"))
-     ))
+     )))
 #+end_src
 
 *** Registers/Marks
@@ -3255,7 +3228,7 @@ because I might enable them again at any time.
 ** =emacs-font-size=
 
 #+BEGIN_SRC emacs-lisp
-  (straight-use-package
+  (use-package
     '(font-size :type git :host github :repo "nabeix/emacs-font-size")
     :config
     (font-size-init 18)
@@ -3281,7 +3254,6 @@ Better? More graphical at least.
 
 #+BEGIN_SRC emacs-lisp
   (use-package ivy-posframe
-    :straight t
     :after (ivy))
 #+END_SRC
 
@@ -3298,7 +3270,6 @@ fuzzy. From https://oremacs.com/2016/01/06/ivy-flx/.
 
 #+BEGIN_SRC emacs-lisp
   (use-package flx
-    :straight t
     :after (ivy counsel)
     :config
     (setq ivy-re-builders-alist
@@ -3318,7 +3289,6 @@ even better with ascii, unicode, and/or github style emoji support.
 
 #+BEGIN_SRC emacs-lisp
   (use-package emojify
-    :straight t
     :init
     ; only unicode and github (not ascii [ e.g. :-) ])
     (setq emojify-set-emoji-styles '(unicode github))
@@ -3341,7 +3311,6 @@ might re-enable it at some point.
 
 #+begin_src emacs-lisp
   (use-package forge
-    :straight t
     :after magit
     )
 #+end_src
@@ -3405,7 +3374,6 @@ Settings:
 
 #+begin_src emacs-lisp
   (use-package format-all
-    :straight t
     :config
     ; autoformaat programming buffers
     (add-hook 'prog-mode-hook 'format-all-mode)
@@ -3426,9 +3394,7 @@ symbols through ~lsp-ivy-workspace-symbol~ and
 [[https://github.com/emacs-lsp/lsp-ivy][Github]]
 
 #+begin_src emacs-lisp
-(use-package lsp-ivy
-    :straight t
-    )
+(use-package lsp-ivy)
 #+end_src
 
 ** Select from a list with Ivy and Counsel
@@ -3441,7 +3407,6 @@ is provided in the =counsel= package along with =swiper=.
 
 #+BEGIN_SRC emacs-lisp
   (use-package counsel
-    :straight t
     :config
     (ivy-mode t)      ; enable ivy-mode everywhere
     (counsel-mode t)  ; enable counsel mode replacements
@@ -3459,7 +3424,6 @@ You can defined your own transformers too.
 
 #+BEGIN_SRC emacs-lisp
   (use-package ivy-rich
-    :straight t
     :after (ivy counsel)
     :config
     (ivy-rich-mode 1)
@@ -3528,7 +3492,6 @@ Some tips:
 
 #+BEGIN_SRC emacs-lisp
   (use-package amx
-    :straight t
     ;; :after (ivy counsel)
     :config
     (amx-mode t))   ; it auto-detects ivy-mode
@@ -3544,7 +3507,6 @@ Keybindings are in the personal keybindings section.
 
 #+begin_src emacs-lisp
   (use-package popper
-    :straight t
     :init
     ;; define which buffers I want to consider pop-ups
     (setq popper-reference-buffers
@@ -3571,9 +3533,7 @@ Keybindings are in the personal keybindings section.
 [[https://github.com/ericdanan/counsel-projectile][Github]]
 
 #+begin_src emacs-lisp
-  (use-package counsel-projectile
-    :straight t
-    )
+  (use-package counsel-projectile)
 #+end_src
 
 ** Use *projectile* to manage projects.
@@ -3583,7 +3543,6 @@ Keybindings are in the personal keybindings section.
 
 #+BEGIN_SRC emacs-lisp
   (use-package projectile
-    :straight t
     :bind-keymap
     ("C-c p" . projectile-command-map)
     :config
@@ -3599,7 +3558,6 @@ We can use *ibuffer-projectile* to do that.
 
 #+BEGIN_SRC emacs-lisp
   (use-package ibuffer-projectile
-    :straight t
     :config
     (add-hook 'ibuffer-hook
       (lambda ()
@@ -3614,7 +3572,6 @@ Doom emacs has a great startup dashboard. Let's use it!
 
 #+BEGIN_SRC emacs-lisp :tangle no
   (use-package dashboard
-    :straight t
     :config
     (dashboard-setup-startup-hook)
     ; set the title
@@ -3663,7 +3620,6 @@ The documentation for this one (with examples) is in the source code.
 
 #+begin_src emacs-lisp
 (use-package company
-  :straight t
   :init
   (add-hook 'after-init-hook 'global-company-mode)
   :config
@@ -3677,7 +3633,6 @@ The documentation for this one (with examples) is in the source code.
 
 #+begin_src emacs-lisp
   (use-package company-box
-    :straight t
     :after company
     :hook (company-mode . company-box-mode))
 #+end_src

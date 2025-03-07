@@ -7,10 +7,10 @@
 (setq gc-cons-threshold most-positive-fixnum)
 
 ;; In Emacs 27+, package initialization occurs before `user-init-file' is
-;; loaded, but after `early-init-file'. Doom handles package initialization, so
+;; loaded, but after `early-init-file'. elpaca handles package initialization, so
 ;; we must prevent Emacs from doing it early!
-(setq package-enable-at-startup nil)
-(advice-add #'package--ensure-init-file :override #'ignore)
+;; (setq package-enable-at-startup nil)
+;; (advice-add #'package--ensure-init-file :override #'ignore)
 
 ;; Prevent the glimpse of un-styled Emacs by disabling these UI elements early.
 (push '(menu-bar-lines . 0) default-frame-alist)
@@ -33,5 +33,4 @@
 ;; (setq comp-deferred-compilation nil)
 
 ;; disable the default Emacs package manager
-;; https://github.com/radian-software/straight.el#getting-started
 (setq package-enable-at-startup nil)
