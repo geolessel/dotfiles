@@ -135,7 +135,13 @@ use-package is now built in to Emacs. Don't install other versions.
 (setq use-package-always-ensure t)
 #+END_SRC
 
+*** Transient
+Make sure that transient is loaded early so magit will use it and not
+the built-in verison.
+
+See https://github.com/magit/magit/issues/5329
 #+begin_src emacs-lisp
+(use-package transient :ensure (:wait t))
 #+end_src
 
 ** Make sure $PATH is correct
@@ -1183,7 +1189,7 @@ executable named ~stree~. I wrote a minor mode that utilizes the gem
 for auto-formatting Ruby files. It is in a local folder and I just
 need to require it here to make it available.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (require 'stree-mode)
 #+end_src
 
@@ -1280,24 +1286,26 @@ as the preferred checker even in typescript files.
 #+begin_src emacs-lisp
 (defun geo/elixir-format-buffer ()
   (interactive)
-  (lsp-format-buffer))
+  (eglot-format))
 #+end_src
 
 #+begin_src emacs-lisp
 (use-package heex-ts-mode
-  :straight t
-  :hook (heex-ts-mode . (lambda () (add-hook
-                                    'before-save-hook
-                                    'geo/elixir-format-buffer
-                                    nil
-                                    t))))
+  :hook ((elixir-ts-mode . eglot-ensure)
+         (heex-ts-mode . (lambda () (add-hook
+                                     'before-save-hook
+                                     'geo/elixir-format-buffer
+                                     nil
+                                     t)))))
 (use-package elixir-ts-mode
-  :straight t
-  :hook (elixir-ts-mode . (lambda () (add-hook
-                                   'before-save-hook
-                                   'geo/elixir-format-buffer
-                                   nil
-                                   t))))
+  :custom
+  (lsp-elixir-server-command '("/Users/geo/src/lexical/_build/dev/package/lexical/bin/start_lexical.sh"))
+  :hook ((elixir-ts-mode . eglot-ensure)
+         (elixir-ts-mode . (lambda () (add-hook
+                                       'before-save-hook
+                                       'geo/elixir-format-buffer
+                                       nil
+                                       t)))))
 #+end_src
 
 #+begin_src emacs-lisp :tangle no
@@ -1397,7 +1405,15 @@ copy of clang.format.el from https://github.com/llvm-mirror/clang/blob/master/to
 #+end_src
 
 ** Markdown
+*** Regular markdown-mode
+
+#+begin_src emacs-lisp
+(use-package markdown-mode
+  :mode ("\\.md\\'" . markdown-mode))
+#+end_src
+
 *** Treesitter markdown-ts-mode
+
 Use markdown-ts-mode. Currently disabled.
 
 #+begin_src emacs-lisp :tangle no
@@ -1783,70 +1799,27 @@ messages inline with =flycheck-inline=.
 #+end_src
 
 ** Documentation and code completion
-*** lsp-mode
-lsp for language server protocol features
+*** eglot
+eglot is now built-in to Emacs, so let's use that instead of ~lsp-mode~.
 
 #+begin_src emacs-lisp
-(use-package lsp-mode
-  :straight t
-  :custom
-  (lsp-completion-provider :none) ;; we use Corfu
-  :init
-  (setq lsp-keymap-prefix "C-c l")
-  (add-to-list 'exec-path "~/.elixir-ls")
-  (defun geo/lsp-mode-setup-completion ()
-    (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
-          '(orderless))) ;; configure orderless
-  :hook
-  (
-   ; (elixir-mode . lsp-deferred)
-   (elixir-ts-mode . lsp)
-   (heex-ts-mode . lsp)
-   (typescript-ts-mode . lsp-deferred)
-   (tsx-ts-mode . lsp-deferred)
-   (js-ts-mode . lsp-deferred)
-   (c-ts-mode . lsp-deferred)
-   (lsp-mode . lsp-enable-which-key-integration)
-   (lsp-completion-mode . geo/lsp-mode-setup-completion))
-  :commands (lsp lsp-deferred))
+;; (fset #'jsonrpc--log-event #'ignore)
+;; (setq eglot-events-buffer-size 0)
+;; (setq eglot-sync-connect nil)
+;; (setq eglot-connect-timeout nil)
+;; (setq eglot-autoshutdown t)
+;; (setq eglot-send-changes-idle-time 3)
+;; (setq flymake-no-changes-timeout 5)
+;; (setq eldoc-echo-area-use-multiline-p nil)
 #+end_src
-
-*** lsp-ui
-
-Some nice ui-related things including:
-
-- =lsp-ui-sideline=
-- =lsp-ui-peek=
-- =lsp-ui-doc=
-- =lsp-ui-imenu=
-
-[[https://emacs-lsp.github.io/lsp-ui/#intro][Github]]
-[[https://emacs-lsp.github.io/lsp-mode/tutorials/how-to-turn-off/][A good guide on which ui element is what]]
 
 #+begin_src emacs-lisp
-(use-package lsp-ui
-  :bind
-  (("C-s-<return>" . lsp-ui-doc-focus-frame))
-  :config
-  (add-hook 'lsp-ui-doc-frame-hook 'evil-normal-state)
-  (define-key evil-normal-state-map (kbd "M-RET") 'lsp-ui-doc-glance)
-  (define-key evil-normal-state-map (kbd "C-M-<return>")
-              #'(lambda ()
-                  (interactive)
-                  (lsp-ui-doc-toggle)
-                  (message "C-s-<return> to focus in documentation")))
-  (setq lsp-ui-doc-enable nil
-        lsp-ui-sideline-enable t
-        lsp-ui-sideline-show-hover nil
-        lsp-ui-sideline-show-code-actions nil
-        lsp-ui-sideline-show-symbol nil
-        lsp-ui-sideline-show-diagnostics t
-        lsp-ui-doc-max-height 80
-        lsp-ui-peek-show-directory nil
-        lsp-headerline-breadcrumb-enable nil
-        lsp-modeline-code-actions-enable t))
+; (use-package eglot-booster
+;   :ensure t
+;   :straight (:type git :host github :repo "jdtsmith/eglot-booster")
+; 	:after eglot
+; 	:config	(eglot-booster-mode))
 #+end_src
-
 
 *** Dash
 
