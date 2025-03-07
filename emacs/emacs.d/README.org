@@ -2394,7 +2394,8 @@ itself.
 ** Buffer/window management
 *** Delete other windows
 #+begin_src emacs-lisp
-(define-key evil-normal-state-map (kbd "s-q") #'delete-other-windows)
+(with-eval-after-load 'evil
+  (define-key evil-normal-state-map (kbd "s-q") #'delete-other-windows))
 #+end_src>
 
 *** Split a full window horizontally
@@ -2447,7 +2448,8 @@ horizontally."
   (interactive)
   (split-window (window-parent (selected-window))))
 
-(define-key evil-normal-state-map (kbd "C-w S") #'geo/window-split-full)
+(with-eval-after-load 'evil
+  (define-key evil-normal-state-map (kbd "C-w S") #'geo/window-split-full))
 #+end_src
 
 ** File management
@@ -2509,13 +2511,17 @@ vim's keybindings are for ~/~ to search the buffer. I do like that
 keybinding but I would like to upgrade the evil-search function to get a
 nice prompt.
 
+For something new, I'm going to use ~consult-line~ instead.
+
 #+begin_src emacs-lisp
 (defun geo/search-with-prompt ()
   (interactive)
   (let ((search-string (read-regexp "Search regex: ")))
     (evil-search search-string t t)))
 
-(define-key evil-normal-state-map (kbd "/") #'geo/search-with-prompt)
+;; (define-key evil-normal-state-map (kbd "/") #'geo/search-with-prompt)
+(with-eval-after-load 'evil
+ (define-key evil-normal-state-map (kbd "/") #'consult-line))
 #+end_src
 
 *** Search with =consult-ripgrep=
@@ -2533,7 +2539,8 @@ entire project. To help seed the search, use ~C-?~ on a word to open
      (list "" dir)))
   (consult-ripgrep dirname seed-word))
 
-(define-key evil-normal-state-map (kbd "C-/") 'geo/consult-ripgrep)
+(with-eval-after-load 'evil
+  (define-key evil-normal-state-map (kbd "C-/") 'geo/consult-ripgrep))
 #+end_src
 
 I'd also like to seed =consult-ripgrep= with the word underneath the
@@ -2545,7 +2552,8 @@ cursor. I can do that by getting the word with ~thing-at-point~.
     (let ((seed-word (thing-at-point 'word t)))
     (geo/consult-ripgrep seed-word)))
 
-(define-key evil-normal-state-map (kbd "C-?") 'geo/consult-ripgrep-thing-at-point)
+(with-eval-after-load 'evil
+  (define-key evil-normal-state-map (kbd "C-?") 'geo/consult-ripgrep-thing-at-point))
 #+end_src
 
 *** Open up this config file for editing
@@ -2691,46 +2699,49 @@ _i_nfo       valu_e_"
 
 *** Registers/Marks
 #+begin_src emacs-lisp
-(pretty-hydra-define geo/hydra-registers-menu (:exit t :quit-key "q")
-  ("Registers"
-   (("r" consult-register "Select from list")
-    ("s" consult-register-store "Store"))
-   "Marks"
-   (("m" consult-mark "Jump to local mark")
-    ("M" consult-global-mark "Jump to global mark"))))
+(with-eval-after-load 'pretty-hydra
+  (pretty-hydra-define geo/hydra-registers-menu (:exit t :quit-key "q")
+    ("Registers"
+     (("r" consult-register "Select from list")
+      ("s" consult-register-store "Store"))
+     "Marks"
+     (("m" consult-mark "Jump to local mark")
+      ("M" consult-global-mark "Jump to global mark")))))
 #+end_src
 
 *** Searching
 #+begin_src emacs-lisp
-(pretty-hydra-define geo/hydra-search-menu (:exit t :quit-key "q")
-  ("Local"
-   (("l" consult-line "Show matching lines")
-    ("L" consult-line-multi "Show matching lines across buffers")
-    ("f" consult-focus-lines "Hide lines not matching")
-    ("m" consult-multi-occur "Search/Select multiple lines")
-    ("i" consult-imenu "imenu"))
-   "External"
-    (("g" consult-grep "Grep")
-     ("r" geo/consult-ripgrep "Ripgrep")
-     ("G" consult-git-grep "git Grep")
-     ("F" consult-find "Find file"))))
+(with-eval-after-load 'pretty-hydra
+  (pretty-hydra-define geo/hydra-search-menu (:exit t :quit-key "q")
+    ("Local"
+     (("l" consult-line "Show matching lines")
+      ("L" consult-line-multi "Show matching lines across buffers")
+      ("f" consult-focus-lines "Hide lines not matching")
+      ("m" consult-multi-occur "Search/Select multiple lines")
+      ("i" consult-imenu "imenu"))
+     "External"
+      (("g" consult-grep "Grep")
+       ("r" geo/consult-ripgrep "Ripgrep")
+       ("G" consult-git-grep "git Grep")
+       ("F" consult-find "Find file")))))
 #+end_src
 
 *** Buffers/Files
 #+begin_src emacs-lisp
-(pretty-hydra-define geo/hydra-buffer-menu (:exit t :quit-key "q")
-  ("Buffers"
-    (("b" consult-buffer "Switch (globally)")
-     ("B" consult-buffer-other-window "Switch (other window)")
-     ("n" evil-buffer-new "New")
-     ("R" rename-buffer "Rename buffer")
-     ("k" kill-this-buffer "Kill this buffer")
-     ("K" geo/kill-other-buffers "Kill all other buffers"))
-   "Files"
-     (("f r" geo/rename-file-and-visit "Rename this file"))
-   "Views/Modes"
-     (("i" persp-ibuffer "ibuffer (within workspace)")
-      ("I" ibuffer "ibuffer (globally)"))))
+(with-eval-after-load 'pretty-hydra
+  (pretty-hydra-define geo/hydra-buffer-menu (:exit t :quit-key "q")
+    ("Buffers"
+      (("b" consult-buffer "Switch (globally)")
+       ("B" consult-buffer-other-window "Switch (other window)")
+       ("n" evil-buffer-new "New")
+       ("R" rename-buffer "Rename buffer")
+       ("k" kill-current-buffer "Kill this buffer")
+       ("K" geo/kill-other-buffers "Kill all other buffers"))
+     "Files"
+       (("f r" geo/rename-file-and-visit "Rename this file"))
+     "Views/Modes"
+       (("i" persp-ibuffer "ibuffer (within workspace)")
+        ("I" ibuffer "ibuffer (globally)")))))
 #+end_src
 
 *** Preferences
@@ -2902,87 +2913,59 @@ add no extra space."
 
 **** The hydra menu
 #+begin_src emacs-lisp
-(pretty-hydra-define geo/hydra-prefs-menu (:quit-key "q")
-  ("Display"
-   (("n" display-line-numbers-mode "line number" :toggle t)
-    ("w" whitespace-mode "whitespace" :toggle t)
-    ("h" global-hl-line-mode "highlight line" :toggle t)
-    ("H" highlight-indent-guides-mode "highlight indents" :toggle t)
-    ("+" default-text-scale-increase "increase font size")
-    ("-" default-text-scale-decrease "decrease font size"))
-   ""
-   (("d" diff-hl-mode "diff-hl" :toggle t)
-    ("c" global-display-fill-column-indicator-mode "show fill column" :toggle t)
-    (")" geo/toggle-show-paren-style "show-paren style")
-    ("t" geo/toggle-show-trailing-whitespace "trailing whitespace" :toggle show-trailing-whitespace)
-    ("p" geo/set-internal-frame-padding "set internal padding")
-    ("l" geo/set-line-spacing "set line spacing"))
-   "Editing"
-   (("e" electric-pair-mode "electric-pair" :toggle t)
-    ("f" auto-fill-mode "auto-fill" :toggle auto-fill-function))
-   "Modeline"
-   (("m c" column-number-mode "column number" :toggle t)
-    ("m l" line-number-mode "line number" :toggle t)
-    ("m e" geo/doom-modeline-toggle-encoding "encoding" :toggle doom-modeline-buffer-encoding)
-    ("m w" geo/doom-modeline-toggle-word-count "word count" :toggle doom-modeline-enable-word-count)
-    ("m m" geo/doom-modeline-toggle-minor-modes "minor modes" :toggle doom-modeline-minor-modes)
-    ("m p" geo/persp-mode-toggle-modestring "perspective list" :toggle persp-show-modestring)
-    ("m t" geo/cycle-display-time-mode "display time" :toggle display-time-mode))))
+(with-eval-after-load 'pretty-hydra
+  (pretty-hydra-define geo/hydra-prefs-menu (:quit-key "q")
+    ("Display"
+     (("n" display-line-numbers-mode "line number" :toggle t)
+      ("w" whitespace-mode "whitespace" :toggle t)
+      ("h" global-hl-line-mode "highlight line" :toggle t)
+      ("H" highlight-indent-guides-mode "highlight indents" :toggle t)
+      ("+" default-text-scale-increase "increase font size")
+      ("-" default-text-scale-decrease "decrease font size"))
+     ""
+     (("d" diff-hl-mode "diff-hl" :toggle t)
+      ("c" global-display-fill-column-indicator-mode "show fill column" :toggle t)
+      (")" geo/toggle-show-paren-style "show-paren style")
+      ("t" geo/toggle-show-trailing-whitespace "trailing whitespace" :toggle show-trailing-whitespace)
+      ("p" geo/set-internal-frame-padding "set internal padding")
+      ("l" geo/set-line-spacing "set line spacing"))
+     "Editing"
+     (("e" electric-pair-mode "electric-pair" :toggle t)
+      ("f" auto-fill-mode "auto-fill" :toggle auto-fill-function))
+     "Modeline"
+     (("m c" column-number-mode "column number" :toggle t)
+      ("m l" line-number-mode "line number" :toggle t)
+      ("m e" geo/doom-modeline-toggle-encoding "encoding" :toggle doom-modeline-buffer-encoding)
+      ("m w" geo/doom-modeline-toggle-word-count "word count" :toggle doom-modeline-enable-word-count)
+      ("m m" geo/doom-modeline-toggle-minor-modes "minor modes" :toggle doom-modeline-minor-modes)
+      ("m p" geo/persp-mode-toggle-modestring "perspective list" :toggle persp-show-modestring)
+      ("m t" geo/cycle-display-time-mode "display time" :toggle display-time-mode)))))
 #+end_src
 
 *** Projects
 
 #+begin_src emacs-lisp
-(pretty-hydra-define geo/hydra-project (:exit t :quit-key "q")
-  ("Files"
-    (("f" project-find-file "Find file")
-     ("d" project-display-buffer "Display buffer")
-     ("D" project-dired "dired"))
+(with-eval-after-load 'pretty-hydra
+  (pretty-hydra-define geo/hydra-project (:exit t :quit-key "q")
+    ("Files"
+      (("f" project-find-file "Find file")
+       ("d" project-display-buffer "Display buffer")
+       ("D" project-dired "dired"))
 
-    "Searching"
-    (("/" consult-ripgrep "ripgrep")
-     ("a" ag-project "ag")
-     ("r" project-query-replace-regexp "Search and replace"))
+      "Searching"
+      (("/" consult-ripgrep "ripgrep")
+       ("a" ag-project "ag")
+       ("r" project-query-replace-regexp "Search and replace"))
 
-    "Management"
-    (("p" project-switch-project "Switch project")
-     ("b" consult-project-buffer "Switch to buffer")
-     ("B" project-kill-buffers "Kill all project buffers"))
+      "Management"
+      (("p" project-switch-project "Switch project")
+       ("b" consult-project-buffer "Switch to buffer")
+       ("B" project-kill-buffers "Kill all project buffers"))
 
-    "Commands"
-    (("v" project-eshell "eshell")
-     ("c" project-shell-command "Run command in root")
-     ("C" project-async-shell-command "Run command in root async"))))
-#+end_src
-
-*** LSP
-
-- https://emacs-lsp.github.io/lsp-ui/
-- https://emacs-lsp.github.io/lsp-mode/page/main-features/
-
-#+begin_src emacs-lisp
-(defun geo/toggle-lsp-variable (variable)
-  "Toggle a VARIABLE related to LSP UI Sideline"
-  (interactive)
-  (set variable (not (symbol-value variable)))
-  (message "%S is now %s" variable (symbol-value variable)))
-
-(pretty-hydra-define geo/hydra-lsp (:exit t :quit-key "q")
-  ("Sideline"
-   (("s d" (lambda () (interactive) (geo/toggle-lsp-variable 'lsp-ui-sideline-show-diagnostics)) "Show diagnostics in sideline")
-    ("s h" (lambda () (interactive) (geo/toggle-lsp-variable 'lsp-ui-sideline-show-hover)) "Show hover in sideline")
-    ("s a" (lambda () (interactive) (geo/toggle-lsp-variable 'lsp-ui-sideline-show-code-actions)) "Show actions in sideline"))
-   "Peek"
-   (("p d" lsp-ui-peek-find-definitions "Find definitions")
-    ("p r" lsp-ui-peek-find-references "Find references")
-    ("p /" (lambda () (interactive) (geo/toggle-lsp-variable 'lsp-ui-peek-show-directory)) "Show the directory"))
-   "Doc"
-   (("d e" (lambda () (interactive) (geo/toggle-lsp-variable 'lsp-ui-doc-enable)) "Enable/disable")
-    ("d c" (lambda () (interactive) (geo/toggle-lsp-variable 'lsp-ui-doc-show-with-cursor)) "Show docs with cursor")
-    ("d m" (lambda () (interactive) (geo/toggle-lsp-variable 'lsp-ui-doc-show-with-mouse)) "Show docs with mouse"))
-   "imenu"
-   (("i s" lsp-ui-imenu "Show imenu"))
-))
+      "Commands"
+      (("v" project-eshell "eshell")
+       ("c" project-shell-command "Run command in root")
+       ("C" project-async-shell-command "Run command in root async")))))
 #+end_src
 
 *** Dired
@@ -2990,6 +2973,7 @@ add no extra space."
 Taken from the [[https://github.com/abo-abo/hydra/wiki/Dired][hydra wiki]]. Activate it with =.= in a =dired= mode.
 
 #+begin_src emacs-lisp
+(with-eval-after-load 'hydra
   (defhydra geo/hydra-dired (:hint nil :color pink)
 "
 _+_ mkdir          _v_iew           _m_ark             _(_ details        _i_nsert-subdir    wdired
@@ -3039,57 +3023,68 @@ T - tag prefix
     ("z" diredp-compress-this-file)
     ("Z" dired-do-compress)
     ("q" nil)
-    ("." nil :color blue))
+    ("." nil :color blue)))
 
-(define-key dired-mode-map (kbd "?") 'geo/hydra-dired/body)
+;; (define-key dired-mode-map (kbd "?") 'geo/hydra-dired/body)
 #+end_src
 
 *** Github
 Some functions that make working with github a little easier.
 
 #+begin_src emacs-lisp
-(pretty-hydra-define geo/hydra-github-menu (:quit-key "q")
-  ("Github"
-   (("o" geo/github-open-in-github "Open file on Github")
-    ("p" geo/github-open-pr-from-branch "Open PR from branch")
-    )
-   ))
+(with-eval-after-load 'pretty-hydra
+  (pretty-hydra-define geo/hydra-github-menu (:quit-key "q")
+    ("Github"
+     (("o" geo/github-open-in-github "Open file on Github")
+      ("p" geo/github-open-pr-from-branch "Open PR from branch")))))
 #+end_src
 
+*** AI
+Menu for working with AI models directly.
+
+#+begin_src emacs-lisp
+(with-eval-after-load 'pretty-hydra
+  (pretty-hydra-define geo/hydra-ai-menu (:quit-key "q")
+    ("GPTel"
+     (("g" gptel-send "Chat with buffer contents up to point")
+      ("G" gptel-menu "Open gptel config menu")
+      ("a" gptel-add "Add/remove region or buffer to context")
+      ("f" gptel-add-file "Add/remove file to context")
+      ("c" gptel "Create a new chat buffer")))))
+#+end_src
 *** Main
 
 My main hydra menu that provides help and direction. Sometimes I
 forget what to call or what keys to press. This helps immensely.
 
 #+begin_src emacs-lisp
-(pretty-hydra-define geo/hydra-top-menu
-  (:title "The world's your oyster"
-     :quit-key "q"
-     :foreign-keys warn
-     :exit t)
-    ("Working"
-     (("w" geo/hydra-workspace-menu/body "Workspaces")
-      ("b" geo/hydra-buffer-menu/body "Buffers")
-      ("r" geo/hydra-registers-menu/body "Registers/Marks")
-      ("s" geo/hydra-search-menu/body "Search")
-      ("p" geo/hydra-project/body "Projects")
-      ("g" magit-status "Magit")
-      ("G" geo/hydra-github-menu/body "Github"))
+(with-eval-after-load 'pretty-hydra
+  (pretty-hydra-define geo/hydra-top-menu
+    (:title "The world's your oyster"
+       :quit-key "q"
+       :foreign-keys warn
+       :exit t)
+      ("Working"
+       (("w" geo/hydra-workspace-menu/body "Workspaces")
+        ("b" geo/hydra-buffer-menu/body "Buffers")
+        ("r" geo/hydra-registers-menu/body "Registers/Marks")
+        ("s" geo/hydra-search-menu/body "Search")
+        ("p" geo/hydra-project/body "Projects")
+        ("g" magit-status "Magit")
+        ("G" geo/hydra-github-menu/body "Github")
+        ("a" geo/hydra-ai-menu/body "AI"))
 
-     "AI"
-     (("C" geo/chatgpt-chat-with-code "Ask ChatGPT about code")
-      ("c" geo/chatgpt-get-input "Ask ChatGPT anything"))
+       "Getting Help"
+       (("A" geo/hydra-apropos-menu/body "Apropos")
+        ("l" geo/hydra-lsp/body "LSP"))
 
-     "Getting Help"
-     (("a" geo/hydra-apropos-menu/body "Apropos")
-      ("l" geo/hydra-lsp/body "LSP"))
+       "Customizing"
+       (("," geo/hydra-prefs-menu/body "Preferences")
+        ("e" geo/edit-config-file "Edit config")))))
 
-     "Customizing"
-     (("," geo/hydra-prefs-menu/body "Preferences")
-      ("e" geo/edit-config-file "Edit config"))))
-
-(define-key evil-normal-state-map (kbd "<SPC>") 'geo/hydra-top-menu/body)
-(define-key evil-visual-state-map (kbd "<SPC>") 'geo/hydra-top-menu/body)
+(with-eval-after-load 'evil
+  (define-key evil-normal-state-map (kbd "<SPC>") 'geo/hydra-top-menu/body)
+  (define-key evil-visual-state-map (kbd "<SPC>") 'geo/hydra-top-menu/body))
 #+end_src
 
 * Things to check out and eventually add
@@ -3171,7 +3166,7 @@ I can't think of categories for these.
 
 - [[https://github.com/edrx/eev][eev]] - "a library for Emacs that lets us create executable logs of
   what we do in a format that is reasonably easy to read and to
-  modify, and that lets us “play back” those logs step by step in any
+  modify, and that lets us "play back" those logs step by step in any
   order." Could be interesting in reproducing debugging or something.
 
 - [[https://github.com/zachcurry/emacs-anywhere][emacs-anywhere]] - provides configurable automation and hooks
