@@ -3,8 +3,8 @@
 # search git logs with live preview of summary of commit
 
 FORMAT="%C(auto)%h%d %s %C(black)%C(bold)%cr"
-PREVIEW="git show --compact-summary {1} | bat --style=numbers --color=always"
-BIND_ENTER="enter:execute(git show --color=always {1})"
+PREVIEW="git show --compact-summary {1}"
+BIND_ENTER="enter:execute(git show --color=always {1} | bat --style=numbers --color=always | less -R)"
 
 git log --color=always --format=$FORMAT \
   | fzf --ansi --tiebreak=index --preview=$PREVIEW --bind=$BIND_ENTER
