@@ -1681,6 +1681,9 @@ and act more like I'd expect.
 (use-package undo-fu
   :config
   (setq evil-undo-system 'undo-fu)
+  (setq undo-limit 67108864) ; 64mb.
+  (setq undo-strong-limit 100663296) ; 96mb.
+  (setq undo-outer-limit 1006632960) ; 960mb.
 
   ;; Make redo use Control+r
   (define-key evil-normal-state-map (kbd "C-r") 'undo-fu-only-redo))
