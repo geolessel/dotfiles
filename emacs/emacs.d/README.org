@@ -414,7 +414,7 @@ I prefer to use the Command key as the meta key on Mac.
 (set-keyboard-coding-system 'utf-8)
 (set-selection-coding-system 'utf-8)
 (prefer-coding-system 'utf-8)
-(setq default-process-coding-system '(uft-8-unix . utf-8-unix))
+(setq default-process-coding-system '(utf-8-unix . utf-8-unix))
 #+end_src>
 
 ** Revert when a buffer's file changes
@@ -422,7 +422,7 @@ When a buffer is pointing a file that changes underneath it, we should
 auto-revert to the current state of the file.
 
 #+begin_src emacs-lisp
-(setq global-auto-revert-mode t)
+(global-auto-revert-mode 1)
 #+end_src
 
 Also make sure to refresh non-file buffers (like =dired=) when the
