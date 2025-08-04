@@ -77,6 +77,13 @@ vim.opt.wildmode = "longest:full,full"
 vim.opt.redrawtime = 10000
 vim.opt.maxmempattern = 20000
 
+-- Auto-resize splits when window is resized
+vim.api.nvim_create_autocmd("VimResized", {
+  callback = function()
+    vim.cmd("wincmd =")
+  end,
+})
+
 --- ==================================================================================
 --- Plugins
 --- ==================================================================================
