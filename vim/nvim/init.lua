@@ -90,15 +90,15 @@ vim.api.nvim_create_autocmd("VimResized", {
 
 vim.pack.add {
   { src = 'https://github.com/neovim/nvim-lspconfig' },
-  { src = 'https://github.com/Saghen/blink.cmp' },       -- blink for autocompletion
-  { src = 'https://github.com/echasnovski/mini.pick' },  -- mini picker for file finding, etc
-  { src = 'https://github.com/echasnovski/mini.icons' }, -- icons for mini picker
-  { src = 'https://github.com/stevearc/conform.nvim' },  -- better code formatting
-  -- TELESCOPE stuff
-  { src = 'https://github.com/nvim-lua/plenary.nvim' },  -- required by telescope
-  { src = 'https://github.com/nvim-telescope/telescope-fzf-native.nvim' },
-  { src = 'https://github.com/nvim-telescope/telescope.nvim' },
+  { src = 'https://github.com/Saghen/blink.cmp',               version = vim.version.range("1.*") }, -- blink for autocompletion
+  { src = 'https://github.com/echasnovski/mini.pick' },                                              -- mini picker for file finding, etc
+  { src = 'https://github.com/echasnovski/mini.icons' },                                             -- icons for mini picker
+  { src = 'https://github.com/stevearc/conform.nvim' },                                              -- better code formatting
   { src = 'https://github.com/nvim-treesitter/nvim-treesitter' },
+  -- TELESCOPE stuff
+  -- { src = 'https://github.com/nvim-lua/plenary.nvim' },  -- required by telescope
+  -- { src = 'https://github.com/nvim-telescope/telescope-fzf-native.nvim' },
+  -- { src = 'https://github.com/nvim-telescope/telescope.nvim' },
   -- end TELESCOPE
   { src = 'https://github.com/folke/which-key.nvim' },
   { src = 'https://github.com/mason-org/mason.nvim' }, -- easy(er) LSP server management
@@ -122,6 +122,11 @@ require 'nvim-treesitter.configs'.setup {
 }
 
 require('blink.cmp').setup({
+  -- Disable completion for git commit messages
+  enabled = function()
+    return vim.bo.filetype ~= "gitcommit"
+  end,
+
   -- 'default' (recommended) for mappings similar to built-in completions (C-y to accept)
   -- 'super-tab' for mappings similar to vscode (tab to accept)
   -- 'enter' for enter to accept
@@ -158,6 +163,7 @@ require('blink.cmp').setup({
   -- See the fuzzy documentation for more information
   fuzzy = { implementation = "prefer_rust_with_warning" }
 })
+
 
 require("conform").setup({
   formatters_by_ft = {
