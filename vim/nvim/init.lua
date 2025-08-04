@@ -78,6 +78,102 @@ vim.opt.redrawtime = 10000
 vim.opt.maxmempattern = 20000
 
 --- ==================================================================================
+--- Plugins
+--- ==================================================================================
+
+vim.pack.add {
+  { src = 'https://github.com/neovim/nvim-lspconfig' },
+  { src = 'https://github.com/Saghen/blink.cmp' },       -- blink for autocompletion
+  { src = 'https://github.com/echasnovski/mini.pick' },  -- mini picker for file finding, etc
+  { src = 'https://github.com/echasnovski/mini.icons' }, -- icons for mini picker
+  { src = 'https://github.com/stevearc/conform.nvim' },  -- better code formatting
+  -- TELESCOPE stuff
+  { src = 'https://github.com/nvim-lua/plenary.nvim' },  -- required by telescope
+  { src = 'https://github.com/nvim-telescope/telescope-fzf-native.nvim' },
+  { src = 'https://github.com/nvim-telescope/telescope.nvim' },
+  { src = 'https://github.com/nvim-treesitter/nvim-treesitter' },
+  -- end TELESCOPE
+  { src = 'https://github.com/folke/which-key.nvim' },
+  { src = 'https://github.com/mason-org/mason.nvim' }, -- easy(er) LSP server management
+}
+
+require("mason").setup()
+require('mini.pick').setup()
+require('mini.icons').setup()
+
+-- Treesitter configuration
+require 'nvim-treesitter.configs'.setup {
+  ensure_installed = { "elixir", "heex", "eex", "lua", "typescript", "tsx", "javascript" },
+  auto_install = true,
+  highlight = {
+    enable = true,
+    additional_vim_regex_highlighting = false,
+  },
+  indent = {
+    enable = true,
+  },
+}
+
+require('blink.cmp').setup({
+  -- 'default' (recommended) for mappings similar to built-in completions (C-y to accept)
+  -- 'super-tab' for mappings similar to vscode (tab to accept)
+  -- 'enter' for enter to accept
+  -- 'none' for no mappings
+  --
+  -- All presets have the following mappings:
+  -- C-space: Open menu or open docs if already open
+  -- C-n/C-p or Up/Down: Select next/previous item
+  -- C-e: Hide menu
+  -- C-k: Toggle signature help (if signature.enabled = true)
+  --
+  -- See :h blink-cmp-config-keymap for defining your own keymap
+  keymap = { preset = 'default' },
+
+  appearance = {
+    -- 'mono' (default) for 'Nerd Font Mono' or 'normal' for 'Nerd Font'
+    -- Adjusts spacing to ensure icons are aligned
+    nerd_font_variant = 'mono'
+  },
+
+  -- (Default) Only show the documentation popup when manually triggered
+  completion = { documentation = { auto_show = false } },
+
+  -- Default list of enabled providers defined so that you can extend it
+  -- elsewhere in your config, without redefining it, due to `opts_extend`
+  sources = {
+    default = { 'lsp', 'path', 'snippets', 'buffer' },
+  },
+
+  -- (Default) Rust fuzzy matcher for typo resistance and significantly better performance
+  -- You may use a lua implementation instead by using `implementation = "lua"` or fallback to the lua implementation,
+  -- when the Rust fuzzy matcher is not available, by using `implementation = "prefer_rust"`
+  --
+  -- See the fuzzy documentation for more information
+  fuzzy = { implementation = "prefer_rust_with_warning" }
+})
+
+require("conform").setup({
+  formatters_by_ft = {
+    -- lua = { "stylua" },
+    -- Conform will run multiple formatters sequentially
+    -- python = { "isort", "black" },
+    -- You can customize some of the format options for the filetype (:help conform.format)
+    rust = { "rustfmt", lsp_format = "fallback" },
+    -- Conform will run the first available formatter
+    javascript = { "prettierd", "prettier", "eslint_d", stop_after_first = true },
+    typescript = { "prettierd", "prettier", "eslint_d", stop_after_first = true },
+    javascriptreact = { "prettierd", "prettier", "eslint_d", stop_after_first = true },
+    typescriptreact = { "prettierd", "prettier", "eslint_d", stop_after_first = true },
+  },
+  format_on_save = {
+    -- These options will be passed to conform.format()
+    timeout_ms = 3000,
+    lsp_format = "fallback",
+  },
+})
+
+
+--- ==================================================================================
 --- KEYMAPS
 --- ==================================================================================
 
@@ -124,7 +220,8 @@ vim.keymap.set("n", "<leader>ec", ":e ~/.config/nvim/init.lua<CR>", { desc = "Ed
 
 -- Buffer management
 vim.keymap.set("n", "<leader>bf", vim.lsp.buf.format, { desc = "Format buffer with LSP" })
-
+vim.keymap.set("n", "<leader>bb", MiniPick.builtin.buffers, { desc = "Pick open buffer" })
+vim.keymap.set("n", "<C-p>", MiniPick.builtin.files, { desc = "Open file picker" })
 
 --- ==================================================================================
 --- Utilities
@@ -308,22 +405,11 @@ vim.keymap.set('n', '<leader>bd', smart_close_buffer, { desc = 'Smart close buff
 --- LSP and treesitter
 --- ==================================================================================
 
-vim.pack.add {
-  { src = 'https://github.com/neovim/nvim-lspconfig' },
-  -- TELESCOPE stuff
-  { src = 'https://github.com/nvim-lua/plenary.nvim' }, -- required by telescope
-  { src = 'https://github.com/nvim-telescope/telescope-fzf-native.nvim' },
-  { src = 'https://github.com/nvim-telescope/telescope.nvim' },
-  { src = 'https://github.com/nvim-treesitter/nvim-treesitter' },
-  -- end TELESCOPE
-  { src = 'https://github.com/folke/which-key.nvim' },
-  { src = 'https://github.com/mason-org/mason.nvim' }, -- easy(er) LSP server management
-}
-
 vim.lsp.config('elixirls', {
-  cmd = { '/Users/geo/.local/share/nvim/mason/bin/elixir-ls' },
+  cmd = { '/Users/geo/.local/share/nvim/mason/packages/elixir-ls/language_server.sh' },
 })
 
+-- get rid of the vim warnings in lua files
 vim.lsp.config('lua_ls', {
   settings = {
     Lua = {
@@ -365,37 +451,22 @@ vim.cmd([[
   highlight FloatBorder guibg=NONE ctermbg=NONE
 ]])
 
--- From the LSP help file; trigger on .
-local triggers = { '.' }
-vim.api.nvim_create_autocmd('InsertCharPre', {
-  buffer = vim.api.nvim_get_current_buf(),
-  callback = function()
-    if vim.fn.pumvisible() == 1 or vim.fn.state('m') == 'm' then
-      return
-    end
-    local char = vim.v.char
-    if vim.list_contains(triggers, char) then
-      local key = vim.keycode('<C-x><C-n>')
-      vim.api.nvim_feedkeys(key, 'm', false)
-    end
-  end
-})
+-- -- From the LSP help file; trigger on .
+-- local triggers = { '.' }
+-- vim.api.nvim_create_autocmd('InsertCharPre', {
+--   buffer = vim.api.nvim_get_current_buf(),
+--   callback = function()
+--     if vim.fn.pumvisible() == 1 or vim.fn.state('m') == 'm' then
+--       return
+--     end
+--     local char = vim.v.char
+--     if vim.list_contains(triggers, char) then
+--       local key = vim.keycode('<C-x><C-n>')
+--       vim.api.nvim_feedkeys(key, 'm', false)
+--     end
+--   end
+-- })
 
-
-require("mason").setup()
-
--- Treesitter configuration
-require 'nvim-treesitter.configs'.setup {
-  ensure_installed = { "elixir", "heex", "eex", "lua", "typescript", "tsx", "javascript" },
-  auto_install = true,
-  highlight = {
-    enable = true,
-    additional_vim_regex_highlighting = false,
-  },
-  indent = {
-    enable = true,
-  },
-}
 
 -- --- ==================================================================================
 -- --- Floating terminal

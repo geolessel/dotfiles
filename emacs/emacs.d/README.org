@@ -498,7 +498,7 @@ Other cool theme packages I've found.
 
 (use-package humanoid-themes)
 
-(use-package catppuccin-theme)
+(use-package catppuccin-theme :ensure (:wait t))
 
 (use-package lambda-themes
   :ensure (:host github :repo "lambda-emacs/lambda-themes")
@@ -1744,7 +1744,14 @@ tools specific to the language I'm writing. To that end, [[https://github.com/js
 format js/ts code (and some others).
 
 #+begin_src emacs-lisp
-(use-package prettier)
+(use-package prettier
+  :config
+  (add-hook 'js-mode-hook 'prettier-mode)
+  (add-hook 'js2-mode-hook 'prettier-mode)
+  (add-hook 'js-ts-mode-hook 'prettier-mode)
+  (add-hook 'typescript-mode-hook 'prettier-mode)
+  (add-hook 'typescript-ts-mode-hook 'prettier-mode)
+  (add-hook 'tsx-ts-mode-hook 'prettier-mode))
 #+end_src
 
 ** Syntax checking
@@ -1858,7 +1865,7 @@ more of Emacs' own functions and internals.
   ;; :straight (corfu :files (:defaults "extensions/*"))
   :custom
   (corfu-cycle t)                ;; Enable cycling for corfu-next/previous
-  ;; (corfu-auto t)                 ;; Enable auto completion
+  (corfu-auto t)                 ;; Enable auto completion
   (corfu-separator ?\s)          ;; Orderless field separator
   ;; (corfu-quit-at-boundary nil)   ;; Never quit at completion boundary
   ;; (corfu-quit-no-match nil)      ;; Never quit, even if there is no match
