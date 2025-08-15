@@ -94,6 +94,7 @@ vim.pack.add {
   { src = 'https://github.com/echasnovski/mini.pairs' },                                             -- auto-close paired openers
   { src = 'https://github.com/echasnovski/mini.surround' },
   { src = 'https://github.com/echasnovski/mini.clue' },                                              -- key hints like which-key
+  { src = 'https://github.com/echasnovski/mini.indentscope' },                                       -- animated indentation lines
   { src = 'https://github.com/stevearc/conform.nvim' },                                              -- better code formatting
   { src = 'https://github.com/nvim-treesitter/nvim-treesitter' },
   { src = 'https://github.com/catppuccin/nvim' },
@@ -114,6 +115,11 @@ require('mini.extra').setup()
 require('mini.icons').setup()
 require('mini.surround').setup()
 require('mini.pairs').setup()
+require('mini.indentscope').setup({
+  -- Whether to first check input line to be a border of adjacent scope.
+  -- Use it if you want to place cursor on function header to get scope of its body.
+  try_as_border = true,
+})
 local miniclue = require('mini.clue')
 miniclue.setup({
   triggers = {
@@ -348,6 +354,15 @@ vim.keymap.set("n", "<leader>gtw", ":Gitsigns toggle_word_diff<CR>", { desc = "t
 
 -- Preferences
 vim.keymap.set("n", "<leader>,c", ":Pick colorschems<CR>", { desc = "Colorscheme" })
+vim.keymap.set("n", "<leader>,i", function()
+  if vim.g.miniindentscope_disable then
+    vim.g.miniindentscope_disable = false
+    print("mini.indentscope enabled")
+  else
+    vim.g.miniindentscope_disable = true
+    print("mini.indentscope disabled")
+  end
+end, { desc = "Toggle indentscope" })
 
 --- ==================================================================================
 --- Utilities
