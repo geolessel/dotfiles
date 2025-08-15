@@ -158,7 +158,8 @@ miniclue.setup({
     { mode = 'n', keys = '<Leader>b', desc = '+Buffers' },
     { mode = 'n', keys = '<Leader>t', desc = '+Tabs' },
     { mode = 'n', keys = '<Leader>w', desc = '+Windows' },
-    { mode = 'n', keys = '<Leader>,', desc = '+Prefs' }
+    { mode = 'n', keys = '<Leader>,', desc = '+Prefs' },
+    { mode = 'n', keys = '<Leader>s', desc = '+Search' }
   },
 
   window = {
@@ -172,6 +173,17 @@ require('neogit').setup({
   graph_style = "unicode",
   process_spinner = true,
   integrations = { mini_pick = true }
+})
+
+-- When closing neogit, select the previous tab instead of next
+vim.api.nvim_create_autocmd("BufWinLeave", {
+  pattern = "Neogit*",
+  callback = function()
+    -- Switch to previous tab if available
+    if vim.fn.tabpagenr() > 1 then
+      vim.cmd("tabprevious")
+    end
+  end
 })
 
 require('gitsigns').setup({
@@ -312,6 +324,14 @@ vim.keymap.set("n", "<C-p>", MiniPick.builtin.files, { desc = "Open file picker"
 
 -- Searching
 vim.keymap.set("n", "<C-_>", MiniPick.builtin.grep_live, { desc = "Recursive grep" })
+-- Ripgrep to quickfix list
+vim.keymap.set("n", "<leader>sg", function()
+  vim.ui.input({ prompt = 'Ripgrep pattern: ' }, function(pattern)
+    if pattern and pattern ~= '' then
+      vim.cmd('cgetexpr system("rg --vimgrep \\"' .. pattern .. '\\"") | copen')
+    end
+  end)
+end, { desc = "Ripgrep to quickfix list" })
 
 -- Help
 vim.keymap.set("n", "<C-h>", MiniPick.builtin.help, { desc = "Find help" })
