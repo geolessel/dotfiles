@@ -1,6 +1,3 @@
--- theme & transparency
-vim.cmd.colorscheme("unokai")
-
 -- Basic settings
 vim.opt.number = true         -- line numbers
 vim.opt.relativenumber = true -- relative line numbers
@@ -92,21 +89,95 @@ vim.pack.add {
   { src = 'https://github.com/neovim/nvim-lspconfig' },
   { src = 'https://github.com/Saghen/blink.cmp',               version = vim.version.range("1.*") }, -- blink for autocompletion
   { src = 'https://github.com/echasnovski/mini.pick' },                                              -- mini picker for file finding, etc
+  { src = 'https://github.com/echasnovski/mini.extra' },                                             -- extra utils (mostly for more pick pickers)
   { src = 'https://github.com/echasnovski/mini.icons' },                                             -- icons for mini picker
+  { src = 'https://github.com/echasnovski/mini.pairs' },                                             -- auto-close paired openers
+  { src = 'https://github.com/echasnovski/mini.surround' },
+  { src = 'https://github.com/echasnovski/mini.clue' },                                              -- key hints like which-key
   { src = 'https://github.com/stevearc/conform.nvim' },                                              -- better code formatting
   { src = 'https://github.com/nvim-treesitter/nvim-treesitter' },
+  { src = 'https://github.com/catppuccin/nvim' },
+  { src = 'https://github.com/lewis6991/gitsigns.nvim' }, -- add git indicators in the sideline
+  -- { src = 'https://github.com/folke/which-key.nvim' },
+  { src = 'https://github.com/mason-org/mason.nvim' },    -- easy(er) LSP server management
+  { src = 'https://github.com/NeogitOrg/neogit' },        -- magit but in neovim!
+  { src = 'https://github.com/nvim-lua/plenary.nvim' },   -- required by neogit
   -- TELESCOPE stuff
-  -- { src = 'https://github.com/nvim-lua/plenary.nvim' },  -- required by telescope
   -- { src = 'https://github.com/nvim-telescope/telescope-fzf-native.nvim' },
   -- { src = 'https://github.com/nvim-telescope/telescope.nvim' },
   -- end TELESCOPE
-  { src = 'https://github.com/folke/which-key.nvim' },
-  { src = 'https://github.com/mason-org/mason.nvim' }, -- easy(er) LSP server management
 }
 
 require("mason").setup()
 require('mini.pick').setup()
+require('mini.extra').setup()
 require('mini.icons').setup()
+require('mini.surround').setup()
+require('mini.pairs').setup()
+local miniclue = require('mini.clue')
+miniclue.setup({
+  triggers = {
+    { mode = 'n', keys = '<Leader>' },
+    { mode = 'x', keys = '<Leader>' },
+
+    -- Built-in completion
+    { mode = 'i', keys = '<C-x>' },
+
+    -- `g` key
+    { mode = 'n', keys = 'g' },
+    { mode = 'x', keys = 'g' },
+
+    -- Marks
+    { mode = 'n', keys = "'" },
+    { mode = 'n', keys = '`' },
+    { mode = 'x', keys = "'" },
+    { mode = 'x', keys = '`' },
+
+    -- Registers
+    { mode = 'n', keys = '"' },
+    { mode = 'x', keys = '"' },
+    { mode = 'i', keys = '<C-r>' },
+    { mode = 'c', keys = '<C-r>' },
+
+    -- Window commands
+    { mode = 'n', keys = '<C-w>' },
+
+    -- `z` key
+    { mode = 'n', keys = 'z' },
+    { mode = 'x', keys = 'z' },
+  },
+  clues = {
+    -- Enhance this by adding descriptions for <Leader> mapping groups
+    miniclue.gen_clues.builtin_completion(),
+    miniclue.gen_clues.g(),
+    miniclue.gen_clues.marks(),
+    miniclue.gen_clues.registers(),
+    miniclue.gen_clues.windows(),
+    miniclue.gen_clues.z(),
+    { mode = 'n', keys = '<Leader>g', desc = '+Git' },
+    { mode = 'n', keys = '<Leader>b', desc = '+Buffers' },
+    { mode = 'n', keys = '<Leader>t', desc = '+Tabs' },
+    { mode = 'n', keys = '<Leader>w', desc = '+Windows' },
+    { mode = 'n', keys = '<Leader>,', desc = '+Prefs' }
+  },
+
+  window = {
+    delay = 0,
+    config = {
+      width = 'auto'
+    },
+  },
+})
+require('neogit').setup({
+  graph_style = "unicode",
+  process_spinner = true,
+  integrations = { mini_pick = true }
+})
+
+require('gitsigns').setup({
+  attach_to_untracked = true,
+  numhl = true
+})
 
 -- Treesitter configuration
 require 'nvim-treesitter.configs'.setup {
@@ -185,6 +256,11 @@ require("conform").setup({
   },
 })
 
+--- ==================================================================================
+--- Colors (after plugins so they can load first
+--- ==================================================================================
+vim.cmd.colorscheme("catppuccin-macchiato")
+
 
 --- ==================================================================================
 --- KEYMAPS
@@ -200,10 +276,6 @@ vim.keymap.set("n", "<C-l>", "zz", { desc = "Vertically center cursor in window"
 -- Leader key
 vim.g.mapleader = " "      -- set leader key to space
 vim.g.maplocalleader = " " -- set local leader key
-
--- Buffer navigation
-vim.keymap.set("n", "<leader>bn", ":bnext<CR>", { desc = "Next buffer" })
-vim.keymap.set("n", "<leader>bp", ":bprevious<CR>", { desc = "Previous buffer" })
 
 -- Window management
 vim.keymap.set("n", "<leader>wv", ":vsplit<CR>", { desc = "Split window vertically" })
@@ -232,9 +304,30 @@ vim.keymap.set("v", ">", ">gv", { desc = "Indent right and reselect" })
 vim.keymap.set("n", "<leader>ec", ":e ~/.config/nvim/init.lua<CR>", { desc = "Edit config" })
 
 -- Buffer management
+vim.keymap.set("n", "<leader>bn", ":bnext<CR>", { desc = "Next buffer" })
+vim.keymap.set("n", "<leader>bp", ":bprevious<CR>", { desc = "Previous buffer" })
 vim.keymap.set("n", "<leader>bf", vim.lsp.buf.format, { desc = "Format buffer with LSP" })
 vim.keymap.set("n", "<leader>bb", MiniPick.builtin.buffers, { desc = "Pick open buffer" })
 vim.keymap.set("n", "<C-p>", MiniPick.builtin.files, { desc = "Open file picker" })
+
+-- Searching
+vim.keymap.set("n", "<C-_>", MiniPick.builtin.grep_live, { desc = "Recursive grep" })
+
+-- Help
+vim.keymap.set("n", "<C-h>", MiniPick.builtin.help, { desc = "Find help" })
+
+-- Git (neogit)
+vim.keymap.set("n", "<leader>gg", ":Neogit cwd=%:p:h<CR>", { desc = "Open Neogit" })
+vim.keymap.set("n", "<leader>gb", ":Gitsigns blame<CR>", { desc = "git blame" })
+vim.keymap.set("n", "<leader>gB", ":Gitsigns blame_line<CR>", { desc = "git blame on current line" })
+vim.keymap.set("n", "<leader>gtb", ":Gitsigns toggle_current_line_blame<CR>", { desc = "toggle current line blame" })
+vim.keymap.set("n", "<leader>gts", ":Gitsigns toggle_signs<CR>", { desc = "toggle git signs" })
+vim.keymap.set("n", "<leader>gtn", ":Gitsigns toggle_numhl<CR>", { desc = "toggle git line number highlight" })
+vim.keymap.set("n", "<leader>gtl", ":Gitsigns toggle_linehl<CR>", { desc = "toggle git line highlight" })
+vim.keymap.set("n", "<leader>gtw", ":Gitsigns toggle_word_diff<CR>", { desc = "toggle git word diff" })
+
+-- Preferences
+vim.keymap.set("n", "<leader>,c", ":Pick colorschems<CR>", { desc = "Colorscheme" })
 
 --- ==================================================================================
 --- Utilities
@@ -348,15 +441,6 @@ vim.cmd([[
   hi TabLineFill guibg=NONE ctermfg=242 ctermbg=NONE
 ]])
 
--- Alternative navigation (more intuitive)
-vim.keymap.set('n', '<leader>tn', ':tabnew<CR>', { desc = 'New tab' })
-vim.keymap.set('n', '<leader>tc', ':tabclose<CR>', { desc = 'Close tab' })
-
--- Tab moving
-vim.keymap.set('n', '<leader>tm', ':tabmove<CR>', { desc = 'Move tab' })
-vim.keymap.set('n', '<leader>t>', ':tabmove +1<CR>', { desc = 'Move tab right' })
-vim.keymap.set('n', '<leader>t<', ':tabmove -1<CR>', { desc = 'Move tab left' })
-
 -- Function to open file in new tab
 local function open_file_in_tab()
   vim.ui.input({ prompt = 'File to open in new tab: ', completion = 'file' }, function(input)
@@ -394,10 +478,21 @@ local function close_tabs_left()
     vim.cmd('1tabclose')
   end
 end
+--
+-- Alternative navigation (more intuitive)
+vim.keymap.set('n', '<leader>tc', ':tabnew<CR>', { desc = 'Create tab' })
+vim.keymap.set('n', '<leader>td', ':tabclose<CR>', { desc = 'Close tab' })
+vim.keymap.set('n', '<leader>tn', ':tabnext<CR>', { desc = 'Next tab' })
+vim.keymap.set('n', '<leader>tp', ':tabprev<CR>', { desc = 'Prev tab' })
+
+-- Tab moving
+vim.keymap.set('n', '<leader>tm', ':tabmove<CR>', { desc = 'Move tab' })
+vim.keymap.set('n', '<leader>t>', ':tabmove +1<CR>', { desc = 'Move tab right' })
+vim.keymap.set('n', '<leader>t<', ':tabmove -1<CR>', { desc = 'Move tab left' })
 
 -- Enhanced keybindings
 vim.keymap.set('n', '<leader>tO', open_file_in_tab, { desc = 'Open file in new tab' })
-vim.keymap.set('n', '<leader>td', duplicate_tab, { desc = 'Duplicate current tab' })
+vim.keymap.set('n', '<leader>tD', duplicate_tab, { desc = 'Duplicate current tab' })
 vim.keymap.set('n', '<leader>tr', close_tabs_right, { desc = 'Close tabs to the right' })
 vim.keymap.set('n', '<leader>tL', close_tabs_left, { desc = 'Close tabs to the left' })
 
@@ -434,6 +529,7 @@ vim.lsp.config('lua_ls', {
 })
 
 vim.lsp.enable({ 'lua_ls', 'elixirls', 'ts_ls' })
+vim.lsp.document_color.enable() -- hex codes are colored
 
 -- format on save
 vim.api.nvim_create_autocmd("BufWritePre", {
