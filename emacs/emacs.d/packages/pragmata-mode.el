@@ -322,7 +322,7 @@
    (pragmata-mode
     (setq-local prettify-symbols-unprettify-at-point 'right-edge)
     (setq-local prettify-symbols-alist pragmata-mode--prettify-symbols-alist)
-    (pragmata-mode--setup-compose-predicate)
+    ;; (pragmata-mode--setup-compose-predicate)
     (prettify-symbols-mode t))
    (t
     (prettify-symbols-mode 0))))
