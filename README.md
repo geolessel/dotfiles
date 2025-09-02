@@ -1,4 +1,44 @@
-# Setting up gpg to automatically sign commits without prompting for password
+# Personal Dotfiles
+
+A comprehensive collection of configuration files and development tools for macOS, organized for easy setup and maintenance.
+
+## Overview
+
+This repository contains configuration files for various development tools and applications:
+
+- **Shell**: Bash and Zsh configurations with custom prompts and aliases
+- **Editors**: 
+  - Neovim (modern, modular configuration with native plugin management)
+  - Vim (traditional setup)
+  - Emacs (comprehensive configuration)
+- **Development Tools**: Git templates, tmux, and custom utilities
+- **macOS Tools**: Hammerspoon automation and Karabiner keyboard customization
+- **Custom Scripts**: Utility scripts and binaries in `bin/` and `src/`
+
+## Structure
+
+- `bash/`, `zsh/` - Shell configurations
+- `nvim/`, `vim/`, `emacs/` - Editor configurations  
+- `git_template/` - Git hooks and templates
+- `hammerspoon/`, `karabiner/` - macOS automation and keyboard tools
+- `bin/` - Custom utility scripts
+- `src/` - Source code for custom tools
+
+## Features
+
+- **Cross-shell compatibility** with both Bash and Zsh support
+- **Modern Neovim setup** using native plugin management and modular architecture
+- **Custom utilities** for development workflow enhancement
+- **macOS integration** with system automation tools
+- **Version controlled** configuration with easy rollback capabilities
+
+## Notes
+
+Each major tool has its own `CLAUDE.md` file containing detailed configuration information and development guidelines for AI-assisted maintenance.
+
+---
+
+## GPG Setup for Commit Signing
 
 1. Install GPGTools - [https://gpgtools.org/](https://gpgtools.org/)
 
