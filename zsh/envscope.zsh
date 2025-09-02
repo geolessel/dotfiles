@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
-# -*- lexical-binding: t -*-
-#
 # envscope - A secure directory environment manager for zsh
+#            by Geoffrey Lessel (code@geoffreylessel.com)
+#
 # Automatically loads .envrc files with SHA-based security approval
 # and provides hierarchical environment management with smart unloading.
 
