@@ -63,10 +63,24 @@ envscope() {
         fi
       done
       ;;
+    clear)
+      echo "[envscope] Clearing all hash caches..."
+      
+      # Clear in-memory caches
+      ENVSCOPE_APPROVED_HASHES=()
+      ENVSCOPE_REJECTED_HASHES=()
+      
+      # Remove cache files
+      [[ -f "$ENVSCOPE_APPROVED_FILE" ]] && rm "$ENVSCOPE_APPROVED_FILE"
+      [[ -f "$ENVSCOPE_REJECTED_FILE" ]] && rm "$ENVSCOPE_REJECTED_FILE"
+      
+      echo "[envscope] Hash caches cleared. All .envrc files will require re-approval."
+      ;;
     *)
       echo "[envscope] Unknown command: $command"
       echo "[envscope] Available commands:"
       echo "  envscope approve <file>  - Approve a previously rejected .envrc file"
+      echo "  envscope clear           - Clear all hash caches (requires re-approval of all files)"
       return 1
       ;;
   esac
