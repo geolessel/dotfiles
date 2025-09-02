@@ -1,6 +1,9 @@
-# Personal Dotfiles
+# Geo's Dotfiles
 
-A comprehensive collection of configuration files and development tools for macOS, organized for easy setup and maintenance.
+My dotfiles I use on my development machines.
+Not all the files and configurations are used all the time.
+Over time, tools fall in and out of favor and their configs may be left to rust away.
+A good example of this is my journey from vi -> vim -> nvim -> emacs -> nvim.
 
 ## Overview
 
