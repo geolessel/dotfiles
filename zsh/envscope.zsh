@@ -7,6 +7,7 @@
 
 # Namespace for envscope to avoid conflicts
 typeset -A ENVSCOPE_APPROVED_HASHES
+typeset -A ENVSCOPE_REJECTED_HASHES
 typeset -A ENVSCOPE_ACTIVE_ENVS
 typeset -A ENVSCOPE_ORIGINAL_VALUES  # Store original values of modified variables
 typeset -A ENVSCOPE_SET_VARS         # Track which variables were set by envscope
@@ -14,6 +15,62 @@ typeset -A ENVSCOPE_FILE_VARS        # Track which variables were set by which f
 typeset -A ENVSCOPE_CURRENT_STATE
 typeset ENVSCOPE_CONFIG_DIR="$HOME/.config/envscope"
 typeset ENVSCOPE_APPROVED_FILE="$ENVSCOPE_CONFIG_DIR/approved_hashes"
+typeset ENVSCOPE_REJECTED_FILE="$ENVSCOPE_CONFIG_DIR/rejected_hashes"
+
+# Command to approve a previously rejected .envrc file
+envscope() {
+  local command="$1"
+  local file="$2"
+  
+  case "$command" in
+    approve)
+      if [[ -z "$file" ]]; then
+        echo "[envscope] Usage: envscope approve <file>"
+        echo "[envscope] Example: envscope approve .envrc"
+        return 1
+      fi
+      
+      # Convert to absolute path
+      if [[ "$file" != /* ]]; then
+        file="$PWD/$file"
+      fi
+      
+      if [[ ! -f "$file" ]]; then
+        echo "[envscope] Error: File '$file' does not exist"
+        return 1
+      fi
+      
+      # Calculate current hash
+      local current_hash=$(_envscope_hash_file "$file")
+      
+      # Remove from rejected list and add to approved list
+      unset "ENVSCOPE_REJECTED_HASHES[$file]"
+      ENVSCOPE_APPROVED_HASHES[$file]=$current_hash
+      
+      # Save both files
+      _envscope_save_rejected_hashes
+      _envscope_save_approved_hashes
+      
+      echo "[envscope] Approved $file"
+      
+      # Reload environment if we're in a directory that would use this file
+      local current_files=($(_envscope_find_envrc_files))
+      for current_file in "${current_files[@]}"; do
+        if [[ "$current_file" == "$file" ]]; then
+          echo "[envscope] Reloading environment..."
+          _envscope_load_envrc
+          break
+        fi
+      done
+      ;;
+    *)
+      echo "[envscope] Unknown command: $command"
+      echo "[envscope] Available commands:"
+      echo "  envscope approve <file>  - Approve a previously rejected .envrc file"
+      return 1
+      ;;
+  esac
+}
 
 # Initialize envscope
 _envscope_init() {
@@ -25,6 +82,13 @@ _envscope_init() {
     while IFS='|' read -r hash file; do
       ENVSCOPE_APPROVED_HASHES[$file]=$hash
     done < "$ENVSCOPE_APPROVED_FILE"
+  fi
+  
+  # Load rejected hashes from file
+  if [[ -f "$ENVSCOPE_REJECTED_FILE" ]]; then
+    while IFS='|' read -r hash file; do
+      ENVSCOPE_REJECTED_HASHES[$file]=$hash
+    done < "$ENVSCOPE_REJECTED_FILE"
   fi
   
   # Capture initial environment state
@@ -84,6 +148,30 @@ _envscope_save_approved_hashes() {
   }
 }
 
+# Save rejected hashes to file
+_envscope_save_rejected_hashes() {
+  # Ensure directory exists
+  if [[ ! -d "$ENVSCOPE_CONFIG_DIR" ]]; then
+    mkdir -p "$ENVSCOPE_CONFIG_DIR" || {
+      echo "[envscope] ERROR: Failed to create config directory" >&2
+      return 1
+    }
+  fi
+  
+  local file hash content=""
+  
+  # Build content string first
+  for file hash in ${(kv)ENVSCOPE_REJECTED_HASHES}; do
+    content="${content}${hash}|${file}\n"
+  done
+  
+  # Write content to file
+  printf "$content" > "$ENVSCOPE_REJECTED_FILE" || {
+    echo "[envscope] ERROR: Failed to write rejected hashes file" >&2
+    return 1
+  }
+}
+
 # Check if .envrc file is approved
 _envscope_is_approved() {
   local file="$1"
@@ -91,6 +179,15 @@ _envscope_is_approved() {
   local approved_hash="${ENVSCOPE_APPROVED_HASHES[$file]}"
   
   [[ "$current_hash" == "$approved_hash" ]]
+}
+
+# Check if .envrc file is rejected
+_envscope_is_rejected() {
+  local file="$1"
+  local current_hash=$(_envscope_hash_file "$file")
+  local rejected_hash="${ENVSCOPE_REJECTED_HASHES[$file]}"
+  
+  [[ "$current_hash" == "$rejected_hash" ]]
 }
 
 # Prompt user for approval of .envrc file
@@ -112,7 +209,9 @@ _envscope_request_approval() {
         return 0
         ;;
       [nN])
-        echo "[envscope] Not approved."
+        ENVSCOPE_REJECTED_HASHES[$file]=$current_hash
+        _envscope_save_rejected_hashes
+        echo "[envscope] Rejected."
         return 1
         ;;
       [vV])
@@ -276,31 +375,26 @@ _envscope_load_envrc() {
   for file in "${files[@]}"; do
     if [[ -f "$file" ]]; then
       if _envscope_is_approved "$file"; then
-        # Capture state before this file
+        # File is approved, load it
         _envscope_capture_current_state
-        
-        # Source the file (suppress echo output)
         source "$file" >/dev/null 2>/dev/null || echo "[envscope] Warning: Error sourcing $file"
-        
-        # Show changes for this specific file
         _envscope_show_file_changes "$file"
-        
         ENVSCOPE_ACTIVE_ENVS[$file]=1
         loaded_any=1
+      elif _envscope_is_rejected "$file"; then
+        # File was previously rejected, skip with helpful message
+        local filename=$(basename "$file")
+        echo "[envscope] Skipping $file (rejected) - run 'envscope approve $filename' to approve"
       elif _envscope_request_approval "$file"; then
-        # Capture state before this file
+        # File was newly approved
         _envscope_capture_current_state
-        
-        # Source the file (suppress echo output)  
         source "$file" >/dev/null 2>/dev/null || echo "[envscope] Warning: Error sourcing $file"
-        
-        # Show changes for this specific file
         _envscope_show_file_changes "$file"
-        
         ENVSCOPE_ACTIVE_ENVS[$file]=1
         loaded_any=1
       else
-        echo "[envscope] Skipping $file (not approved)"
+        # File was newly rejected, already handled in _envscope_request_approval
+        continue
       fi
     fi
   done
