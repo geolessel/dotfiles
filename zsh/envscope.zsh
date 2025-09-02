@@ -10,6 +10,7 @@ typeset -A ENVSCOPE_APPROVED_HASHES
 typeset -A ENVSCOPE_ACTIVE_ENVS
 typeset -A ENVSCOPE_ORIGINAL_VALUES  # Store original values of modified variables
 typeset -A ENVSCOPE_SET_VARS         # Track which variables were set by envscope
+typeset -A ENVSCOPE_FILE_VARS        # Track which variables were set by which file
 typeset -A ENVSCOPE_CURRENT_STATE
 typeset ENVSCOPE_CONFIG_DIR="$HOME/.config/envscope"
 typeset ENVSCOPE_APPROVED_FILE="$ENVSCOPE_CONFIG_DIR/approved_hashes"
@@ -98,10 +99,6 @@ _envscope_request_approval() {
   local current_hash=$(_envscope_hash_file "$file")
   
   echo "[envscope] Found new or modified .envrc file: $file"
-  echo "[envscope] Contents:"
-  echo "----------------------------------------"
-  cat "$file" | sed 's/^/  /'
-  echo "----------------------------------------"
   
   while true; do
     printf "[envscope] Approve this .envrc file? (y/n/v=view): "
@@ -109,9 +106,7 @@ _envscope_request_approval() {
     echo  # newline after single char input
     case "$response" in
       [yY])
-        echo "[envscope] Setting hash..."
         ENVSCOPE_APPROVED_HASHES[$file]=$current_hash
-        echo "[envscope] Saving to file..."
         _envscope_save_approved_hashes
         echo "[envscope] Approved!"
         return 0
@@ -121,7 +116,7 @@ _envscope_request_approval() {
         return 1
         ;;
       [vV])
-        echo "[envscope] Viewing file contents:"
+        echo "[envscope] File contents:"
         echo "----------------------------------------"
         cat "$file" | sed 's/^/  /'
         echo "----------------------------------------"
@@ -178,13 +173,52 @@ _envscope_find_envrc_files() {
   echo "${existing_files[@]}"
 }
 
-# Compare environment states and show changes
-_envscope_show_env_changes() {
-  # Simple approach - just show that environment was loaded
-  # The complex diff was likely causing the hang
-  echo "[envscope] Environment loaded successfully"
+# Show environment changes for a specific file by analyzing exports
+_envscope_show_file_changes() {
+  local file="$1"
+  local -A old_state
+  local var val
   
-  # Update current state for next comparison
+  # Copy old state
+  for var in ${(k)ENVSCOPE_CURRENT_STATE}; do
+    old_state[$var]="${ENVSCOPE_CURRENT_STATE[$var]}"
+  done
+  
+  # Parse the .envrc file to find exported variables
+  local changes=()
+  local exported_vars=()
+  
+  # Extract variable names that are exported in this file
+  while IFS= read -r line; do
+    # Match export statements
+    if [[ "$line" =~ ^[[:space:]]*export[[:space:]]+([A-Za-z0-9_]+)= ]]; then
+      exported_vars+=(${match[1]})
+    fi
+  done < "$file"
+  
+  # Clear previous tracking for this file to avoid duplicates
+  ENVSCOPE_FILE_VARS[$file]=""
+  
+  # Check each exported variable to see if it was new or modified
+  for var in "${exported_vars[@]}"; do
+    local current_value="${(P)var}"
+    if [[ -z "${old_state[$var]}" ]]; then
+      # New variable
+      changes+=("+$var")
+    elif [[ "${old_state[$var]}" != "$current_value" ]]; then
+      # Modified variable  
+      changes+=("~$var")
+    fi
+    # Track that this file sets this variable (no duplicates due to clear above)
+    ENVSCOPE_FILE_VARS[$file]+="$var "
+  done
+  
+  # Show changes if any
+  if [[ ${#changes[@]} -gt 0 ]]; then
+    echo "[envscope] $file | ${(j: :)changes}"
+  fi
+  
+  # Update current state
   _envscope_capture_current_state
 }
 
@@ -200,8 +234,8 @@ _envscope_capture_pre_load_state() {
       PWD|OLDPWD|SHLVL|_) continue ;;
     esac
     
-    # Store original value if we don't already have it
-    if [[ -z "${ENVSCOPE_ORIGINAL_VALUES[$var]}" ]]; then
+    # Store original value only if we don't already have it AND it's not currently managed by envscope
+    if [[ -z "${ENVSCOPE_ORIGINAL_VALUES[$var]}" && -z "${ENVSCOPE_SET_VARS[$var]}" ]]; then
       ENVSCOPE_ORIGINAL_VALUES[$var]="$val"
     fi
   done < <(env)
@@ -220,7 +254,12 @@ _envscope_track_changes() {
     esac
     
     # Check if this variable was set or changed
-    if [[ -z "${ENVSCOPE_ORIGINAL_VALUES[$var]}" || "${ENVSCOPE_ORIGINAL_VALUES[$var]}" != "$val" ]]; then
+    if [[ -z "${ENVSCOPE_ORIGINAL_VALUES[$var]}" ]]; then
+      # Variable didn't exist originally
+      ENVSCOPE_ORIGINAL_VALUES[$var]="__ENVSCOPE_UNSET__"
+      ENVSCOPE_SET_VARS[$var]=1
+    elif [[ "${ENVSCOPE_ORIGINAL_VALUES[$var]}" != "$val" ]]; then
+      # Variable was changed from original
       ENVSCOPE_SET_VARS[$var]=1
     fi
   done < <(env)
@@ -237,13 +276,27 @@ _envscope_load_envrc() {
   for file in "${files[@]}"; do
     if [[ -f "$file" ]]; then
       if _envscope_is_approved "$file"; then
-        echo "[envscope] Loading $file (approved)"
-        source "$file" 2>/dev/null || echo "[envscope] Warning: Error sourcing $file"
+        # Capture state before this file
+        _envscope_capture_current_state
+        
+        # Source the file (suppress echo output)
+        source "$file" >/dev/null 2>/dev/null || echo "[envscope] Warning: Error sourcing $file"
+        
+        # Show changes for this specific file
+        _envscope_show_file_changes "$file"
+        
         ENVSCOPE_ACTIVE_ENVS[$file]=1
         loaded_any=1
       elif _envscope_request_approval "$file"; then
-        echo "[envscope] Loading $file (newly approved)"
-        source "$file" 2>/dev/null || echo "[envscope] Warning: Error sourcing $file"
+        # Capture state before this file
+        _envscope_capture_current_state
+        
+        # Source the file (suppress echo output)  
+        source "$file" >/dev/null 2>/dev/null || echo "[envscope] Warning: Error sourcing $file"
+        
+        # Show changes for this specific file
+        _envscope_show_file_changes "$file"
+        
         ENVSCOPE_ACTIVE_ENVS[$file]=1
         loaded_any=1
       else
@@ -253,36 +306,32 @@ _envscope_load_envrc() {
   done
   
   if [[ $loaded_any -eq 1 ]]; then
-    # Track what variables were set by the .envrc files
+    # Track what variables were set by all the .envrc files
     _envscope_track_changes
-    echo "[envscope] Environment loaded successfully"
   fi
 }
 
-# Restore environment variables to their original state
+# Restore environment variables and show which variables are affected
 _envscope_restore_environment() {
   local var
-  local restored_vars=()
-  local unset_vars=()
+  local affected_vars=()
   
   for var in ${(k)ENVSCOPE_SET_VARS}; do
+    affected_vars+=("$var")
+    
     if [[ -n "${ENVSCOPE_ORIGINAL_VALUES[$var]}" ]]; then
       # Restore original value
       export "$var"="${ENVSCOPE_ORIGINAL_VALUES[$var]}"
-      restored_vars+=("$var")
     else
       # Variable was newly created, unset it
       unset "$var"
-      unset_vars+=("$var")
     fi
     unset "ENVSCOPE_SET_VARS[$var]"
     unset "ENVSCOPE_ORIGINAL_VALUES[$var]"
   done
   
-  # Show summary of changes
-  if [[ ${#restored_vars[@]} -gt 0 || ${#unset_vars[@]} -gt 0 ]]; then
-    echo "[envscope] Environment restored: ${#restored_vars[@]} restored, ${#unset_vars[@]} unset"
-  fi
+  # Return the list of affected variables
+  echo "${affected_vars[@]}"
 }
 
 # Unload .envrc files that are no longer in scope
@@ -291,6 +340,7 @@ _envscope_unload_envrc() {
   local active_file
   local should_unload
   local unloaded_any=0
+  local unloaded_files=()
   
   # Check each active environment
   for active_file in ${(k)ENVSCOPE_ACTIVE_ENVS}; do
@@ -306,21 +356,87 @@ _envscope_unload_envrc() {
     
     # Unload if no longer in scope
     if [[ $should_unload -eq 1 ]]; then
-      echo "[envscope] Unloading $active_file"
+      # Get variables set by this specific file
+      local file_vars=(${=ENVSCOPE_FILE_VARS[$active_file]})
+      
+      if [[ ${#file_vars[@]} -gt 0 ]]; then
+        local unload_changes=()
+        
+        # Determine what happens to each variable during unloading
+        for var in "${file_vars[@]}"; do
+          # Check if this variable is used by any remaining .envrc files
+          local var_used_elsewhere=0
+          local new_value=""
+          
+          for remaining_file in "${current_files[@]}"; do
+            if [[ "$ENVSCOPE_FILE_VARS[$remaining_file]" == *"$var "* ]]; then
+              var_used_elsewhere=1
+              # Get the value from the remaining file by parsing it
+              while IFS= read -r line; do
+                if [[ "$line" =~ ^[[:space:]]*export[[:space:]]+${var}=\"?([^\"]*) ]]; then
+                  new_value="${match[1]}"
+                  new_value="${new_value%\"}"  # Remove trailing quote if present
+                  break
+                fi
+              done < "$remaining_file"
+              break
+            fi
+          done
+          
+          # Determine the change type
+          if [[ $var_used_elsewhere -eq 1 ]]; then
+            # Variable will be changed to value from remaining file
+            unload_changes+=("~$var")
+          else
+            # Check if variable will be restored to original or removed
+            if [[ -n "${ENVSCOPE_ORIGINAL_VALUES[$var]}" ]]; then
+              unload_changes+=("~$var")  # Restored to original
+            else
+              unload_changes+=("-$var")  # Removed entirely
+            fi
+          fi
+          
+          # Actually perform the unloading
+          if [[ $var_used_elsewhere -eq 0 ]]; then
+            local original_value="${ENVSCOPE_ORIGINAL_VALUES[$var]}"
+            if [[ -n "$original_value" && "$original_value" != "__ENVSCOPE_UNSET__" ]]; then
+              export "$var"="$original_value"
+            else
+              unset "$var"
+            fi
+            unset "ENVSCOPE_SET_VARS[$var]"
+            unset "ENVSCOPE_ORIGINAL_VALUES[$var]"
+          fi
+        done
+        
+        echo "[envscope] Unloading $active_file | ${(j: :)unload_changes}"
+      fi
+      
+      unset "ENVSCOPE_FILE_VARS[$active_file]"
       unset "ENVSCOPE_ACTIVE_ENVS[$active_file]"
       unloaded_any=1
     fi
   done
   
   if [[ $unloaded_any -eq 1 ]]; then
-    # Restore original environment state
-    _envscope_restore_environment
-    
     # Reload remaining .envrc files in current scope
     local remaining_files=($(_envscope_find_envrc_files))
     if [[ ${#remaining_files[@]} -gt 0 ]]; then
-      echo "[envscope] Reloading remaining environments..."
       _envscope_load_envrc
+    else
+      # No remaining files - clean up any leftover variables
+      for var in ${(k)ENVSCOPE_SET_VARS}; do
+        local original_value="${ENVSCOPE_ORIGINAL_VALUES[$var]}"
+        if [[ -n "$original_value" && "$original_value" != "__ENVSCOPE_UNSET__" ]]; then
+          export "$var"="$original_value"
+        else
+          unset "$var"
+        fi
+        unset "ENVSCOPE_SET_VARS[$var]"
+        unset "ENVSCOPE_ORIGINAL_VALUES[$var]"
+      done
+      # Clear all file variable tracking
+      ENVSCOPE_FILE_VARS=()
     fi
   fi
 }
