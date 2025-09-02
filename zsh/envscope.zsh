@@ -13,11 +13,12 @@ typeset -A ENVSCOPE_ORIGINAL_VALUES  # Store original values of modified variabl
 typeset -A ENVSCOPE_SET_VARS         # Track which variables were set by envscope
 typeset -A ENVSCOPE_FILE_VARS        # Track which variables were set by which file
 typeset -A ENVSCOPE_CURRENT_STATE
+typeset -A ENVSCOPE_LAST_SOURCE_RC    # Track last sourcing exit code per file
 typeset ENVSCOPE_CONFIG_DIR="$HOME/.config/envscope"
 typeset ENVSCOPE_APPROVED_FILE="$ENVSCOPE_CONFIG_DIR/approved_hashes"
 typeset ENVSCOPE_REJECTED_FILE="$ENVSCOPE_CONFIG_DIR/rejected_hashes"
 
-# Command to approve a previously rejected .envrc file
+# Command to approve or clear caches
 envscope() {
   local command="$1"
   local file="$2"
@@ -47,7 +48,7 @@ envscope() {
       unset "ENVSCOPE_REJECTED_HASHES[$file]"
       ENVSCOPE_APPROVED_HASHES[$file]=$current_hash
       
-      # Save both files
+      # Save both files (atomic)
       _envscope_save_rejected_hashes
       _envscope_save_approved_hashes
       
@@ -71,8 +72,8 @@ envscope() {
       ENVSCOPE_REJECTED_HASHES=()
       
       # Remove cache files
-      [[ -f "$ENVSCOPE_APPROVED_FILE" ]] && rm "$ENVSCOPE_APPROVED_FILE"
-      [[ -f "$ENVSCOPE_REJECTED_FILE" ]] && rm "$ENVSCOPE_REJECTED_FILE"
+      [[ -f "$ENVSCOPE_APPROVED_FILE" ]] && rm -f -- "$ENVSCOPE_APPROVED_FILE"
+      [[ -f "$ENVSCOPE_REJECTED_FILE" ]] && rm -f -- "$ENVSCOPE_REJECTED_FILE"
       
       echo "[envscope] Hash caches cleared. All .envrc files will require re-approval."
       ;;
@@ -109,6 +110,14 @@ _envscope_init() {
   _envscope_capture_current_state
 }
 
+# Pretty-print stderr lines from sourced files (no temp files)
+_envscope_prefix_stderr() {
+  local line
+  while IFS= read -r line; do
+    print -r -- "  $line"
+  done
+}
+
 # Capture current environment state
 _envscope_capture_current_state() {
   ENVSCOPE_CURRENT_STATE=()
@@ -120,25 +129,26 @@ _envscope_capture_current_state() {
     [[ -z "$var" ]] && continue
     # Skip variables with problematic characters
     [[ "$var" =~ [^A-Za-z0-9_] ]] && continue
-    
     ENVSCOPE_CURRENT_STATE[$var]="$val"
   done < <(env)
 }
 
-# Calculate SHA256 hash of a file
+# Calculate SHA256 hash of a file (prefer openssl, then shasum, then sha256sum)
 _envscope_hash_file() {
   local file="$1"
-  if command -v sha256sum >/dev/null 2>&1; then
-    sha256sum "$file" | cut -d' ' -f1
+  if command -v openssl >/dev/null 2>&1; then
+    openssl dgst -sha256 "$file" | awk '{print $NF}'
   elif command -v shasum >/dev/null 2>&1; then
-    shasum -a 256 "$file" | cut -d' ' -f1
+    shasum -a 256 "$file" | awk '{print $1}'
+  elif command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$file" | awk '{print $1}'
   else
-    echo "ERROR: No SHA256 utility found (sha256sum or shasum)" >&2
+    echo "ERROR: No SHA256 utility found (openssl, shasum, or sha256sum)" >&2
     return 1
   fi
 }
 
-# Save approved hashes to file
+# Save approved hashes to file (atomic, printf-safe)
 _envscope_save_approved_hashes() {
   # Ensure directory exists
   if [[ ! -d "$ENVSCOPE_CONFIG_DIR" ]]; then
@@ -147,22 +157,17 @@ _envscope_save_approved_hashes() {
       return 1
     }
   fi
-  
-  local file hash content=""
-  
-  # Build content string first
-  for file hash in ${(kv)ENVSCOPE_APPROVED_HASHES}; do
-    content="${content}${hash}|${file}\n"
-  done
-  
-  # Write content to file
-  printf "$content" > "$ENVSCOPE_APPROVED_FILE" || {
-    echo "[envscope] ERROR: Failed to write approved hashes file" >&2
-    return 1
-  }
+  local tmp="$ENVSCOPE_APPROVED_FILE.tmp.$$"
+  {
+    local file hash
+    for file hash in ${(kv)ENVSCOPE_APPROVED_HASHES}; do
+      printf "%s|%s\n" "$hash" "$file"
+    done
+  } >| "$tmp" || { echo "[envscope] ERROR: Failed to write temp approved hashes file" >&2; rm -f -- "$tmp"; return 1; }
+  mv -f -- "$tmp" "$ENVSCOPE_APPROVED_FILE" || { echo "[envscope] ERROR: Failed to move approved hashes file" >&2; rm -f -- "$tmp"; return 1; }
 }
 
-# Save rejected hashes to file
+# Save rejected hashes to file (atomic, printf-safe)
 _envscope_save_rejected_hashes() {
   # Ensure directory exists
   if [[ ! -d "$ENVSCOPE_CONFIG_DIR" ]]; then
@@ -171,19 +176,14 @@ _envscope_save_rejected_hashes() {
       return 1
     }
   fi
-  
-  local file hash content=""
-  
-  # Build content string first
-  for file hash in ${(kv)ENVSCOPE_REJECTED_HASHES}; do
-    content="${content}${hash}|${file}\n"
-  done
-  
-  # Write content to file
-  printf "$content" > "$ENVSCOPE_REJECTED_FILE" || {
-    echo "[envscope] ERROR: Failed to write rejected hashes file" >&2
-    return 1
-  }
+  local tmp="$ENVSCOPE_REJECTED_FILE.tmp.$$"
+  {
+    local file hash
+    for file hash in ${(kv)ENVSCOPE_REJECTED_HASHES}; do
+      printf "%s|%s\n" "$hash" "$file"
+    done
+  } >| "$tmp" || { echo "[envscope] ERROR: Failed to write temp rejected hashes file" >&2; rm -f -- "$tmp"; return 1; }
+  mv -f -- "$tmp" "$ENVSCOPE_REJECTED_FILE" || { echo "[envscope] ERROR: Failed to move rejected hashes file" >&2; rm -f -- "$tmp"; return 1; }
 }
 
 # Check if .envrc file is approved
@@ -191,7 +191,6 @@ _envscope_is_approved() {
   local file="$1"
   local current_hash=$(_envscope_hash_file "$file")
   local approved_hash="${ENVSCOPE_APPROVED_HASHES[$file]}"
-  
   [[ "$current_hash" == "$approved_hash" ]]
 }
 
@@ -200,7 +199,6 @@ _envscope_is_rejected() {
   local file="$1"
   local current_hash=$(_envscope_hash_file "$file")
   local rejected_hash="${ENVSCOPE_REJECTED_HASHES[$file]}"
-  
   [[ "$current_hash" == "$rejected_hash" ]]
 }
 
@@ -231,7 +229,7 @@ _envscope_request_approval() {
       [vV])
         echo "[envscope] File contents:"
         echo "----------------------------------------"
-        cat "$file" | sed 's/^/  /'
+        sed 's/^/  /' "$file"
         echo "----------------------------------------"
         ;;
       *)
@@ -348,7 +346,7 @@ _envscope_capture_pre_load_state() {
     esac
     
     # Store original value only if we don't already have it AND it's not currently managed by envscope
-    if [[ -z "${ENVSCOPE_ORIGINAL_VALUES[$var]}" && -z "${ENVSCOPE_SET_VARS[$var]}" ]]; then
+    if (( ! ${+ENVSCOPE_ORIGINAL_VALUES[$var]} )) && (( ! ${+ENVSCOPE_SET_VARS[$var]} )); then
       ENVSCOPE_ORIGINAL_VALUES[$var]="$val"
     fi
   done < <(env)
@@ -367,7 +365,7 @@ _envscope_track_changes() {
     esac
     
     # Check if this variable was set or changed
-    if [[ -z "${ENVSCOPE_ORIGINAL_VALUES[$var]}" ]]; then
+    if (( ! ${+ENVSCOPE_ORIGINAL_VALUES[$var]} )); then
       # Variable didn't exist originally
       ENVSCOPE_ORIGINAL_VALUES[$var]="__ENVSCOPE_UNSET__"
       ENVSCOPE_SET_VARS[$var]=1
@@ -391,7 +389,12 @@ _envscope_load_envrc() {
       if _envscope_is_approved "$file"; then
         # File is approved, load it
         _envscope_capture_current_state
-        source "$file" >/dev/null 2>/dev/null || echo "[envscope] Warning: Error sourcing $file"
+        source "$file" >/dev/null 2> >(_envscope_prefix_stderr >&2)
+        local rc=$?
+        ENVSCOPE_LAST_SOURCE_RC[$file]=$rc
+        if (( rc != 0 )); then
+          echo "[envscope] Error sourcing $file (exit $rc)"
+        fi
         _envscope_show_file_changes "$file"
         ENVSCOPE_ACTIVE_ENVS[$file]=1
         loaded_any=1
@@ -402,7 +405,12 @@ _envscope_load_envrc() {
       elif _envscope_request_approval "$file"; then
         # File was newly approved
         _envscope_capture_current_state
-        source "$file" >/dev/null 2>/dev/null || echo "[envscope] Warning: Error sourcing $file"
+        source "$file" >/dev/null 2> >(_envscope_prefix_stderr >&2)
+        local rc=$?
+        ENVSCOPE_LAST_SOURCE_RC[$file]=$rc
+        if (( rc != 0 )); then
+          echo "[envscope] Error sourcing $file (exit $rc)"
+        fi
         _envscope_show_file_changes "$file"
         ENVSCOPE_ACTIVE_ENVS[$file]=1
         loaded_any=1
@@ -427,9 +435,10 @@ _envscope_restore_environment() {
   for var in ${(k)ENVSCOPE_SET_VARS}; do
     affected_vars+=("$var")
     
-    if [[ -n "${ENVSCOPE_ORIGINAL_VALUES[$var]}" ]]; then
+    local original_value="${ENVSCOPE_ORIGINAL_VALUES[$var]}"
+    if (( ${+ENVSCOPE_ORIGINAL_VALUES[$var]} )) && [[ "$original_value" != "__ENVSCOPE_UNSET__" ]]; then
       # Restore original value
-      export "$var"="${ENVSCOPE_ORIGINAL_VALUES[$var]}"
+      export "$var"="$original_value"
     else
       # Variable was newly created, unset it
       unset "$var"
@@ -497,7 +506,7 @@ _envscope_unload_envrc() {
             unload_changes+=("~$var")
           else
             # Check if variable will be restored to original or removed
-            if [[ -n "${ENVSCOPE_ORIGINAL_VALUES[$var]}" ]]; then
+            if (( ${+ENVSCOPE_ORIGINAL_VALUES[$var]} )); then
               unload_changes+=("~$var")  # Restored to original
             else
               unload_changes+=("-$var")  # Removed entirely
@@ -564,3 +573,20 @@ _envscope_init
 
 # Load .envrc for current directory on startup
 _envscope_load_envrc
+
+# Show current envscope status: active files, last rc, and vars
+envscope-status() {
+  echo "[envscope] Active .envrc files:"
+  local file
+  local files=($(_envscope_find_envrc_files))
+  for file in "${files[@]}"; do
+    if [[ -n "${ENVSCOPE_ACTIVE_ENVS[$file]}" ]]; then
+      local rc
+      rc="${ENVSCOPE_LAST_SOURCE_RC[$file]:-N/A}"
+      print -r -- "  $file (rc=$rc)"
+      if [[ -n "${ENVSCOPE_FILE_VARS[$file]}" ]]; then
+        print -r -- "    vars: ${ENVSCOPE_FILE_VARS[$file]}"
+      fi
+    fi
+  done
+}
