@@ -108,6 +108,16 @@ vim.keymap.set("n", "<leader>,n", function()
     print("Line numbers disabled")
   end
 end, { desc = "Toggle line numbers" })
+vim.keymap.set("n", "<leader>,v", function()
+  local current_config = vim.diagnostic.config()
+  current_config.virtual_lines = not current_config.virtual_lines
+  vim.diagnostic.config(current_config)
+  if current_config.virtual_lines then
+    print("LSP virtual lines enabled")
+  else
+    print("LSP virtual lines disabled")
+  end
+end, { desc = "Toggle LSP virtual lines" })
 
 -- Tab management
 vim.keymap.set('n', '<leader>tc', ':tabnew<CR>', { desc = 'Create tab' })

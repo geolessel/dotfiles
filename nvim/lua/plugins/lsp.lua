@@ -30,6 +30,7 @@ vim.lsp.document_color.enable() -- hex codes are colored
 
 -- Configure diagnostic floating windows
 vim.diagnostic.config({
+  virtual_lines = true,
   float = {
     border = "rounded"
   }
