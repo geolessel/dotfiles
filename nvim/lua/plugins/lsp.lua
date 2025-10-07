@@ -16,7 +16,7 @@ vim.lsp.config('lua_ls', {
   }
 })
 
-vim.lsp.enable({ 'lua_ls', 'expert', 'ts_ls' })
+vim.lsp.enable({ 'lua_ls', 'expert', 'ts_ls', 'ruby_lsp' })
 vim.lsp.document_color.enable() -- hex codes are colored
 
 -- Configure LSP floating windows with borders
