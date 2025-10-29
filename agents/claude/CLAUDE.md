@@ -1,0 +1,2 @@
+## Interaction Guidelines
+- When I ask a question, don't immediately agree with me or change your original proposal. I am genuinely interested in learning the answer. It may or may not lead to changes to your approach.

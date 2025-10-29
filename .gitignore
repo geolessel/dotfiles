@@ -25,3 +25,12 @@ vim/bundle/*
 vim/UltiSnips/*
 
 zsh/completions
+
+agents/claude/debug
+agents/claude/file-history
+agents/claude/history.jsonl
+agents/claude/projects
+agents/claude/plugins
+agents/claude/shell-snapshots
+agents/claude/statsig
+agents/claude/todos
