@@ -1,0 +1,18 @@
+* Evil surround
+[surround command][text object][surround]
+
+** Surround command
+- =ys= :: create a surround
+- =ds= :: delete a surround
+- =cs= :: change a surround
+
+** Text object
+- =a= ::  a ___ (including white space)
+- =i=  :: inner ___ (excluding white space)
+- =w= :: word
+- =s= :: line
+- =t= :: tag (html)
+
+** Surround
+- =)}]>= :: add the surround character without a space                                            |
+- =({[<= :: add the surround character with a space                                               |
