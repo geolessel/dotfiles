@@ -1,10 +1,10 @@
 -- Basic settings
-vim.opt.number = true         -- line numbers
-vim.opt.relativenumber = true -- relative line numbers
-vim.opt.cursorline = true     -- highlight current line
-vim.opt.wrap = false          -- don't wrap lines
-vim.opt.scrolloff = 6         -- keep 6 lines above/below cursor
-vim.opt.sidescrolloff = 8     -- keep 8 columns left/right of cursor
+vim.opt.number = true          -- line numbers
+vim.opt.relativenumber = false -- relative line numbers
+vim.opt.cursorline = true      -- highlight current line
+vim.opt.wrap = false           -- don't wrap lines
+vim.opt.scrolloff = 6          -- keep 6 lines above/below cursor
+vim.opt.sidescrolloff = 8      -- keep 8 columns left/right of cursor
 
 -- Indentation
 vim.opt.tabstop = 2        -- tab width
@@ -87,3 +87,4 @@ local undodir = vim.fn.expand("~/.vim/undodir")
 if vim.fn.isdirectory(undodir) == 0 then
   vim.fn.mkdir(undodir, "p")
 end
+
