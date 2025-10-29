@@ -29,7 +29,26 @@ require('blink.cmp').setup({
   },
 
   -- (Default) Only show the documentation popup when manually triggered
-  completion = { documentation = { auto_show = false } },
+  completion = {
+    documentation = { auto_show = false },
+    menu = {
+      draw = {
+        columns = {
+          { 'kind_icon',   'label',    'label_description', gap = 1 },
+          { 'kind_icon',   'kind' },
+          { 'source_name', 'source_id' },
+        },
+        components = {
+          source_name = {
+            text = function(ctx)
+              if ctx.source_id == 'cmdline' then return end
+              return ctx.source_name:sub(1, 4)
+            end,
+          },
+        },
+      },
+    }
+  },
 
   -- Default list of enabled providers defined so that you can extend it
   -- elsewhere in your config, without redefining it, due to `opts_extend`
@@ -42,5 +61,6 @@ require('blink.cmp').setup({
   -- when the Rust fuzzy matcher is not available, by using `implementation = "prefer_rust"`
   --
   -- See the fuzzy documentation for more information
-  fuzzy = { implementation = "prefer_rust_with_warning" }
+  fuzzy = { implementation = "prefer_rust_with_warning" },
+
 })

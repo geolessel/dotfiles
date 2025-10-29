@@ -67,6 +67,48 @@ vim.keymap.set("n", "<leader>sg", function()
     end
   end)
 end, { desc = "Ripgrep to quickfix list" })
+-- Ripgrep subdirectory to quickfix list
+vim.keymap.set("n", "<leader>sd", function()
+  local current_dir = vim.fn.getcwd()
+
+  -- Create a custom picker that lists directories
+  local get_directories = function()
+    local cmd = 'find . -type d -not -path "*/\\.git/*" 2>/dev/null'
+    local handle = io.popen(cmd)
+    if not handle then return {} end
+
+    local result = handle:read("*a")
+    handle:close()
+
+    local dirs = {}
+    for dir in result:gmatch("[^\r\n]+") do
+      -- Convert relative path to absolute
+      local abs_path = vim.fn.fnamemodify(dir, ':p')
+      table.insert(dirs, { text = dir, path = abs_path })
+    end
+
+    return dirs
+  end
+
+  MiniPick.start({
+    source = {
+      items = get_directories(),
+      name = 'Select directory to search',
+      choose = function(item)
+        if not item then return end
+
+        -- Now prompt for the search pattern
+        vim.schedule(function()
+          vim.ui.input({ prompt = 'Ripgrep pattern: ' }, function(pattern)
+            if pattern and pattern ~= '' then
+              vim.cmd('cgetexpr system("rg --vimgrep \\"' .. pattern .. '\\" \\"' .. item.path .. '\\"") | copen')
+            end
+          end)
+        end)
+      end,
+    }
+  })
+end, { desc = "Ripgrep subdirectory to quickfix list" })
 
 -- Help
 vim.keymap.set("n", "<C-h>", MiniPick.builtin.help, { desc = "Find help" })
@@ -135,3 +177,4 @@ vim.keymap.set('n', '<leader>tO', tabs.open_file_in_tab, { desc = 'Open file in 
 vim.keymap.set('n', '<leader>tD', tabs.duplicate_tab, { desc = 'Duplicate current tab' })
 vim.keymap.set('n', '<leader>tr', tabs.close_tabs_right, { desc = 'Close tabs to the right' })
 vim.keymap.set('n', '<leader>tL', tabs.close_tabs_left, { desc = 'Close tabs to the left' })
+
