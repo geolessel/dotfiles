@@ -1,0 +1,48 @@
+# Minimalistic window
+window-decoration = auto
+macos-titlebar-style = hidden
+window-padding-x = 16
+window-padding-y = 16
+# Non-native fullscreen, but do leave the menu bar visible
+macos-non-native-fullscreen = visible-menu
+macos-titlebar-style = transparent
+# once maximized, stay maximized
+# window-save-state=always
+window-inherit-working-directory = false
+
+# selected text is copied to system clipboard
+copy-on-select = true
+
+shell-integration = zsh
+
+font-family = "PragmataPro Liga"
+font-size = 20
+
+cursor-style = block
+cursor-style-blink = true
+
+minimum-contrast = 1.5
+
+# theme = Monokai Pro Light
+# theme = Monokai Pro Machine
+# latte, frappe, macchiato, mocha
+theme = catppuccin-macchiato
+
+# Finally
+macos-option-as-alt = true
+
+# Cmd+Esc shows quick terminal
+keybind = global:super+shift+escape=toggle_quick_terminal
+
+# Don't quit on Cmd+Q
+# keybind = super+q=ignore
+
+# DO quit (without warning!) on Cmd+Q when pressed inside the macOS app switcher
+# confirm-close-surface = false
+
+# Disable ligatures
+# font-feature=-calt
+# font-feature=-liga
+# font-feature=-dlig
+
+keybind = shift+enter=text:\n
