@@ -37,3 +37,4 @@ export LANG='en_US.UTF-8'
 export LC_CTYPE=C
 export EDITOR="nvim"
 export KEYTIMEOUT=1
+export MIX_OS_DEPS_COMPILE_PARTITION_COUNT=$(( $(sysctl -n hw.physicalcpu) / 2 ))
