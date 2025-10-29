@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Find all man files in the directories specified by MANPATH
+find_man_files() {
+  manpath | tr ':' '\n'# | xargs -I {} find {} -type f -regex '.*[0-9]$'
+}
+
+# Main script
+find_man_files | fzf --preview 'man {}' --preview-window=right:70% --height=100% --layout=reverse --bind 'enter:execute(man {})'
