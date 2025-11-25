@@ -20,6 +20,7 @@ zsh_add_config "pco"
 zsh_add_config "env"
 zsh_add_config "aliases"
 zsh_add_config "bindings"
+zsh_add_config "envscope.zsh"
 
 zsh_add_completion_file "docker" "https://raw.githubusercontent.com/docker/cli/master/contrib/completion/zsh/_docker"
 zsh_add_completion_file "docker-compose" "https://raw.githubusercontent.com/docker/compose/master/contrib/completion/zsh/_docker-compose"
