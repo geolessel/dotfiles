@@ -6,17 +6,28 @@
 # and provides hierarchical environment management with smart unloading.
 
 # Namespace for envscope to avoid conflicts
-typeset -A ENVSCOPE_APPROVED_HASHES
-typeset -A ENVSCOPE_REJECTED_HASHES
-typeset -A ENVSCOPE_ACTIVE_ENVS
-typeset -A ENVSCOPE_ORIGINAL_VALUES  # Store original values of modified variables
-typeset -A ENVSCOPE_SET_VARS         # Track which variables were set by envscope
-typeset -A ENVSCOPE_FILE_VARS        # Track which variables were set by which file
-typeset -A ENVSCOPE_CURRENT_STATE
-typeset -A ENVSCOPE_LAST_SOURCE_RC    # Track last sourcing exit code per file
-typeset ENVSCOPE_CONFIG_DIR="$HOME/.config/envscope"
-typeset ENVSCOPE_APPROVED_FILE="$ENVSCOPE_CONFIG_DIR/approved_hashes"
-typeset ENVSCOPE_REJECTED_FILE="$ENVSCOPE_CONFIG_DIR/rejected_hashes"
+typeset -gA ENVSCOPE_APPROVED_HASHES
+typeset -gA ENVSCOPE_REJECTED_HASHES
+typeset -gA ENVSCOPE_ACTIVE_ENVS
+typeset -gA ENVSCOPE_ORIGINAL_VALUES  # Store original values of modified variables
+typeset -gA ENVSCOPE_SET_VARS         # Track which variables were set by envscope
+typeset -gA ENVSCOPE_FILE_VARS        # Track which variables were set by which file
+typeset -gA ENVSCOPE_CURRENT_STATE
+typeset -gA ENVSCOPE_LAST_SOURCE_RC    # Track last sourcing exit code per file
+typeset -g ENVSCOPE_CONFIG_DIR="$HOME/.config/envscope"
+typeset -g ENVSCOPE_APPROVED_FILE="$ENVSCOPE_CONFIG_DIR/approved_hashes"
+typeset -g ENVSCOPE_REJECTED_FILE="$ENVSCOPE_CONFIG_DIR/rejected_hashes"
+
+_envscope_ensure_state_vars() {
+  typeset -gA ENVSCOPE_APPROVED_HASHES
+  typeset -gA ENVSCOPE_REJECTED_HASHES
+  typeset -gA ENVSCOPE_ORIGINAL_VALUES
+  typeset -gA ENVSCOPE_SET_VARS
+  typeset -gA ENVSCOPE_FILE_VARS
+  typeset -gA ENVSCOPE_ACTIVE_ENVS
+  typeset -gA ENVSCOPE_CURRENT_STATE
+  typeset -gA ENVSCOPE_LAST_SOURCE_RC
+}
 
 # Command to approve or clear caches
 envscope() {
@@ -188,6 +199,7 @@ _envscope_save_rejected_hashes() {
 
 # Check if .envrc file is approved
 _envscope_is_approved() {
+  _envscope_ensure_state_vars
   local file="$1"
   local current_hash=$(_envscope_hash_file "$file")
   local approved_hash="${ENVSCOPE_APPROVED_HASHES[$file]}"
@@ -196,6 +208,7 @@ _envscope_is_approved() {
 
 # Check if .envrc file is rejected
 _envscope_is_rejected() {
+  _envscope_ensure_state_vars
   local file="$1"
   local current_hash=$(_envscope_hash_file "$file")
   local rejected_hash="${ENVSCOPE_REJECTED_HASHES[$file]}"
@@ -204,6 +217,7 @@ _envscope_is_rejected() {
 
 # Prompt user for approval of .envrc file
 _envscope_request_approval() {
+  _envscope_ensure_state_vars
   local file="$1"
   local current_hash=$(_envscope_hash_file "$file")
   
@@ -335,6 +349,7 @@ _envscope_show_file_changes() {
 
 # Capture environment state before loading .envrc
 _envscope_capture_pre_load_state() {
+  _envscope_ensure_state_vars
   local var val
   while IFS='=' read -r var val; do
     [[ -z "$var" ]] && continue
@@ -346,7 +361,7 @@ _envscope_capture_pre_load_state() {
     esac
     
     # Store original value only if we don't already have it AND it's not currently managed by envscope
-    if (( ! ${+ENVSCOPE_ORIGINAL_VALUES[$var]} )) && (( ! ${+ENVSCOPE_SET_VARS[$var]} )); then
+    if [[ ! -v ENVSCOPE_ORIGINAL_VALUES[$var] && ! -v ENVSCOPE_SET_VARS[$var] ]]; then
       ENVSCOPE_ORIGINAL_VALUES[$var]="$val"
     fi
   done < <(env)
@@ -354,6 +369,7 @@ _envscope_capture_pre_load_state() {
 
 # Track which variables were set/modified by .envrc loading  
 _envscope_track_changes() {
+  _envscope_ensure_state_vars
   local var val
   while IFS='=' read -r var val; do
     [[ -z "$var" ]] && continue
@@ -365,7 +381,7 @@ _envscope_track_changes() {
     esac
     
     # Check if this variable was set or changed
-    if (( ! ${+ENVSCOPE_ORIGINAL_VALUES[$var]} )); then
+    if [[ ! -v ENVSCOPE_ORIGINAL_VALUES[$var] ]]; then
       # Variable didn't exist originally
       ENVSCOPE_ORIGINAL_VALUES[$var]="__ENVSCOPE_UNSET__"
       ENVSCOPE_SET_VARS[$var]=1
@@ -429,6 +445,7 @@ _envscope_load_envrc() {
 
 # Restore environment variables and show which variables are affected
 _envscope_restore_environment() {
+  _envscope_ensure_state_vars
   local var
   local affected_vars=()
   
@@ -436,7 +453,7 @@ _envscope_restore_environment() {
     affected_vars+=("$var")
     
     local original_value="${ENVSCOPE_ORIGINAL_VALUES[$var]}"
-    if (( ${+ENVSCOPE_ORIGINAL_VALUES[$var]} )) && [[ "$original_value" != "__ENVSCOPE_UNSET__" ]]; then
+    if [[ -v ENVSCOPE_ORIGINAL_VALUES[$var] && "$original_value" != "__ENVSCOPE_UNSET__" ]]; then
       # Restore original value
       export "$var"="$original_value"
     else
@@ -453,6 +470,7 @@ _envscope_restore_environment() {
 
 # Unload .envrc files that are no longer in scope
 _envscope_unload_envrc() {
+  _envscope_ensure_state_vars
   local current_files=($(_envscope_find_envrc_files))
   local active_file
   local should_unload
@@ -506,7 +524,7 @@ _envscope_unload_envrc() {
             unload_changes+=("~$var")
           else
             # Check if variable will be restored to original or removed
-            if (( ${+ENVSCOPE_ORIGINAL_VALUES[$var]} )); then
+            if [[ -v ENVSCOPE_ORIGINAL_VALUES[$var] ]]; then
               unload_changes+=("~$var")  # Restored to original
             else
               unload_changes+=("-$var")  # Removed entirely
