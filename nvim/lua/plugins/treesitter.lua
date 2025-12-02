@@ -4,7 +4,7 @@ vim.pack.add {
 
 -- Treesitter configuration
 require 'nvim-treesitter.configs'.setup {
-  ensure_installed = { "elixir", "heex", "eex", "lua", "typescript", "tsx", "javascript" },
+  ensure_installed = { "elixir", "heex", "eex", "erlang", "ruby", "lua", "typescript", "tsx", "javascript" },
   auto_install = true,
   highlight = {
     enable = true,
@@ -14,3 +14,6 @@ require 'nvim-treesitter.configs'.setup {
     enable = true,
   },
 }
+
+-- Configure LFE files to use Erlang parser
+vim.treesitter.language.register('erlang', 'lfe')

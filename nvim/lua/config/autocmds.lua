@@ -42,3 +42,11 @@ vim.api.nvim_create_autocmd("BufWritePre", {
     vim.lsp.buf.format()
   end,
 })
+
+-- Detect LFE (Lisp Flavored Erlang) files
+vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+  pattern = "*.lfe",
+  callback = function()
+    vim.bo.filetype = "lfe"
+  end,
+})

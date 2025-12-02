@@ -16,7 +16,13 @@ vim.lsp.config('lua_ls', {
   }
 })
 
-vim.lsp.enable({ 'lua_ls', 'expert', 'ts_ls', 'ruby_lsp' })
+-- Configure ELP for LFE files
+vim.lsp.config('elp', {
+  filetypes = { 'lfe' },
+  root_markers = { 'rebar.config', 'rebar.config.script', '.git' },
+})
+
+vim.lsp.enable({ 'lua_ls', 'expert', 'ts_ls', 'ruby_lsp', 'elp' })
 vim.lsp.document_color.enable() -- hex codes are colored
 
 -- Configure LSP floating windows with borders
