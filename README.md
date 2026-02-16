@@ -39,6 +39,17 @@ This repository contains configuration files for various development tools and a
 
 Each major tool has its own `CLAUDE.md` file containing detailed configuration information and development guidelines for AI-assisted maintenance.
 
+## Setup on a new machine
+
+- edit `~/.zshenv`
+   ```sh
+   export ZDOTDIR="$HOME/.config/zsh"
+   export XDG_CONFIG_HOME="$HOME/.config"
+   ```
+- `ln -s` tmux, zsh, ghostty, mise, nvim in `~/.config`
+- `brew install git fzf tmux diff-so-fancy ripgrep mise`
+- `brew install neovim --HEAD`
+
 ---
 
 ## GPG Setup for Commit Signing
