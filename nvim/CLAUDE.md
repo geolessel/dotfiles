@@ -42,6 +42,7 @@ nvim/
 │   ├── ui.lua              # Mini UI plugins (declaration + config)
 │   ├── treesitter.lua      # Treesitter (declaration + config)
 │   ├── formatting.lua      # Conform (declaration + config)
+│   ├── zig.lua             # Zig language support + ZLS (declaration + config)
 │   └── colorscheme.lua     # Catppuccin (declaration + config)
 └── lua/utils/
     ├── init.lua           # Utility functions
@@ -57,6 +58,8 @@ The main `init.lua` loads modules in this order:
 - Uses `vim.lsp.config()` and `vim.lsp.enable()` (native Neovim LSP)
 - Format-on-save enabled globally
 - Supports multiple languages via Mason-managed LSP servers
+- Language-specific configurations:
+  - **Zig**: ZLS with format-on-save for `.zig` and `.zon` files (in `plugins/zig.lua`)
 
 ### Key Mappings Philosophy
 - Leader key: Space

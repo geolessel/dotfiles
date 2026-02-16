@@ -15,6 +15,7 @@ require('plugins.formatting')
 require('plugins.colorscheme')
 require('plugins.markview')
 require('plugins.testing')
+require('plugins.zig')
 
 -- Keymaps (last to ensure all dependencies are loaded)
 require('config.keymaps')
