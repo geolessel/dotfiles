@@ -2,6 +2,7 @@
 alias reload="source ~/usr/dotfiles/zsh/aliases"
 alias ea="$EDITOR ~/usr/dotfiles/zsh/aliases && reload"
 alias ee="$EDITOR ~/usr/dotfiles/zsh/env"
+alias e="emacs -nw"
 alias c="clear"
 alias cl="clear; l"
 alias man='LC_ALL=C LANG=C man'
@@ -38,6 +39,7 @@ alias be='bundle exec'
 alias ber='bundle exec rails'
 alias by='bundle && yarn'
 alias wds='bin/webpack-dev-server'
+alias vi=nvim
 
 ### File System
 case "$(uname -s)" in

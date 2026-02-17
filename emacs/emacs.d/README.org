@@ -515,7 +515,7 @@ Here is the theme to load for this session.
 
 #+BEGIN_SRC emacs-lisp
 (load-theme 'catppuccin t) ; t treats it as safe
-(catppuccin-load-flavor 'frappe)
+(catppuccin-load-flavor 'macchiato)
 ;; (load-theme 'flatui t)
 #+END_SRC
 
@@ -957,6 +957,17 @@ is nicely indented without me having to think too much about it.
 
 #+begin_src emacs-lisp
 (add-hook 'org-mode-hook 'org-indent-mode)
+#+end_src
+
+~evil-mode~ overrides ~TAB~ with ~evil-jump-forward~; restore
+~org-cycle~ and made the changes required to do the same for terminal emacs.
+
+#+begin_src emacs-lisp
+(add-hook 'org-mode-hook
+          (lambda ()
+            (evil-local-set-key 'normal (kbd "<tab>") #'org-cycle)
+            ;; In terminal mode, TAB is sent as C-i
+            (evil-local-set-key 'normal (kbd "TAB") #'org-cycle)))
 #+end_src
 
 *** Enable auto-fill-mode by default
@@ -2572,7 +2583,9 @@ entire project. To help seed the search, use ~C-?~ on a word to open
   (consult-ripgrep dirname seed-word))
 
 (with-eval-after-load 'evil
-  (define-key evil-normal-state-map (kbd "C-/") 'geo/consult-ripgrep))
+  (define-key evil-normal-state-map (kbd "C-/") 'geo/consult-ripgrep)
+  ;; In terminal mode, C-/ is sent as C-_ (both map to \x1f)
+  (define-key evil-normal-state-map (kbd "C-_") 'geo/consult-ripgrep))
 #+end_src
 
 I'd also like to seed =consult-ripgrep= with the word underneath the
@@ -2754,6 +2767,7 @@ _i_nfo       valu_e_"
      "External"
       (("g" consult-grep "Grep")
        ("r" geo/consult-ripgrep "Ripgrep")
+       ("R" geo/consult-ripgrep-thing-at-point "Ripgrep word at point")
        ("G" consult-git-grep "git Grep")
        ("F" consult-find "Find file")))))
 #+end_src
