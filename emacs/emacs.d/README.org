@@ -460,13 +460,13 @@ bump up that value a bit.
 Doom emacs has some great themes. Let's use them!
 
 #+BEGIN_SRC emacs-lisp
-(use-package doom-themes)
+(use-package doom-themes :defer t)
 #+END_SRC
 
 I love the monokai theme and would like to use it. Bring it in.
 
 #+begin_src emacs-lisp
-(use-package monokai-theme)
+(use-package monokai-theme :defer t)
 #+end_src
 
 [[https://github.com/motform/stimmung-themes][stimmung-themes]] is a pretty minimal theme in regards to font
@@ -474,33 +474,36 @@ colors. It uses background colors and bold/italics to do a lot of its
 communication.
 
 #+begin_src emacs-lisp
-(use-package stimmung-themes)
+(use-package stimmung-themes :defer t)
 #+end_src
 
 Other cool theme packages I've found.
 
 #+begin_src emacs-lisp
 (use-package tron-legacy-theme
-  :config
+  :defer t
+  :init
   (setq tron-legacy-theme-vidid-cursor t))
 
-(use-package kaolin-themes)
+(use-package kaolin-themes :defer t)
 
-(use-package modus-themes)
+(use-package modus-themes :defer t)
 
 ;; There are tons of options to define for these.
 ;; See https://protesilaos.com/emacs/ef-themes
 (use-package ef-themes
-  :config
+  :defer t
+  :init
   (setq ef-themes-region '(intense)))
 
-(use-package base16-theme)
+(use-package base16-theme :defer t)
 
-(use-package humanoid-themes)
+(use-package humanoid-themes :defer t)
 
 (use-package catppuccin-theme :ensure (:wait t))
 
 (use-package lambda-themes
+  :defer t
   :ensure (:host github :repo "lambda-emacs/lambda-themes")
   :custom
   (lambda-themes-set-italic-comments t)
@@ -743,7 +746,7 @@ this. According to the docs, "it is like an Emacs-wide version of
 [[https://github.com/purcell/default-text-scale][Github]]
 
 #+begin_src emacs-lisp
-  (use-package default-text-scale)
+  (use-package default-text-scale :defer t)
 #+end_src
 
 ** Modeline
@@ -819,6 +822,7 @@ Alternatives (taken from the =highlight-indent-guides= Github:
 
 #+begin_src emacs-lisp
   (use-package highlight-indent-guides
+    :defer t
     :init
     ;; I would much prefer to use 'character as the method, but
     ;; it appears it has some performance hits when doing so
@@ -829,9 +833,7 @@ Alternatives (taken from the =highlight-indent-guides= Github:
 
 #+begin_src emacs-lisp
   (use-package rainbow-delimiters
-    :config
-    (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
-    )
+    :hook (prog-mode . rainbow-delimiters-mode))
 #+end_src
 
 *** Highlight the matching line when searching with evil
@@ -1156,9 +1158,7 @@ cover properly by default, such as help-mode, M-x calendar, Eshell and more.
 
 #+begin_src emacs-lisp
   (use-package yaml-mode
-    :config
-    (add-to-list 'auto-mode-alist '("\\.ya?ml$" . yaml-mode))
-    )
+    :mode "\\.ya?ml$")
 #+end_src
 
 ** Ruby
@@ -1192,7 +1192,7 @@ Some options that may be worth fiddling with in the future:
 [[https://github.com/pezra/rspec-mode][Github]]
 
 #+begin_src emacs-lisp
-  (use-package rspec-mode)
+  (use-package rspec-mode :defer t)
 #+end_src
 
 ** JS
@@ -1223,7 +1223,7 @@ Default keybindings:
 - ~C-c C-d~: Decrement the number at point
 
 #+begin_src emacs-lisp
-  (use-package json-mode)
+  (use-package json-mode :defer t)
 #+end_src
 
 ** RJSX
@@ -1244,6 +1244,7 @@ warnings and errors that are really annoying since we use
 
 #+begin_src emacs-lisp
 (use-package rjsx-mode
+  :defer t
   :config
   (with-eval-after-load 'rjsx-mode
     (define-key rjsx-mode-map "<" nil)
@@ -1258,8 +1259,8 @@ warnings and errors that are really annoying since we use
 
 #+begin_src emacs-lisp
 (use-package web-mode
-  :config
-  (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
+  :mode "\\.html?\\'"
+  :init
   (setq-default web-mode-code-indent-offset 2))
 #+end_src
 
@@ -1270,17 +1271,16 @@ as the preferred checker even in typescript files.
 
 #+begin_src emacs-lisp
 (use-package typescript-mode
-  :config
-  (setq-default typescript-indent-level 2)
-  (add-to-list 'auto-mode-alist '("\\.tsx?$" . typescript-mode))
-  (add-hook 'typescript-mode-hook
-            (lambda () (setq flycheck-checker 'javascript-eslint))))
+  :mode "\\.tsx?$"
+  :hook (typescript-mode . (lambda () (setq flycheck-checker 'javascript-eslint)))
+  :init
+  (setq-default typescript-indent-level 2))
 #+end_src
 
 ** Slim
 
 #+begin_src emacs-lisp
-  (use-package slim-mode)
+  (use-package slim-mode :defer t)
 #+end_src
 
 * Elixir
@@ -1330,8 +1330,7 @@ To build the image from the buffer, use ~C-c C-b~.
 
 #+begin_src emacs-lisp
   (use-package dockerfile-mode
-    :config
-    (add-to-list 'auto-mode-alist '("Dockerfile\\'" . dockerfile-mode)))
+    :mode "Dockerfile\\'")
 #+end_src
 
 *** Docker compose
@@ -1339,7 +1338,7 @@ To build the image from the buffer, use ~C-c C-b~.
 files.
 
 #+begin_src emacs-lisp
-  (use-package docker-compose-mode)
+  (use-package docker-compose-mode :defer t)
 #+end_src
 
 ** Assembly
@@ -1368,7 +1367,8 @@ A Common Lisp dev environment build on top of Emacs.
 
 #+begin_src emacs-lisp
 (use-package slime
-  :config
+  :defer t
+  :init
   (setq inferior-lisp-program "sbcl"))
 #+end_src
 
@@ -1665,11 +1665,11 @@ Keys:
 
 #+begin_src emacs-lisp
   (use-package git-timemachine
+    :defer t
     :config
-    (with-eval-after-load 'git-timemachine
-      (evil-make-overriding-map git-timemachine-mode-map 'normal)
-      ;; force update evil keymaps after git-timemachine-mode is loaded
-      (add-hook 'git-timemachine-mode-hook #'evil-normalize-keymaps)))
+    (evil-make-overriding-map git-timemachine-mode-map 'normal)
+    ;; force update evil keymaps after git-timemachine-mode is loaded
+    (add-hook 'git-timemachine-mode-hook #'evil-normalize-keymaps))
 #+end_src
 
 ** Undo
@@ -1739,11 +1739,11 @@ can utilize that server to make fixes in our javascript files.
 (defvar geo/eslint_d-exec-path "/usr/local/bin")
 
 (use-package eslintd-fix
-  :config
-  (add-hook 'js-mode-hook 'eslintd-fix-mode)
-  (add-hook 'typescript-mode-hook 'eslintd-fix-mode)
-  (add-hook 'js-ts-mode-hook 'eslintd-fix-mode)
-  (add-hook 'typescript-ts-mode-hook 'eslintd-fix-mode)
+  :hook ((js-mode . eslintd-fix-mode)
+         (typescript-mode . eslintd-fix-mode)
+         (js-ts-mode . eslintd-fix-mode)
+         (typescript-ts-mode . eslintd-fix-mode))
+  :init
   ; we need the location of eslint_d
   (add-to-list 'exec-path geo/eslint_d-exec-path))
 #+end_src
@@ -1756,13 +1756,12 @@ format js/ts code (and some others).
 
 #+begin_src emacs-lisp
 (use-package prettier
-  :config
-  (add-hook 'js-mode-hook 'prettier-mode)
-  (add-hook 'js2-mode-hook 'prettier-mode)
-  (add-hook 'js-ts-mode-hook 'prettier-mode)
-  (add-hook 'typescript-mode-hook 'prettier-mode)
-  (add-hook 'typescript-ts-mode-hook 'prettier-mode)
-  (add-hook 'tsx-ts-mode-hook 'prettier-mode))
+  :hook ((js-mode . prettier-mode)
+         (js2-mode . prettier-mode)
+         (js-ts-mode . prettier-mode)
+         (typescript-mode . prettier-mode)
+         (typescript-ts-mode . prettier-mode)
+         (tsx-ts-mode . prettier-mode)))
 #+end_src
 
 ** Syntax checking
@@ -2002,7 +2001,7 @@ times since then and I think I can use it regularly now. Plus, I don't
 have to maintain it!
 
 #+begin_src emacs-lisp
-(use-package gptel)
+(use-package gptel :defer t)
 #+end_src
 
 * General packages
@@ -2052,9 +2051,9 @@ Emacs.
 
 #+begin_src emacs-lisp
   (use-package ag
-    :config
-    (setq ag-highlight-search t) ; highlight results
-    )
+    :defer t
+    :init
+    (setq ag-highlight-search t))
 #+end_src
 
 ** Make the minibuffer better
@@ -2252,6 +2251,7 @@ I've heard that *vterm* is the bee's knees.
 
 #+begin_src emacs-lisp
   (use-package vterm
+    :defer t
     :init
     (setq vterm-always-compile-module t))
 #+end_src
