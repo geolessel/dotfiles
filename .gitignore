@@ -20,6 +20,13 @@ emacs/emacs.d/modules/*
 emacs/emacs.d/test/*
 emacs/emacs.d/straight
 emacs/emacs.d/litter
+emacs/emacs.d/README.el
+emacs/emacs.d/custom.el
+emacs/emacs.d/eln-cache/
+emacs/emacs.d/elpaca/
+emacs/emacs.d/history
+emacs/emacs.d/projects
+emacs/emacs.d/transient/
 
 vim/bundle/*
 vim/UltiSnips/*
