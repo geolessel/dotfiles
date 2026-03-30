@@ -45,4 +45,4 @@ keybind = global:super+shift+escape=toggle_quick_terminal
 # font-feature=-liga
 # font-feature=-dlig
 
-keybind = shift+enter=text:\n
+keybind = shift+enter=text:\x1b\r
