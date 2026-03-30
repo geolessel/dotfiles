@@ -70,7 +70,6 @@ For each confirmed action item, call `add_todo` with:
 - **title**: Concise action item in imperative mood (e.g., "Review API docs with Alex", "Send updated timeline to stakeholders")
 - **notes**: `From meeting: [Meeting Title] (YYYY-MM-DD)` -- include the Granola citation link if one is available (e.g., `[[0]](url)`)
 - **tags**: `["meeting"]`
-- **area**: "Planning Center"
 - Do NOT set `when`, `deadline`, `list_id`, or `heading_id` -- todos go straight to the inbox for me to triage
 
 After creating all todos, report what was created: how many todos, which meetings they came from.
@@ -79,7 +78,6 @@ After creating all todos, report what was created: how many todos, which meeting
 
 - Preserve all Granola citation links (e.g., `[[0]](url)`) in the notes field so I can trace back to the source
 - Keep action item titles short and actionable -- imperative mood, no fluff
-- If there is a general todo item that can't be traced to a specific person, include it
 - When in doubt about whether an item is mine, include it -- I can always delete from the inbox
 - Do not create duplicate todos if the same action item appears across multiple meetings
 
