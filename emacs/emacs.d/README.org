@@ -161,7 +161,8 @@ issue.
     (exec-path-from-shell-variables
      '("PATH" "MANPATH"))
     :config
-    (when (memq window-system '(mac ns x))
+    (when (or (memq window-system '(mac ns x))
+              (daemonp))
       (exec-path-from-shell-initialize)))
 #+end_src
 
@@ -236,7 +237,8 @@ saving, I don't want autosaving to happen in the first place anymore.
 ** Hide the scroll bar
 
 #+BEGIN_SRC emacs-lisp
-  (scroll-bar-mode -1)
+  (when (fboundp 'scroll-bar-mode)
+    (scroll-bar-mode -1))
 #+END_SRC
 
 ** Set the fill column to 78
@@ -417,6 +419,62 @@ I prefer to use the Command key as the meta key on Mac.
 (setq default-process-coding-system '(utf-8-unix . utf-8-unix))
 #+end_src>
 
+** Terminal and tmux compatibility
+
+When running Emacs in a terminal inside tmux (=emacs -nw= or
+=emacsclient -t=), several things need special handling: true color,
+clipboard, mouse, keybindings, and performance.
+
+*** Help Emacs recognize the tmux-256color TERM
+Emacs doesn't have a built-in terminfo entry for =tmux-256color=, so
+we alias it to =xterm-256color= which Emacs does know.
+
+#+begin_src emacs-lisp
+(add-to-list 'term-file-aliases '("tmux-256color" . "xterm-256color"))
+#+end_src
+
+*** Clipboard integration via OSC 52
+OSC 52 lets terminal Emacs copy text to the system clipboard through
+tmux. This works even over SSH. Emacs 29+ has built-in support.
+
+#+begin_src emacs-lisp
+(unless (display-graphic-p)
+  (setq xterm-set-window-title t)
+  (when (fboundp 'xterm-paste)
+    (global-set-key [xterm-paste] #'xterm-paste)))
+#+end_src
+
+*** Terminal performance tweaks
+These reduce redisplay overhead in terminal mode where rendering is
+inherently slower than GUI.
+
+#+begin_src emacs-lisp
+(unless (display-graphic-p)
+  (setq redisplay-skip-fontification-on-input t)
+  (setq fast-but-imprecise-scrolling t)
+  (setq bidi-paragraph-direction 'left-to-right)
+  (setq bidi-inhibit-bpa t))
+#+end_src
+
+*** Refresh environment variables from tmux
+When reattaching a tmux session, environment variables like
+=SSH_AUTH_SOCK= and =DISPLAY= go stale. This function pulls fresh
+values from tmux.
+
+#+begin_src emacs-lisp
+(defun geo/refresh-tmux-env ()
+  "Update Emacs environment from tmux session."
+  (interactive)
+  (when (getenv "TMUX")
+    (let ((pairs (shell-command-to-string "tmux show-environment")))
+      (dolist (line (split-string pairs "\n" t))
+        (cond
+         ((string-prefix-p "-" line)
+          (setenv (substring line 1) nil))
+         ((string-match "\\`\\([^=]+\\)=\\(.*\\)\\'" line)
+          (setenv (match-string 1 line) (match-string 2 line))))))))
+#+end_src
+
 ** Revert when a buffer's file changes
 When a buffer is pointing a file that changes underneath it, we should
 auto-revert to the current state of the file.
@@ -453,8 +511,9 @@ I want some breathing space between the text and the frame, so let's
 bump up that value a bit.
 
 #+begin_src emacs-lisp
-(setq default-frame-alist
-      '((internal-border-width . 15)))
+(when (display-graphic-p)
+  (setq default-frame-alist
+        '((internal-border-width . 15))))
 #+end_src
 ** Themes
 Doom emacs has some great themes. Let's use them!
@@ -650,7 +709,8 @@ Light
 When you have the best font, use the best font.
 
 #+BEGIN_SRC emacs-lisp
-(set-frame-font "PragmataPro Liga-16" nil t)
+(when (display-graphic-p)
+  (set-frame-font "PragmataPro Liga-16" nil t))
 #+END_SRC
 
 GNU Emacs doesn't have great support for ligatures, but I defintely
@@ -659,10 +719,11 @@ want them. I wrote a minor mode to support PragmataPro specifically
 https://github.com/fabrizioschiavi/pragmatapro/tree/master/emacs_snippets.
 
 #+begin_src emacs-lisp
-(require 'pragmata-mode)
-(add-hook 'prog-mode-hook #'pragmata-mode)
-(add-hook 'text-mode-hook #'pragmata-mode)
-(add-hook 'conf-mode-hook #'pragmata-mode)
+(when (display-graphic-p)
+  (require 'pragmata-mode)
+  (add-hook 'prog-mode-hook #'pragmata-mode)
+  (add-hook 'text-mode-hook #'pragmata-mode)
+  (add-hook 'conf-mode-hook #'pragmata-mode))
 #+end_src
 
 The author of PragmataPro maintains a script that helps set up
@@ -1642,7 +1703,10 @@ until a save has occurred.
 #+BEGIN_SRC emacs-lisp
   (use-package diff-hl
     :config
-    (global-diff-hl-mode))
+    (global-diff-hl-mode)
+    ;; Terminal Emacs has no fringe — use the margin instead
+    (unless (display-graphic-p)
+      (diff-hl-margin-mode)))
 #+END_SRC
 
 *** View git history and go back in time
@@ -1986,6 +2050,19 @@ its tree-sitter version.
         ;; zig-mode not defined
         ))
 #+end_src
+
+*** Automatically install and use tree-sitter modes
+=treesit-auto= automatically installs missing tree-sitter grammars and
+remaps major modes to their tree-sitter equivalents when available.
+
+#+begin_src emacs-lisp
+(use-package treesit-auto
+  :demand t
+  :config
+  (treesit-auto-add-to-auto-mode-alist 'all)
+  (global-treesit-auto-mode))
+#+end_src
+
 ** LLM / ChatGPT integration
 *** Homegrown
 Integrate with OpenAI ChatGPT. My own creation. Well, technically, I used ChatGPT to bootstrap it and add features.
@@ -3626,6 +3703,7 @@ Doom emacs has a great startup dashboard. Let's use it!
 
 #+begin_src emacs-lisp
   (use-package company-box
+    :if (display-graphic-p)
     :after company
     :hook (company-mode . company-box-mode))
 #+end_src
