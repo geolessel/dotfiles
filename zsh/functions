@@ -15,6 +15,28 @@ function zsh_add_plugin() {
   fi
 }
 
+
+function e() {
+  emacsclient -t -a '' "$@"
+}
+
+function claude-wt() {
+  local branch tmpfile
+
+  vared -p "Branch: " branch
+  [[ -z "$branch" ]] && echo "Branch name required." && return 1
+
+  tmpfile=$(mktemp "${TMPDIR:-/tmp}/wt-claude-prompt.XXXXXX")
+  ${EDITOR:-nvim} "$tmpfile"
+  [[ ! -s "$tmpfile" ]] && rm -f "$tmpfile" && echo "Prompt required." && return 1
+
+  local prompt
+  prompt=$(<"$tmpfile")
+  rm -f "$tmpfile"
+
+  wt switch --create "$branch" -x "claude-safe --" -- "$prompt"
+}
+
 function zsh_add_completion_file() {
   local FILE_NAME="_$1"
   local COMPLETIONS_DIR="$ZDOTDIR/completions"

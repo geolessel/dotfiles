@@ -20,7 +20,6 @@ zsh_add_config "pco"
 zsh_add_config "env"
 zsh_add_config "aliases"
 zsh_add_config "bindings"
-zsh_add_config "envscope.zsh"
 
 zsh_add_completion_file "docker" "https://raw.githubusercontent.com/docker/cli/master/contrib/completion/zsh/_docker"
 zsh_add_completion_file "docker-compose" "https://raw.githubusercontent.com/docker/compose/master/contrib/completion/zsh/_docker-compose"
@@ -39,3 +38,15 @@ export LC_CTYPE=C
 export EDITOR="nvim"
 export KEYTIMEOUT=1
 export MIX_OS_DEPS_COMPILE_PARTITION_COUNT=$(( $(sysctl -n hw.physicalcpu) / 2 ))
+
+eval "$(mise activate zsh)"
+
+export PATH="$PATH:/Users/geo/usr/dotfiles/bin:/Users/geo/.local/bin"
+export CLAUDE_CONFIG_DIR=~/.claude
+
+if command -v wt >/dev/null 2>&1; then eval "$(command wt config shell init zsh)"; fi
+
+# envscope must load last so .envrc overrides take effect after all
+# exports and tool activations (mise, etc.) have set their baseline values
+zsh_add_config "envscope.zsh"
+

@@ -1,0 +1,10 @@
+#!/usr/bin/env zsh
+if ! command -v safehouse &>/dev/null; then
+  echo "Warning: 'safehouse' is not installed or not in PATH." >&2
+  exit 1
+fi
+exec safehouse \
+  --add-dirs="$HOME/.hex:$HOME/.dolt:$HOME/.claude:$HOME/.claude-personal" \
+  --add-dirs-ro="$HOME/.local/share/mise:$HOME/.config/mise" \
+  --env-pass=MIX_HOME,CLAUDE_CONFIG_DIR \
+  claude --permission-mode acceptEdits "$@"
