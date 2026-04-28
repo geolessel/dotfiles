@@ -17,7 +17,11 @@ function zsh_add_plugin() {
 
 
 function e() {
-  emacsclient -t -a '' "$@"
+  if [ $# -eq 0 ]; then
+    emacsclient -t -a '' --eval "(progn (switch-to-buffer (get-buffer-create \"*scratch*\")) (cd \"$PWD\"))"
+  else
+    emacsclient -t -a '' "$@"
+  fi
 }
 
 function claude-wt() {
