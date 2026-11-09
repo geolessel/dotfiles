@@ -41,3 +41,6 @@ agents/claude/plugins
 agents/claude/shell-snapshots
 agents/claude/statsig
 agents/claude/todos
+
+herdr/*
+!herdr/config.toml
