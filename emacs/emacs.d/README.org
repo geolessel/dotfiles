@@ -1,3 +1,4 @@
+# -*- lexical-binding: t; -*-
 #+AUTHOR: Geoffrey Lessel
 #+TITLE: Geo's emacs config
 
@@ -24,7 +25,10 @@ file." So here we are.
 For some good reading regard dynamic vs. lexical binding, I've found
 [[https://www.emacswiki.org/emacs/DynamicBindingVsLexicalBinding][this page on Emacs Wiki]] to be good.
 
-#+begin_src emacs-lisp
+However, https://www.masteringemacs.org/article/whats-new-in-emacs-311
+says don't set it as the default. Hmmm.
+
+#+begin_src emacs-lisp :tangle no
 (setq-default lexical-binding t)
 #+end_src
 
@@ -435,13 +439,24 @@ we alias it to =xterm-256color= which Emacs does know.
 
 *** Clipboard integration via OSC 52
 OSC 52 lets terminal Emacs copy text to the system clipboard through
-tmux. This works even over SSH. Emacs 29+ has built-in support.
+tmux. This works even over SSH. Emacs 29+ has built-in =xterm-paste=
+for the inbound direction; for the outbound (copy) direction we wire
+=interprogram-cut-function= to a small OSC 52 sender so that any kill
+— including evil's =y= — lands in the macOS clipboard. tmux's
+=set-clipboard on= forwards the escape to the outer terminal.
 
 #+begin_src emacs-lisp
+(defun geo/osc52-copy (text)
+  "Copy TEXT to the system clipboard via the OSC 52 escape sequence."
+  (let ((encoded (base64-encode-string
+                  (encode-coding-string text 'utf-8) t)))
+    (send-string-to-terminal (format "\e]52;c;%s\a" encoded))))
+
 (unless (display-graphic-p)
   (setq xterm-set-window-title t)
   (when (fboundp 'xterm-paste)
-    (global-set-key [xterm-paste] #'xterm-paste)))
+    (global-set-key [xterm-paste] #'xterm-paste))
+  (setq interprogram-cut-function #'geo/osc52-copy))
 #+end_src
 
 *** Terminal performance tweaks
@@ -1224,6 +1239,24 @@ cover properly by default, such as help-mode, M-x calendar, Eshell and more.
 
 ** Ruby
 *** Ruby mode
+
+#+begin_src emacs-lisp
+(use-package ruby-mode
+  :ensure nil
+  :defer t
+  :mode ("\\.rb\\'" . ruby-ts-mode)
+  :init
+  ;; Pin the Ruby server to ruby-lsp (eglot's default offers solargraph
+  ;; first). Runs at startup so it's registered before eglot loads.
+  (with-eval-after-load 'eglot
+    (add-to-list 'eglot-server-programs
+                 '((ruby-mode ruby-ts-mode) "ruby-lsp")))
+  :hook ((ruby-ts-mode . eglot-ensure)
+         (ruby-ts-mode . (lambda ()
+                           (add-hook 'before-save-hook
+                                     #'eglot-format-buffer nil t)))))
+#+end_src
+
 By default, a magic comment is inserted at the top of any file that
 Emacs detects is using utf-8 encoding. Since I'm not the only one
 editing these files, I find it annoying to add this for other people
