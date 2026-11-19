@@ -44,3 +44,11 @@ agents/claude/todos
 
 herdr/*
 !herdr/config.toml
+
+herdr-app/*
+!herdr-app/keys.json
+!herdr-app/settings.json
+!herdr-app/mods/
+herdr-app/mods/*
+!herdr-app/mods/my-*/
+herdr-app/mods/my-*/gpui-kit.d.ts
