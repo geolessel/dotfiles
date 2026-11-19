@@ -27,11 +27,20 @@ emacs/emacs.d/elpaca/
 emacs/emacs.d/history
 emacs/emacs.d/projects
 emacs/emacs.d/transient/
+emacs/emacs.d/tree-sitter/
+emacs/emacs.d/#*#
 
 vim/bundle/*
 vim/UltiSnips/*
 
 zsh/completions
+zsh/.zcompdump*
+zsh/.zsh_history
+zsh/.zsh_sessions/
+# machine-local installer additions (pipx, OrbStack)
+zsh/.zprofile
+
+tmux/plugins/
 
 agents/claude/debug
 agents/claude/file-history
