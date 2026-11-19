@@ -41,12 +41,10 @@ Each major tool has its own `CLAUDE.md` file containing detailed configuration i
 
 ## Setup on a new machine
 
-- edit `~/.zshenv`
-   ```sh
-   export ZDOTDIR="$HOME/.config/zsh"
-   export XDG_CONFIG_HOME="$HOME/.config"
-   ```
-- `ln -s` tmux, zsh, ghostty, mise, nvim in `~/.config`
+- clone this repo to `~/usr/dotfiles`
+- run `~/usr/dotfiles/setup.sh`. It writes `~/.zshenv` (sets `ZDOTDIR`), links zsh, tmux,
+  nvim, vim, emacs, ghostty, mise, herdr, herdr-app and the Claude files, and clones the
+  tmux catppuccin plugin. It is safe to run again, and it lists anything it skipped.
 - `brew install git fzf tmux diff-so-fancy ripgrep mise`
 - `brew install neovim --HEAD`
 
