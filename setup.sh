@@ -22,5 +22,9 @@ echo "export ZDOTDIR=~/.config/zsh" > .zshrc
 echo "source ${ZDOTDIR}/zshrc" >> .zshrc
 ln -s usr/dotfiles/zsh/p10k.zsh .p10k.zsh
 
+### HERDR
+ln -s ../usr/dotfiles/herdr .config/herdr
+ln -s ../usr/dotfiles/herdr-app .config/herdr-app
+
 # git clone https://github.com/gmarik/Vundle.vim.git ${1}/.vim/bundle/Vundle.vim
 # echo "Inside vim, run :PluginInstall to install plugins"
