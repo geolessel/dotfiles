@@ -1,0 +1,7 @@
+[tools]
+elixir = "1.19"
+erlang = "28"
+node = "22"
+python = "latest"
+ruby = "latest"
+rust = "latest"
